@@ -80,4 +80,3 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 - [Remotion](https://www.remotion.dev/)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Radix UI](https://www.radix-ui.com/)
-# react-video-editor-pro

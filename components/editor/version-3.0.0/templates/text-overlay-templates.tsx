@@ -1,0 +1,72 @@
+import { TextOverlayTemplate } from "../types";
+
+/**
+ * Array of predefined text overlay templates.
+ * These templates provide quick starting points for common text overlay styles.
+ */
+export const textOverlayTemplates: TextOverlayTemplate[] = [
+  {
+    id: '1',
+    name: 'Title',
+    description: 'Title',
+    text: 'Hello World.',
+    fontSize: 128,
+    displayFontSize: 30,
+    fontColor: 'white',
+    fontFamily: 'font-sans',
+    start: 0,
+    duration: 300,
+    fontWeight: '800',
+    backgroundColor: 'none',
+    row: 0,
+    position: { x: 50, y: 50 },
+  },
+  {
+    id: '2',
+    name: 'Subtitle',
+    description: 'Subtitle',
+    text: 'Just building...',
+    fontSize: 128,
+    displayFontSize: 30,
+    fontColor: 'white',
+    fontFamily: 'font-serif',
+    fontWeight: '500',
+    backgroundColor: 'none',
+    start: 0,
+    duration: 300,
+    row: 0,
+    position: { x: 50, y: 60 },
+  },
+  {
+    id: '3',
+    name: 'Lower Third',
+    description: 'Lower Third',
+    text: 'Founder Mode',
+    fontSize: 128,
+    displayFontSize: 30,
+    fontColor: 'white',
+    fontWeight: 'bold',
+    backgroundColor: 'none',
+    fontFamily: 'font-mono',
+    start: 0,
+    duration: 300,
+    row: 0,
+    position: { x: 10, y: 80 },
+  },
+  {
+    id: '4',
+    name: 'Handwritten',
+    description: 'Handwritten',
+    text: 'Lets go!!!',
+    fontSize: 128,
+    displayFontSize: 30,
+    fontColor: 'white',
+    fontWeight: '100',
+    backgroundColor: 'none',
+    fontFamily: 'font-retro',
+    start: 0,
+    duration: 300,
+    row: 0,
+    position: { x: 50, y: 70 },
+  }
+];
