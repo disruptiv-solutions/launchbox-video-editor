@@ -30,7 +30,6 @@ export const useOverlays = () => {
         zIndex: 0,
         transform: "none",
         objectFit: "cover",
-        backgroundColor: "#101828",
       },
     },
     {

@@ -37,6 +37,12 @@ These instructions will get you a copy of the project up and running on your loc
    NEXT_PUBLIC_PEXELS_API_KEY=your_pexels_api_key_here
    ```
 
+   You can obtain a free API key by:
+
+   1. Going to https://www.pexels.com/api/
+   2. Signing up for a Pexels account
+   3. Copying your API key from the dashboard
+
 5. Start the development server:
 
    ```
@@ -64,6 +70,30 @@ To create a new version:
 3. Make your changes and improvements to the new version.
 4. Create a new page for the version under `/app/versions`.
 5. Add a new markdown file in the `/versions` folder with the changelog for the new version.
+
+## Video Rendering
+
+This project uses [Remotion](https://www.remotion.dev/) for video rendering on AWS Lambda, providing a scalable and efficient solution for processing video edits.
+
+### Remotion Setup
+
+To enable video rendering capabilities:
+
+1. Follow the [Remotion Lambda Setup Guide](https://www.remotion.dev/docs/lambda/setup) to configure your AWS environment
+2. Set up your AWS credentials and Lambda function
+3. Deploy your Remotion site to AWS S3
+
+For a detailed walkthrough of integrating Remotion with Next.js, check out [this comprehensive guide](https://www.reactvideoeditor.com/blog/video-rendering-with-remotion-and-nextjs).
+
+### Common Issues
+
+Video rendering can be tricky to get right initially. Some common pitfalls to watch out for:
+
+- **Lambda Memory Issues**: The most common problem is insufficient memory allocation. Start with at least 2048MB and adjust based on your video processing needs.
+- **Timeout Errors**: Complex renders may require increased Lambda timeout settings.
+- **Asset Loading**: Ensure all assets (fonts, images, etc.) are properly uploaded and accessible to Lambda.
+
+Refer to the [Remotion documentation](https://www.remotion.dev/) for detailed troubleshooting guidance and best practices.
 
 ## Usage
 

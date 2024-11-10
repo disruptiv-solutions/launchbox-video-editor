@@ -1,6 +1,4 @@
 import { Composition } from "remotion";
-import { z } from "zod";
-import { CompositionProps } from "../types";
 import { Main } from "./main";
 import { COMP_NAME, DURATION_IN_FRAMES, FPS } from "../constants";
 
@@ -9,13 +7,16 @@ import { COMP_NAME, DURATION_IN_FRAMES, FPS } from "../constants";
  * Sets up the composition and provides default props.
  */
 export const RemotionRoot: React.FC = () => {
-  const defaultMyCompProps: z.infer<typeof CompositionProps> = {
+  const defaultMyCompProps: any = {
     overlays: [],
     durationInFrames: DURATION_IN_FRAMES,
     fps: FPS,
     width: 1920,
     height: 1920,
     src: "",
+    setSelectedOverlayId: () => {},
+    selectedOverlayId: null,
+    changeOverlay: () => {},
   };
 
   return (
