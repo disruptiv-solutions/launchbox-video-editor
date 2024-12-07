@@ -148,7 +148,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 asChild
                 className="text-xs text-zinc-200 hover:text-gray-900 transition-colors"
               >
-                <Link href="/">V4</Link>
+                <Link href="/">V5</Link>
               </SidebarMenuButton>
             </div>
           </SidebarMenu>

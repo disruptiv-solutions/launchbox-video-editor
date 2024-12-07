@@ -9,6 +9,6 @@ export const VIDEO_HEIGHT = 720;
 
 export const SITE_NAME = "sams-site";
 export const LAMBDA_FUNCTION_NAME =
-  "remotion-render-4-0-221-mem2048mb-disk2048mb-120sec";
+  "remotion-render-4-0-255-mem2048mb-disk2048mb-120sec";
 
 export const REGION = "us-east-1";
