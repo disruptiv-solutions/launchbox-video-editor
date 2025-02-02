@@ -55,8 +55,8 @@ export const Editor: React.FC = () => {
             mobile-friendly experience, use the Version 3.0.0 component.
           </p>
           <p className="text-sm text-gray-400 font-light">
-            Note, We&apos;re working on bringing full mobile support to this
-            version soon 👀
+            Note, Were working on bringing full mobile support to this version
+            soon 👀
           </p>
         </div>
       </div>

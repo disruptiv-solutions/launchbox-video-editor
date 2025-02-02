@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
 
 import { Metadata } from "next";
 import { getSortedVersionsData } from "@/lib/versions";
@@ -34,9 +35,15 @@ export default function VersionChangeLog() {
             {versions.map((version, index) => (
               <article
                 key={version.version}
-                className="relative group  bg-slate-800 md:p-8 p-4 md:mb-0 mb-10 rounded-lg border hover:border-blue-200 border-gray-700"
+                className={`relative group bg-slate-800 md:p-8 p-4 md:mb-0 mb-10 rounded-lg border border-gray-700 ${
+                  version.status !== "Legacy" ? "hover:border-blue-200" : ""
+                }`}
               >
-                <div className="absolute -inset-y-2.5 -inset-x-4 md:-inset-y-4 md:-inset-x-6 sm:rounded-2xl  duration-300"></div>
+                <div
+                  className={`absolute -inset-y-2.5 -inset-x-4 md:-inset-y-4 md:-inset-x-6 sm:rounded-2xl duration-300 ${
+                    version.status === "Legacy" ? "pointer-events-none" : ""
+                  }`}
+                ></div>
                 <svg
                   viewBox="0 0 9 9"
                   className={`hidden absolute right-full mr-6 top-2  md:mr-[45.5px] w-[calc(0.5rem+8px)] h-[calc(0.5rem+8px)] overflow-visible sm:block ${
@@ -55,6 +62,24 @@ export default function VersionChangeLog() {
                   ></circle>
                 </svg>
                 <div className="relative">
+                  {version.status === "Legacy" && (
+                    <div className="mb-6 p-4 rounded-lg bg-red-900/20 border border-red-700">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5" />
+                        <div>
+                          <h4 className="text-sm font-medium text-red-400">
+                            Legacy Version Notice
+                          </h4>
+                          <p className="mt-1 text-xs text-red-300">
+                            This version has been removed from the codebase and
+                            is no longer supported. We recommend using a more
+                            recent version. If you need access to this version,
+                            please contact support.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between">
                     <h3 className="tracking-tight text-lg md:text-2xl font-medium text-blue-200 pt-8 lg:pt-0">
                       Version {version.version}
@@ -101,7 +126,7 @@ export default function VersionChangeLog() {
                     Features & Changes
                   </h4>
                   <ul className="mt-2 space-y-2 list-none">
-                    {version.changes.map((change, index) => (
+                    {version?.changes?.map((change, index) => (
                       <li key={index} className="flex items-start">
                         <span className="text-blue-300 mr-2">•</span>
                         <span className="text-zinc-100 text-xs md:text-sm">
@@ -131,18 +156,20 @@ export default function VersionChangeLog() {
                     </div>
                   )}
                 </div>
-                <Link
-                  href={`/versions/${version.version}`}
-                  className="mt-6 flex items-center text-sm text-blue-300 font-medium"
-                >
-                  <span className="absolute -inset-y-2.5 -inset-x-4 md:-inset-y-4 md:-inset-x-6 sm:rounded-2xl"></span>
-                  <Button
-                    variant="outline"
-                    className=" text-sm font-medium duration-300 flex items-center gap-2 relative text-slate-900 "
+                {version.status !== "Legacy" && (
+                  <Link
+                    href={`/versions/${version.version}`}
+                    className="mt-6 flex items-center text-sm text-blue-300 font-medium"
                   >
-                    View this version
-                  </Button>
-                </Link>
+                    <span className="absolute -inset-y-2.5 -inset-x-4 md:-inset-y-4 md:-inset-x-6 sm:rounded-2xl"></span>
+                    <Button
+                      variant="outline"
+                      className="text-sm font-medium duration-300 flex items-center gap-2 relative text-slate-900"
+                    >
+                      View this version
+                    </Button>
+                  </Link>
+                )}
               </article>
             ))}
           </div>

@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo, memo } from "react";
 import { Overlay } from "../types";
 import {
   ContextMenu,
@@ -7,6 +7,8 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Trash2, Copy, Scissors, Type, Film, Music } from "lucide-react";
+import { useWaveformProcessor } from "../hooks/use-waveform-processor";
+import WaveformVisualizer from "./waveform-visualizer";
 
 /**
  * TimelineItem Component
@@ -24,6 +26,12 @@ import { Trash2, Copy, Scissors, Type, Film, Music } from "lucide-react";
  *
  * @component
  */
+
+// Add new interface for waveform data
+interface WaveformData {
+  peaks: number[];
+  length: number;
+}
 
 interface TimelineItemProps {
   /** The overlay item data to be rendered */
@@ -60,6 +68,8 @@ interface TimelineItemProps {
   onHover: (itemId: number, position: number) => void;
   /** Callback fired when context menu state changes */
   onContextMenuChange: (open: boolean) => void;
+  /** Waveform data for audio items */
+  waveformData?: WaveformData;
 }
 
 /** Height of each timeline item in pixels */
@@ -81,6 +91,12 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   onHover,
   onContextMenuChange,
 }) => {
+  const waveformData = useWaveformProcessor(
+    item.type === "sound" ? item.src : undefined,
+    item.type === "sound" ? item.startFromSound : undefined,
+    item.durationInFrames
+  );
+
   const isSelected = selectedItem?.id === item.id;
 
   /**
@@ -133,33 +149,40 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
       case "text":
         return isHandle
           ? "bg-purple-800"
-          : "bg-purple-500/80 hover:bg-purple-600 border-purple-400 text-white";
+          : "bg-purple-500/90 hover:bg-purple-600 border-purple-400 text-white";
       case "clip":
         return isHandle
           ? "bg-indigo-800"
-          : "bg-indigo-500/80 hover:bg-indigo-600 border-indigo-400 text-white";
+          : "bg-indigo-500/90 hover:bg-indigo-600 border-indigo-400 text-white";
       case "sound":
         return isHandle
           ? "bg-amber-800"
-          : "bg-amber-500/80 hover:bg-amber-600 border-amber-400 text-white";
+          : "bg-amber-500/90 hover:bg-amber-600 border-amber-400 text-white";
       default:
         return isHandle
           ? "bg-gray-500"
-          : "bg-gray-500/80 hover:bg-gray-600 border-gray-400 text-white";
+          : "bg-gray-500/90 hover:bg-gray-600 border-gray-400 text-white";
     }
   };
 
+  const itemClasses = useMemo(() => getItemClasses(item.type), [item.type]);
+
   return (
-    <ContextMenu onOpenChange={(isOpen) => onContextMenuChange(isOpen)}>
+    <ContextMenu onOpenChange={onContextMenuChange}>
       <ContextMenuTrigger className="z-[100]">
         <div
-          className={`absolute inset-y-0 rounded-sm shadow-sm cursor-grab transition duration-300 ease-in-out ${getItemClasses(
-            item.type
-          )} ${isDragging && draggedItem?.id === item.id ? "opacity-50" : ""} ${
+          className={`absolute inset-y-0 rounded-md shadow-md cursor-grab 
+          ${itemClasses} 
+          ${
+            isDragging && draggedItem?.id === item.id
+              ? "opacity-50"
+              : "transition-transform duration-75"
+          } 
+          ${
             isSelected
-              ? "border-[1.8px] shadow-[0_0_0_1px_rgba(255,255,255,0.5)] border-white/90"
-              : ""
-          } select-none pointer-events-auto`}
+              ? "border-2 shadow-[0_0_0_2px_rgba(255,255,255,0.6)] border-white"
+              : "border border-white/20"
+          } select-none pointer-events-auto overflow-hidden`}
           style={{
             left: `${(item.from / totalDuration) * 100}%`,
             width: `${(item.durationInFrames / totalDuration) * 100}%`,
@@ -170,23 +193,35 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
           onClick={(e) => handleItemInteraction(e, "click")}
           onMouseMove={handleMouseMove}
         >
-          <div className="capitalize absolute inset-0 flex items-center justify-center text-xs truncate px-1 gap-1">
-            {item.type === "text" ? (
-              <Type className="w-3 h-3 mr-1" />
-            ) : item.type === "clip" ? (
-              <Film className="w-3 h-3 mr-1" />
-            ) : item.type === "sound" ? (
-              <Music className="w-3 h-3 mr-1" />
-            ) : null}
-            {item.type}
+          {item.type === "sound" && waveformData && (
+            <div className="absolute inset-0 opacity-40">
+              <WaveformVisualizer
+                waveformData={waveformData}
+                totalDuration={totalDuration}
+                durationInFrames={item.durationInFrames}
+              />
+            </div>
+          )}
+
+          <div className="absolute inset-0 flex items-center px-2 text-xs font-medium">
+            <div className="flex items-center gap-1.5 z-10">
+              {item.type === "text" ? (
+                <Type className="w-3.5 h-3.5" />
+              ) : item.type === "clip" ? (
+                <Film className="w-3.5 h-3.5" />
+              ) : item.type === "sound" ? (
+                <Music className="w-3.5 h-3.5" />
+              ) : null}
+              <span className="capitalize truncate">{item.type}</span>
+            </div>
           </div>
 
-          {/* Left resize handle  */}
+          {/* Resize handles with improved visibility */}
           <div
-            className={`absolute left-0 top-0 bottom-0 w-1 md:w-1.5  rounded-md cursor-ew-resize ${getItemClasses(
+            className={`absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize ${getItemClasses(
               item.type,
               true
-            )} z-20 m-1.5`}
+            )} z-20 opacity-0 hover:opacity-100 transition-opacity duration-200`}
             onMouseDown={(e) => {
               e.stopPropagation();
               handleMouseDown("resize-start", e);
@@ -196,13 +231,11 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
               handleTouchStart("resize-start", e);
             }}
           />
-
-          {/* Right resize handle */}
           <div
-            className={`absolute right-0 top-0 bottom-0 w-1 md:w-1.5 rounded-md cursor-ew-resize ${getItemClasses(
+            className={`absolute right-0 top-0 bottom-0 w-1.5 cursor-ew-resize ${getItemClasses(
               item.type,
               true
-            )} z-20 m-1.5`}
+            )} z-20 opacity-0 hover:opacity-100 transition-opacity duration-200`}
             onMouseDown={(e) => {
               e.stopPropagation();
               handleMouseDown("resize-end", e);
@@ -232,4 +265,4 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   );
 };
 
-export default TimelineItem;
+export default memo(TimelineItem);
