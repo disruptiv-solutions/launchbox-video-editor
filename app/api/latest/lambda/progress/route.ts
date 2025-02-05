@@ -3,12 +3,12 @@ import { AwsRegion, getRenderProgress } from "@remotion/lambda/client";
 import {
   ProgressRequest,
   ProgressResponse,
-} from "@/components/editor/version-4.0.0/types";
-import { executeApi } from "@/components/editor/version-4.0.0/lambda-helpers/api-response";
+} from "@/components/editor/version-6.0.0/types";
+import { executeApi } from "@/components/editor/version-6.0.0/lambda-helpers/api-response";
 import {
   LAMBDA_FUNCTION_NAME,
   REGION,
-} from "@/components/editor/version-4.0.0/constants";
+} from "@/components/editor/version-6.0.0/constants";
 
 /**
  * API endpoint to check the progress of a Remotion video render on AWS Lambda

@@ -4,7 +4,7 @@
  */
 export const REGION = "us-east-1";
 
-export const SITE_NAME = "first-site";
+export const SITE_NAME = "sams-site";
 export const RAM = 3009;
 export const DISK = 2048;
 export const TIMEOUT = 240;

@@ -1,13 +1,13 @@
 import { AwsRegion, RenderMediaOnLambdaOutput } from "@remotion/lambda/client";
 import { renderMediaOnLambda } from "@remotion/lambda/client";
-import { RenderRequest } from "@/components/editor/version-4.0.0/types";
-import { executeApi } from "@/components/editor/version-4.0.0/lambda-helpers/api-response";
+import { RenderRequest } from "@/components/editor/version-6.0.0/types";
+import { executeApi } from "@/components/editor/version-6.0.0/lambda-helpers/api-response";
 
 import {
   LAMBDA_FUNCTION_NAME,
   REGION,
   SITE_NAME,
-} from "@/components/editor/version-4.0.0/constants";
+} from "@/components/editor/version-6.0.0/constants";
 
 /**
  * Configuration for the Lambda render function

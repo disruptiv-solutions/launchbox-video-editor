@@ -35,8 +35,8 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
   overlay,
 }) => {
   const dynamicFontSize = `${Math.min(
-    overlay?.width / 10,
-    overlay?.height / 1.2
+    overlay?.width / 2.5,
+    overlay?.height / 1.5
   )}px`;
 
   return (
@@ -46,13 +46,20 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
         height: "100%",
         display: "flex",
         alignItems: "center",
+        justifyContent: "center",
         overflow: "hidden",
         ...overlay?.styles,
         fontSize: dynamicFontSize,
         fontFamily: getFontFamily(overlay.styles.fontFamily),
       }}
     >
-      <div style={{ width: "100%", textAlign: overlay.styles.textAlign }}>
+      <div
+        style={{
+          width: "100%",
+          textAlign: overlay.styles.textAlign,
+          padding: "20px",
+        }}
+      >
         {overlay.content}
       </div>
     </div>
