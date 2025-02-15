@@ -101,7 +101,20 @@ The main page of the application displays a version changelog. Users can navigat
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the React Video Editor Pro (RVE) License. For detailed terms and conditions, please visit our [License Page](https://www.reactvideoeditor.com/important/license).
+
+### Licensing Requirements
+
+React Video Editor Pro utilizes [Remotion](https://www.remotion.dev/) for video rendering capabilities. Please note:
+
+1. For commercial use, you must obtain:
+
+   - A React Video Editor Pro license
+   - A separate Remotion license
+
+2. The React Video Editor Pro license does not include Remotion licensing rights. For Remotion licensing information, please refer to their [official license terms](https://github.com/remotion-dev/remotion/blob/main/LICENSE.md).
+
+Ensure compliance with both licenses before deploying to production.
 
 ## Acknowledgments
 

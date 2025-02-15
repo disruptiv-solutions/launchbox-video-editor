@@ -1,7 +1,7 @@
 import React from "react";
 import { Overlay } from "../types";
 import { TextLayerContent } from "./text-layer-content";
-import { Video, Audio, spring, useCurrentFrame } from "remotion";
+import { Audio, OffthreadVideo, spring, useCurrentFrame } from "remotion";
 
 interface LayerContentProps {
   overlay: Overlay;
@@ -33,33 +33,16 @@ export const LayerContent: React.FC<LayerContentProps> = ({ overlay }) => {
           <TextLayerContent overlay={overlay} />
         </div>
       );
-    case "image":
-      return (
-        <img
-          src={overlay.content}
-          alt="Layer content"
-          style={{ ...commonStyle, objectFit: "contain" }}
-        />
-      );
     case "clip":
       console.log("Clip overlay:", overlay);
       return (
         <div style={{ ...commonStyle, opacity: fadeIn }}>
-          <Video
+          <OffthreadVideo
             src={overlay.src}
             startFrom={overlay.videoStartTime || 0}
             style={{ ...commonStyle, objectFit: overlay.styles.objectFit }}
           />
         </div>
-      );
-    case "shape":
-      return (
-        <div
-          style={{
-            ...commonStyle,
-            backgroundColor: overlay.content,
-          }}
-        />
       );
     case "sound":
       return (
