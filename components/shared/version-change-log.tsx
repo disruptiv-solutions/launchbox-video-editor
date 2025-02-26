@@ -95,13 +95,31 @@ export default function VersionChangeLog() {
                           : "bg-purple-400/10 text-purple-400 ring-purple-400/30"
                       }`}
                     >
-                      {index === 0 ? "Latest" : version.status || "Stable"}
+                      {version.status || "Stable"}
                     </span>
                   </div>
                   <div className="mt-2 mb-4 text-xs md:text-base lg:text-base text-zinc-100 ">
                     <p>{version?.description || "No description available."}</p>
                   </div>
                   <div className="border-t border-gray-700 mb-4"></div>
+                  {version.status === "BETA" && (
+                    <div className="mb-6 p-4 rounded-lg bg-amber-900/20 border border-amber-700">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5" />
+                        <div>
+                          <h4 className="text-sm font-medium text-amber-400">
+                            Beta Version
+                          </h4>
+                          <p className="mt-1 text-xs text-amber-300">
+                            This version is in beta. We welcome you to try it
+                            out and would appreciate any feedback or issues you
+                            encounter.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {(version.video || version.image) && (
                     <div className="mb-6 rounded-lg overflow-hidden">
                       {version.video ? (
@@ -164,7 +182,7 @@ export default function VersionChangeLog() {
                     <span className="absolute -inset-y-2.5 -inset-x-4 md:-inset-y-4 md:-inset-x-6 sm:rounded-2xl"></span>
                     <Button
                       variant="outline"
-                      className="text-sm font-medium duration-300 flex items-center gap-2 relative text-slate-900"
+                      className="text-sm font-medium duration-300 flex items-center gap-2 relative dark:text-white text-slate-900"
                     >
                       View this version
                     </Button>

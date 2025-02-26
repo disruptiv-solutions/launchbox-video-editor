@@ -1,7 +1,7 @@
 import ReactVideoEditor from "@/components/editor/version-5.0.0/react-video-editor";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
-export default function Version4() {
+export default function Version5() {
   return (
     <SidebarProvider
       style={

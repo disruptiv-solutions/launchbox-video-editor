@@ -99,7 +99,6 @@ export const SelectTextOverlay: React.FC<SelectTextOverlayProps> = () => {
       content: option.content ?? "Testing",
       styles: {
         ...option.styles,
-        fontSize: "3rem",
         opacity: 1,
         zIndex: 1,
         transform: "none",
