@@ -35,6 +35,7 @@
     "@remotion/captions": "^4.0.265",
     "@remotion/cli": "^4.0.265",
     "@remotion/cloudrun": "^v4.0.265",
+    "@remotion/compositor-darwin-arm64": "^4.0.272",
     "@remotion/google-fonts": "^4.0.265",
     "@remotion/lambda": "^4.0.265",
     "@remotion/player": "^v4.0.265",

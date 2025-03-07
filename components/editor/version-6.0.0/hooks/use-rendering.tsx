@@ -1,47 +1,7 @@
 import { z } from "zod";
 import { useCallback, useMemo, useState } from "react";
 import { CompositionProps } from "../types";
-
-import {
-  getProgress as getLambdaProgress,
-  renderVideo as renderLambdaVideo,
-} from "../lambda-helpers/api";
-import {
-  getProgress as getSsrProgress,
-  renderVideo as renderSsrVideo,
-} from "../ssr-helpers/api";
-
-/**
- * Common response type for both rendering implementations.
- * This ensures consistency regardless of which renderer is used.
- */
-type RenderResponse = {
-  renderId: string;
-  bucketName?: string; // Optional for SSR implementation
-};
-
-/**
- * Environment variable that controls which rendering implementation to use:
- * - When NEXT_PUBLIC_USE_SSR="true": Uses the SSR (Server-Side Rendering) implementation
- * - When NEXT_PUBLIC_USE_SSR="false": Uses the Lambda (AWS Lambda) implementation
- *
- * This can be configured via environment variables to switch between rendering engines
- * without code changes.
- */
-const USE_SSR = process.env.NEXT_PUBLIC_USE_SSR === "true";
-
-/**
- * Dynamically selects the appropriate rendering functions based on USE_SSR flag:
- * - getProgress: Checks the rendering progress
- * - renderVideo: Initiates the video rendering process
- *
- * Both implementations (SSR and Lambda) conform to the same interface,
- * making them interchangeable at runtime.
- */
-const getProgress = USE_SSR ? getSsrProgress : getLambdaProgress;
-const renderVideo = USE_SSR
-  ? (params: any): Promise<RenderResponse> => renderSsrVideo(params)
-  : (params: any): Promise<RenderResponse> => renderLambdaVideo(params);
+import { getProgress, renderVideo } from "../ssr-helpers/api";
 
 // Define possible states for the rendering process
 export type State =
@@ -50,7 +10,6 @@ export type State =
   | {
       // Video is being rendered
       renderId: string;
-      bucketName: string;
       progress: number;
       status: "rendering";
     }
@@ -94,15 +53,12 @@ export const useRendering = (
     });
     try {
       console.log("Calling renderVideo API with inputProps", inputProps);
-      const { renderId, bucketName } = await renderVideo({ id, inputProps });
-      console.log(
-        `Render initiated: renderId=${renderId}, bucketName=${bucketName}`
-      );
+      const { renderId } = await renderVideo({ id, inputProps });
+      console.log(`Render initiated: renderId=${renderId}`);
       setState({
         status: "rendering",
         progress: 0,
         renderId: renderId,
-        bucketName: bucketName ?? "",
       });
 
       let pending = true;
@@ -111,23 +67,16 @@ export const useRendering = (
         console.log(`Checking progress for renderId=${renderId}`);
         const result = await getProgress({
           id: renderId,
-          bucketName: bucketName ?? "",
+          // We need to pass an empty bucketName for backward compatibility
+          bucketName: "",
         });
         switch (result.type) {
           case "error": {
             console.error(`Render error: ${result.message}`);
-            const errorMessage = result.message.includes("Failed to fetch")
-              ? `Rendering failed: This might be caused by insufficient disk space in your browser. Try:\n` +
-                `1. Clearing browser cache and temporary files\n` +
-                `2. Freeing up disk space\n` +
-                `3. Using a different browser\n` +
-                `Original error: ${result.message}`
-              : result.message;
-
             setState({
               status: "error",
               renderId: renderId,
-              error: new Error(errorMessage),
+              error: new Error(result.message),
             });
             pending = false;
             break;
@@ -148,7 +97,6 @@ export const useRendering = (
             console.log(`Render progress: ${result.progress}%`);
             setState({
               status: "rendering",
-              bucketName: bucketName ?? "",
               progress: result.progress,
               renderId: renderId,
             });

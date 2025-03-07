@@ -50,6 +50,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   state,
   handleRender,
 }) => {
+  console.log("state", state);
   // Store multiple renders
   const [renders, setRenders] = React.useState<RenderItem[]>([]);
   // Track if there are new renders
@@ -57,10 +58,11 @@ const RenderControls: React.FC<RenderControlsProps> = ({
 
   // Add new render to the list when completed
   React.useEffect(() => {
-    if (state.status === "done" && state.url) {
+    if (state.status === "done") {
       setRenders((prev) => [
         {
-          url: state.url!,
+          // Use the correct URL path format for SSR rendered videos
+          url: state.url.startsWith("/") ? state.url : `/videos/${state.url}`,
           timestamp: new Date(),
           id: crypto.randomUUID(),
           status: "success",
@@ -74,17 +76,23 @@ const RenderControls: React.FC<RenderControlsProps> = ({
           timestamp: new Date(),
           id: crypto.randomUUID(),
           status: "error",
-          error: "Failed to render video. Please try again.",
+          error:
+            state.error?.message || "Failed to render video. Please try again.",
         },
         ...prev,
       ]);
       setHasNewRender(true);
     }
-  }, [state.status, state.url]);
+  }, [state.status, state.url, state.error]);
 
   const handleDownload = (url: string) => {
+    // Convert the video URL to a download URL
+    const downloadUrl = url
+      .replace("/videos/", "/api/latest/ssr/download/")
+      .replace(".mp4", "");
+
     const a = document.createElement("a");
-    a.href = url;
+    a.href = downloadUrl;
     a.download = "rendered-video.mp4";
     document.body.appendChild(a);
     a.click();
@@ -128,7 +136,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
                           Render Failed
                         </span>
                       ) : (
-                        new URL(render.url!).pathname.split("/").pop()
+                        render.url!.split("/").pop()
                       )}
                     </div>
                     <div className="text-[11px] text-muted-foreground">

@@ -1,5 +1,9 @@
 import { bundle } from "@remotion/bundler";
-import { renderMedia, selectComposition, RenderMediaOnProgress } from "@remotion/renderer";
+import {
+  renderMedia,
+  selectComposition,
+  RenderMediaOnProgress,
+} from "@remotion/renderer";
 import path from "path";
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
@@ -25,58 +29,55 @@ export async function startRendering(
   compositionId: string,
   inputProps: Record<string, unknown>
 ) {
-  // Generate a unique ID for this render
   const renderId = uuidv4();
-  
-  // Set initial progress
+
+  // Initialize tracking immediately
   renderProgress.set(renderId, 0);
   renderStatus.set(renderId, "rendering");
-  
+
   // Define output file path and public URL
   const outputFile = path.join(VIDEOS_DIR, `${renderId}.mp4`);
   const publicUrl = `/videos/${renderId}.mp4`;
-  
+
   // Start the rendering process asynchronously
   (async () => {
     try {
       // Get the base URL for serving media files
       const baseUrl = getBaseUrl();
-      
+
       // Bundle the video
       const bundleLocation = await bundle(
-        path.join(process.cwd(), "components", "editor", "version-6.0.0", "remotion", "entry.tsx"),
+        path.join(
+          process.cwd(),
+          "components",
+          "editor",
+          "version-6.0.0",
+          "remotion",
+          "index.ts"
+        ),
         undefined,
         {
-          // Disable the compositor to avoid platform-specific dependencies
-          webpackOverride: (config) => {
-            return {
-              ...config,
-              resolve: {
-                ...config.resolve,
-                fallback: {
-                  ...config.resolve?.fallback,
-                  // Darwin (macOS)
-                  '@remotion/compositor-darwin-x64': false,
-                  '@remotion/compositor-darwin-arm64': false,
-                  
-                  // Linux
-                  '@remotion/compositor-linux-x64': false,
-                  '@remotion/compositor-linux-arm64': false,
-                  '@remotion/compositor-linux-x64-musl': false,
-                  '@remotion/compositor-linux-arm64-musl': false,
-                  '@remotion/compositor-linux-x64-gnu': false,
-                  '@remotion/compositor-linux-arm64-gnu': false,
-                  
-                  // Windows
-                  '@remotion/compositor-win32-x64': false,
-                  '@remotion/compositor-windows-x64': false,
-                },
+          // Disable all platform-specific compositors
+          webpackOverride: (config) => ({
+            ...config,
+            resolve: {
+              ...config.resolve,
+              fallback: {
+                ...config.resolve?.fallback,
+                // Explicitly disable ALL compositor packages
+                "@remotion/compositor": false,
+                "@remotion/compositor-darwin-arm64": false,
+                "@remotion/compositor-darwin-x64": false,
+                "@remotion/compositor-linux-x64": false,
+                "@remotion/compositor-linux-arm64": false,
+                "@remotion/compositor-win32-x64-msvc": false,
+                "@remotion/compositor-windows-x64": false,
               },
-            };
-          }
+            },
+          }),
         }
       );
-      
+
       // Select the composition
       const composition = await selectComposition({
         serveUrl: bundleLocation,
@@ -84,27 +85,28 @@ export async function startRendering(
         inputProps: {
           ...inputProps,
           // Pass the base URL to the composition for media file access
-          baseUrl
+          baseUrl,
         },
       });
-      
+
       // Get the actual duration from inputProps or use composition's duration
-      const actualDurationInFrames = inputProps.durationInFrames as number || composition.durationInFrames;
+      const actualDurationInFrames =
+        (inputProps.durationInFrames as number) || composition.durationInFrames;
       console.log(`Using actual duration: ${actualDurationInFrames} frames`);
-      
+
       // Render the video using chromium
       await renderMedia({
         codec: "h264",
         composition: {
           ...composition,
           // Override the duration to use the actual duration from inputProps
-          durationInFrames: actualDurationInFrames
+          durationInFrames: actualDurationInFrames,
         },
         serveUrl: bundleLocation,
         outputLocation: outputFile,
         inputProps: {
           ...inputProps,
-          baseUrl
+          baseUrl,
         },
         // Set chromium options according to the correct API
         chromiumOptions: {
@@ -118,7 +120,7 @@ export async function startRendering(
           renderProgress.set(renderId, progress.progress);
         }) as RenderMediaOnProgress,
       });
-      
+
       // Get file size
       const stats = fs.statSync(outputFile);
       renderStatus.set(renderId, "done");
@@ -127,11 +129,15 @@ export async function startRendering(
       console.log(`Render ${renderId} completed successfully`);
     } catch (error) {
       renderStatus.set(renderId, "error");
-      renderErrors.set(renderId, error instanceof Error ? error.message : String(error));
+      renderErrors.set(
+        renderId,
+        error instanceof Error ? error.message : String(error)
+      );
       console.error(`Render ${renderId} failed:`, error);
     }
   })();
-  
+
+  // Return the ID immediately so tracking can begin
   return renderId;
 }
 
@@ -139,12 +145,20 @@ export async function startRendering(
  * Get the current progress of a render
  */
 export function getRenderProgress(renderId: string) {
+  // Add logging to debug missing renders
+  console.log("Checking progress for render:", renderId);
+  console.log("Available render IDs:", Array.from(renderStatus.keys()));
+
   const progress = renderProgress.get(renderId) || 0;
   const status = renderStatus.get(renderId) || "rendering";
   const error = renderErrors.get(renderId);
   const url = renderUrls.get(renderId);
   const size = renderSizes.get(renderId);
-  
+
+  if (!renderStatus.has(renderId)) {
+    throw new Error(`No render found with ID: ${renderId}`);
+  }
+
   return {
     renderId,
     progress,
