@@ -60,6 +60,12 @@ interface EditorContextProps {
 
   // New resetOverlays prop
   resetOverlays: () => void;
+
+  // Autosave functionality
+  saveProject?: () => Promise<void>; // Manual save function
+
+  // Add renderType to the context
+  renderType: "ssr" | "lambda";
 }
 
 // Create the context with undefined as default value

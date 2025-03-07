@@ -40,8 +40,9 @@ export function EditorHeader() {
    * Destructure required values from the editor context:
    * - renderMedia: Function to handle media rendering/export
    * - state: Current editor state
+   * - renderType: Type of render
    */
-  const { renderMedia, state } = useEditorContext();
+  const { renderMedia, state, saveProject, renderType } = useEditorContext();
 
   return (
     <header
@@ -64,7 +65,12 @@ export function EditorHeader() {
       <div className="flex-grow" />
 
       {/* Media rendering controls */}
-      <RenderControls handleRender={renderMedia} state={state} />
+      <RenderControls
+        handleRender={renderMedia}
+        state={state}
+        saveProject={saveProject}
+        renderType={renderType}
+      />
     </header>
   );
 }

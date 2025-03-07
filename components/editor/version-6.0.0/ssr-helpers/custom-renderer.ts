@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from "uuid";
 import { getBaseUrl } from "../utils/url-helper";
 
 // Ensure the videos directory exists
-const VIDEOS_DIR = path.join(process.cwd(), "public", "videos");
+const VIDEOS_DIR = path.join(process.cwd(), "public", "rendered-videos");
 if (!fs.existsSync(VIDEOS_DIR)) {
   fs.mkdirSync(VIDEOS_DIR, { recursive: true });
 }
@@ -37,7 +37,7 @@ export async function startRendering(
 
   // Define output file path and public URL
   const outputFile = path.join(VIDEOS_DIR, `${renderId}.mp4`);
-  const publicUrl = `/videos/${renderId}.mp4`;
+  const publicUrl = `/rendered-videos/${renderId}.mp4`;
 
   // Start the rendering process asynchronously
   (async () => {

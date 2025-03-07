@@ -1,7 +1,14 @@
 import { z } from "zod";
 import { useCallback, useMemo, useState } from "react";
 import { CompositionProps } from "../types";
-import { getProgress, renderVideo } from "../ssr-helpers/api";
+import {
+  getProgress as ssrGetProgress,
+  renderVideo as ssrRenderVideo,
+} from "../ssr-helpers/api";
+import {
+  getProgress as lambdaGetProgress,
+  renderVideo as lambdaRenderVideo,
+} from "../lambda-helpers/api";
 
 // Define possible states for the rendering process
 export type State =
@@ -12,6 +19,7 @@ export type State =
       renderId: string;
       progress: number;
       status: "rendering";
+      bucketName?: string; // Make bucketName optional
     }
   | {
       // Error occurred during rendering
@@ -35,10 +43,13 @@ const wait = async (milliSeconds: number) => {
   });
 };
 
+type RenderType = "ssr" | "lambda";
+
 // Custom hook to manage video rendering process
 export const useRendering = (
-  id: string, // Unique identifier for the render
-  inputProps: z.infer<typeof CompositionProps> // Video composition properties
+  id: string,
+  inputProps: z.infer<typeof CompositionProps>,
+  renderType: RenderType = "ssr" // Default to SSR rendering
 ) => {
   // Maintain current state of the rendering process
   const [state, setState] = useState<State>({
@@ -47,18 +58,32 @@ export const useRendering = (
 
   // Main function to handle the rendering process
   const renderMedia = useCallback(async () => {
-    console.log("Starting renderMedia process");
+    console.log(`Starting renderMedia process using ${renderType}`);
     setState({
       status: "invoking",
     });
     try {
+      const renderVideo =
+        renderType === "ssr" ? ssrRenderVideo : lambdaRenderVideo;
+      const getProgress =
+        renderType === "ssr" ? ssrGetProgress : lambdaGetProgress;
+
       console.log("Calling renderVideo API with inputProps", inputProps);
-      const { renderId } = await renderVideo({ id, inputProps });
-      console.log(`Render initiated: renderId=${renderId}`);
+      const response = await renderVideo({ id, inputProps });
+      const renderId = response.renderId;
+      const bucketName =
+        "bucketName" in response ? response.bucketName : undefined;
+
+      if (renderType === "ssr") {
+        // Add a small delay for SSR rendering to ensure initialization
+        await wait(3000);
+      }
+
       setState({
         status: "rendering",
         progress: 0,
-        renderId: renderId,
+        renderId,
+        bucketName: typeof bucketName === "string" ? bucketName : undefined,
       });
 
       let pending = true;
@@ -67,9 +92,9 @@ export const useRendering = (
         console.log(`Checking progress for renderId=${renderId}`);
         const result = await getProgress({
           id: renderId,
-          // We need to pass an empty bucketName for backward compatibility
-          bucketName: "",
+          bucketName: typeof bucketName === "string" ? bucketName : "",
         });
+        console.log("result", result);
         switch (result.type) {
           case "error": {
             console.error(`Render error: ${result.message}`);
@@ -112,7 +137,7 @@ export const useRendering = (
         renderId: null,
       });
     }
-  }, [id, inputProps]);
+  }, [id, inputProps, renderType]);
 
   // Reset the rendering state back to initial
   const undo = useCallback(() => {

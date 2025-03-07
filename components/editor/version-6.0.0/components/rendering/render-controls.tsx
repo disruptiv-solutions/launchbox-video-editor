@@ -1,5 +1,5 @@
 import React from "react";
-import { Download, Loader2, Bell } from "lucide-react";
+import { Download, Loader2, Bell, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -28,10 +28,14 @@ interface RenderItem {
  * Props for the RenderControls component
  * @property {object} state - Current render state containing status, progress, and URL
  * @property {() => void} handleRender - Function to trigger a new render
+ * @property {() => void} saveProject - Function to save the project
+ * @property {('ssr' | 'lambda')?} renderType - Type of render (SSR or Lambda)
  */
 interface RenderControlsProps {
   state: any;
   handleRender: () => void;
+  saveProject?: () => Promise<void>;
+  renderType?: "ssr" | "lambda";
 }
 
 /**
@@ -49,6 +53,8 @@ interface RenderControlsProps {
 const RenderControls: React.FC<RenderControlsProps> = ({
   state,
   handleRender,
+  saveProject,
+  renderType = "ssr",
 }) => {
   console.log("state", state);
   // Store multiple renders
@@ -61,8 +67,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
     if (state.status === "done") {
       setRenders((prev) => [
         {
-          // Use the correct URL path format for SSR rendered videos
-          url: state.url.startsWith("/") ? state.url : `/videos/${state.url}`,
+          url: state.url,
           timestamp: new Date(),
           id: crypto.randomUUID(),
           status: "success",
@@ -86,10 +91,15 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   }, [state.status, state.url, state.error]);
 
   const handleDownload = (url: string) => {
-    // Convert the video URL to a download URL
-    const downloadUrl = url
-      .replace("/videos/", "/api/latest/ssr/download/")
-      .replace(".mp4", "");
+    let downloadUrl = url;
+
+    if (renderType === "ssr") {
+      // Convert the video URL to a download URL for SSR
+      downloadUrl = url
+        .replace("/rendered-videos/", "/api/latest/ssr/download/")
+        .replace(".mp4", "");
+    }
+    // Lambda URLs are already in the correct format for download
 
     const a = document.createElement("a");
     a.href = downloadUrl;
@@ -99,8 +109,28 @@ const RenderControls: React.FC<RenderControlsProps> = ({
     document.body.removeChild(a);
   };
 
+  const getDisplayFileName = (url: string) => {
+    if (renderType === "ssr") {
+      return url.split("/").pop();
+    }
+    // For Lambda URLs, use the full URL pathname
+    try {
+      return new URL(url).pathname.split("/").pop();
+    } catch {
+      return url.split("/").pop();
+    }
+  };
+
   return (
     <>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="relative hover:bg-accent"
+        onClick={saveProject}
+      >
+        <Save className="w-3.5 h-3.5" />
+      </Button>
       <Popover onOpenChange={() => setHasNewRender(false)}>
         <PopoverTrigger asChild>
           <Button
@@ -136,7 +166,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
                           Render Failed
                         </span>
                       ) : (
-                        render.url!.split("/").pop()
+                        getDisplayFileName(render.url!)
                       )}
                     </div>
                     <div className="text-[11px] text-muted-foreground">
@@ -185,7 +215,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
             Preparing...
           </>
         ) : (
-          "Render Video"
+          `Render Video (${renderType === "ssr" ? "SSR" : "Lambda"})`
         )}
       </Button>
     </>
