@@ -1,7 +1,14 @@
 import { z } from "zod";
 import { useCallback, useMemo, useState } from "react";
 import { CompositionProps } from "../types";
-import { getProgress, renderVideo } from "../ssr-helpers/api";
+
+import {
+  getProgress as getLambdaProgress,
+  renderVideo as renderLambdaVideo,
+} from "../lambda-helpers/api";
+
+const getProgress = getLambdaProgress;
+const renderVideo = renderLambdaVideo;
 
 // Define possible states for the rendering process
 export type State =
@@ -10,6 +17,7 @@ export type State =
   | {
       // Video is being rendered
       renderId: string;
+      bucketName: string;
       progress: number;
       status: "rendering";
     }
@@ -53,12 +61,15 @@ export const useRendering = (
     });
     try {
       console.log("Calling renderVideo API with inputProps", inputProps);
-      const { renderId } = await renderVideo({ id, inputProps });
-      console.log(`Render initiated: renderId=${renderId}`);
+      const { renderId, bucketName } = await renderVideo({ id, inputProps });
+      console.log(
+        `Render initiated: renderId=${renderId}, bucketName=${bucketName}`
+      );
       setState({
         status: "rendering",
         progress: 0,
         renderId: renderId,
+        bucketName: bucketName,
       });
 
       let pending = true;
@@ -67,16 +78,23 @@ export const useRendering = (
         console.log(`Checking progress for renderId=${renderId}`);
         const result = await getProgress({
           id: renderId,
-          // We need to pass an empty bucketName for backward compatibility
-          bucketName: "",
+          bucketName: bucketName,
         });
         switch (result.type) {
           case "error": {
             console.error(`Render error: ${result.message}`);
+            const errorMessage = result.message.includes("Failed to fetch")
+              ? `Rendering failed: This might be caused by insufficient disk space in your browser. Try:\n` +
+                `1. Clearing browser cache and temporary files\n` +
+                `2. Freeing up disk space\n` +
+                `3. Using a different browser\n` +
+                `Original error: ${result.message}`
+              : result.message;
+
             setState({
               status: "error",
               renderId: renderId,
-              error: new Error(result.message),
+              error: new Error(errorMessage),
             });
             pending = false;
             break;
@@ -97,6 +115,7 @@ export const useRendering = (
             console.log(`Render progress: ${result.progress}%`);
             setState({
               status: "rendering",
+              bucketName: bucketName ?? "",
               progress: result.progress,
               renderId: renderId,
             });
