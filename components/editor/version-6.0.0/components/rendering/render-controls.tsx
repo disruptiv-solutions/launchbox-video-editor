@@ -24,6 +24,42 @@ interface RenderItem {
   error?: string;
 }
 
+// Define strict types for render state
+type RenderStatus = "init" | "invoking" | "rendering" | "done" | "error";
+
+interface RenderState {
+  status: RenderStatus;
+  progress?: number;
+  url?: string;
+  error?: Error;
+}
+
+// Define render type and associated handlers
+interface RenderTypeConfig {
+  getDownloadUrl: (url: string) => string;
+  getDisplayFileName: (url: string) => string;
+}
+
+const renderTypeConfigs: Record<"ssr" | "lambda", RenderTypeConfig> = {
+  ssr: {
+    getDownloadUrl: (url: string) =>
+      url
+        .replace("/rendered-videos/", "/api/latest/ssr/download/")
+        .replace(".mp4", ""),
+    getDisplayFileName: (url: string) => url.split("/").pop() || "",
+  },
+  lambda: {
+    getDownloadUrl: (url: string) => url, // Lambda URLs are already in correct format
+    getDisplayFileName: (url: string) => {
+      try {
+        return new URL(url).pathname.split("/").pop() || "";
+      } catch {
+        return url.split("/").pop() || "";
+      }
+    },
+  },
+};
+
 /**
  * Props for the RenderControls component
  * @property {object} state - Current render state containing status, progress, and URL
@@ -32,7 +68,7 @@ interface RenderItem {
  * @property {('ssr' | 'lambda')?} renderType - Type of render (SSR or Lambda)
  */
 interface RenderControlsProps {
-  state: any;
+  state: RenderState;
   handleRender: () => void;
   saveProject?: () => Promise<void>;
   renderType?: "ssr" | "lambda";
@@ -62,9 +98,12 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   // Track if there are new renders
   const [hasNewRender, setHasNewRender] = React.useState(false);
 
-  // Add new render to the list when completed
+  // Get the appropriate config for current render type
+  const config = renderTypeConfigs[renderType];
+
+  // Handle render state changes
   React.useEffect(() => {
-    if (state.status === "done") {
+    if (state.status === "done" && state.url) {
       setRenders((prev) => [
         {
           url: state.url,
@@ -75,7 +114,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
         ...prev,
       ]);
       setHasNewRender(true);
-    } else if (state.status === "error") {
+    } else if (state.status === "error" && state.error) {
       setRenders((prev) => [
         {
           timestamp: new Date(),
@@ -91,34 +130,13 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   }, [state.status, state.url, state.error]);
 
   const handleDownload = (url: string) => {
-    let downloadUrl = url;
-
-    if (renderType === "ssr") {
-      // Convert the video URL to a download URL for SSR
-      downloadUrl = url
-        .replace("/rendered-videos/", "/api/latest/ssr/download/")
-        .replace(".mp4", "");
-    }
-    // Lambda URLs are already in the correct format for download
-
+    const downloadUrl = config.getDownloadUrl(url);
     const a = document.createElement("a");
     a.href = downloadUrl;
     a.download = "rendered-video.mp4";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-  };
-
-  const getDisplayFileName = (url: string) => {
-    if (renderType === "ssr") {
-      return url.split("/").pop();
-    }
-    // For Lambda URLs, use the full URL pathname
-    try {
-      return new URL(url).pathname.split("/").pop();
-    } catch {
-      return url.split("/").pop();
-    }
   };
 
   return (
@@ -166,7 +184,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
                           Render Failed
                         </span>
                       ) : (
-                        getDisplayFileName(render.url!)
+                        config.getDisplayFileName(render.url!)
                       )}
                     </div>
                     <div className="text-[11px] text-muted-foreground">
@@ -207,7 +225,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
         {state.status === "rendering" ? (
           <>
             <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-            Rendering... {(state.progress * 100).toFixed(0)}%
+            Rendering... {(state.progress ?? 0 * 100).toFixed(0)}%
           </>
         ) : state.status === "invoking" ? (
           <>
@@ -215,7 +233,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
             Preparing...
           </>
         ) : (
-          `Render Video (${renderType === "ssr" ? "SSR" : "Lambda"})`
+          `Render Video (${renderType.toUpperCase()})`
         )}
       </Button>
     </>

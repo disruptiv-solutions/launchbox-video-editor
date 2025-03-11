@@ -55,6 +55,8 @@ export const LayerContent: React.FC<LayerContentProps> = ({ overlay }) => {
     height: "100%",
   };
 
+  console.log("Overlay", overlay);
+
   switch (overlay.type) {
     case OverlayType.VIDEO:
       return (

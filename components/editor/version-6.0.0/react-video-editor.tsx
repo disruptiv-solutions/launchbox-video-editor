@@ -95,7 +95,7 @@ export default function ReactVideoEditor({ projectId }: { projectId: string }) {
     src: "",
   };
 
-  const RENDER_TYPE: "ssr" | "lambda" = "ssr";
+  const RENDER_TYPE: "ssr" | "lambda" = "lambda";
   const { renderMedia, state } = useRendering(
     "TestComponent",
     inputProps,
