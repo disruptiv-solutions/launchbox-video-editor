@@ -8,6 +8,12 @@ import path from "path";
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 import { getBaseUrl } from "../utils/url-helper";
+import {
+  saveRenderState,
+  updateRenderProgress,
+  completeRender,
+  failRender,
+} from "./render-state";
 
 // Ensure the videos directory exists
 const VIDEOS_DIR = path.join(process.cwd(), "public", "rendered-videos");
@@ -31,17 +37,19 @@ export async function startRendering(
 ) {
   const renderId = uuidv4();
 
-  // Initialize tracking immediately
-  renderProgress.set(renderId, 0);
-  renderStatus.set(renderId, "rendering");
+  // Initialize render state
+  saveRenderState(renderId, {
+    status: "rendering",
+    progress: 0,
+    timestamp: Date.now(),
+  });
 
-  // Define output file path and public URL
-  const outputFile = path.join(VIDEOS_DIR, `${renderId}.mp4`);
-  const publicUrl = `/rendered-videos/${renderId}.mp4`;
-
-  // Start the rendering process asynchronously
+  // Start rendering asynchronously
   (async () => {
     try {
+      // Update progress as rendering proceeds
+      updateRenderProgress(renderId, 0);
+
       // Get the base URL for serving media files
       const baseUrl = getBaseUrl();
 
@@ -103,7 +111,7 @@ export async function startRendering(
           durationInFrames: actualDurationInFrames,
         },
         serveUrl: bundleLocation,
-        outputLocation: outputFile,
+        outputLocation: path.join(VIDEOS_DIR, `${renderId}.mp4`),
         inputProps: {
           ...inputProps,
           baseUrl,
@@ -117,27 +125,21 @@ export async function startRendering(
         timeoutInMilliseconds: 300000, // 5 minutes
         onProgress: ((progress) => {
           // Extract just the progress percentage from the detailed progress object
-          renderProgress.set(renderId, progress.progress);
+          updateRenderProgress(renderId, progress.progress);
         }) as RenderMediaOnProgress,
       });
 
       // Get file size
-      const stats = fs.statSync(outputFile);
-      renderStatus.set(renderId, "done");
-      renderUrls.set(renderId, publicUrl);
-      renderSizes.set(renderId, stats.size);
+      const stats = fs.statSync(path.join(VIDEOS_DIR, `${renderId}.mp4`));
+      const outputPath = `/rendered-videos/${renderId}.mp4`;
+      completeRender(renderId, outputPath, stats.size);
       console.log(`Render ${renderId} completed successfully`);
-    } catch (error) {
-      renderStatus.set(renderId, "error");
-      renderErrors.set(
-        renderId,
-        error instanceof Error ? error.message : String(error)
-      );
+    } catch (error: any) {
+      failRender(renderId, error.message);
       console.error(`Render ${renderId} failed:`, error);
     }
   })();
 
-  // Return the ID immediately so tracking can begin
   return renderId;
 }
 

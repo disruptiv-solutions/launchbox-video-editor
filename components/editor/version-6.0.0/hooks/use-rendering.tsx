@@ -62,6 +62,7 @@ export const useRendering = (
     setState({
       status: "invoking",
     });
+
     try {
       const renderVideo =
         renderType === "ssr" ? ssrRenderVideo : lambdaRenderVideo;
@@ -71,11 +72,11 @@ export const useRendering = (
       console.log("Calling renderVideo API with inputProps", inputProps);
       const response = await renderVideo({ id, inputProps });
       const renderId = response.renderId;
-      const bucketName =
-        "bucketName" in response ? response.bucketName : undefined;
+      console.log("Received renderId:", renderId);
 
+      // Add a longer initial delay for the first render
       if (renderType === "ssr") {
-        // Add a small delay for SSR rendering to ensure initialization
+        console.log("Waiting for SSR initialization...");
         await wait(3000);
       }
 
@@ -83,50 +84,68 @@ export const useRendering = (
         status: "rendering",
         progress: 0,
         renderId,
-        bucketName: typeof bucketName === "string" ? bucketName : undefined,
       });
 
+      let retryCount = 0;
+      const maxRetries = 3;
       let pending = true;
 
       while (pending) {
-        console.log(`Checking progress for renderId=${renderId}`);
-        const result = await getProgress({
-          id: renderId,
-          bucketName: typeof bucketName === "string" ? bucketName : "",
-        });
-        console.log("result", result);
-        switch (result.type) {
-          case "error": {
-            console.error(`Render error: ${result.message}`);
-            setState({
-              status: "error",
-              renderId: renderId,
-              error: new Error(result.message),
-            });
-            pending = false;
-            break;
+        try {
+          console.log(`Checking progress for renderId=${renderId}`);
+          const result = await getProgress({
+            id: renderId,
+            bucketName: "",
+          });
+
+          // Reset retry count on successful progress check
+          retryCount = 0;
+
+          console.log("Progress result:", result);
+
+          switch (result.type) {
+            case "error": {
+              console.error(`Render error: ${result.message}`);
+              setState({
+                status: "error",
+                renderId: renderId,
+                error: new Error(result.message),
+              });
+              pending = false;
+              break;
+            }
+            case "done": {
+              console.log(
+                `Render complete: url=${result.url}, size=${result.size}`
+              );
+              setState({
+                size: result.size,
+                url: result.url,
+                status: "done",
+              });
+              pending = false;
+              break;
+            }
+            case "progress": {
+              console.log(`Render progress: ${result.progress}%`);
+              setState({
+                status: "rendering",
+                progress: result.progress,
+                renderId: renderId,
+              });
+              await wait(1000);
+            }
           }
-          case "done": {
-            console.log(
-              `Render complete: url=${result.url}, size=${result.size}`
-            );
-            setState({
-              size: result.size,
-              url: result.url,
-              status: "done",
-            });
-            pending = false;
-            break;
+        } catch (error) {
+          console.error("Error checking progress:", error);
+          retryCount++;
+
+          if (retryCount >= maxRetries) {
+            throw error;
           }
-          case "progress": {
-            console.log(`Render progress: ${result.progress}%`);
-            setState({
-              status: "rendering",
-              progress: result.progress,
-              renderId: renderId,
-            });
-            await wait(1000);
-          }
+
+          // Wait longer between retries
+          await wait(1000 * retryCount);
         }
       }
     } catch (err) {

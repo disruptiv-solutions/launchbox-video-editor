@@ -32,3 +32,7 @@ export const ZOOM_CONSTRAINTS = {
   transitionDuration: 100, // Animation duration in milliseconds
   easing: "cubic-bezier(0.4, 0.0, 0.2, 1)", // Smooth easing function for zoom transitions
 };
+
+// Render configuration
+// NOTE: TO CHANGE RENDER TYPE, UPDATE THE RENDER_TYPE CONSTANT
+export const RENDER_TYPE: "ssr" | "lambda" = "ssr";

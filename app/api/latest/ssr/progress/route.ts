@@ -1,48 +1,37 @@
 import { ProgressRequest } from "@/components/editor/version-6.0.0/types";
 import { executeApi } from "@/components/editor/version-6.0.0/ssr-helpers/api-response";
-import {
-  renderProgress,
-  renderStatus,
-  renderErrors,
-  renderUrls,
-  renderSizes,
-} from "@/components/editor/version-6.0.0/ssr-helpers/custom-renderer";
+import { getRenderState } from "@/components/editor/version-6.0.0/ssr-helpers/render-state";
 
 /**
  * POST endpoint handler for checking rendering progress
  */
 export const POST = executeApi(ProgressRequest, async (req, body) => {
-  console.log("Checking progress for render:", body.id);
-
-  // We ignore bucketName as it's only needed for AWS Lambda
   const { id } = body;
-  const status = renderStatus.get(id);
-  const progress = renderProgress.get(id) || 0;
+  const state = getRenderState(id);
 
-  if (!status) {
+  if (!state) {
     return {
       type: "error",
       message: `No render found with ID: ${id}`,
     };
   }
 
-  if (status === "error") {
-    return {
-      type: "error",
-      message: renderErrors.get(id) || "Unknown error occurred",
-    };
+  switch (state.status) {
+    case "error":
+      return {
+        type: "error",
+        message: state.error || "Unknown error occurred",
+      };
+    case "done":
+      return {
+        type: "done",
+        url: state.url,
+        size: state.size,
+      };
+    default:
+      return {
+        type: "progress",
+        progress: state.progress || 0,
+      };
   }
-
-  if (status === "done") {
-    return {
-      type: "done",
-      url: renderUrls.get(id) || "",
-      size: renderSizes.get(id) || 0,
-    };
-  }
-
-  return {
-    type: "progress",
-    progress,
-  };
 });

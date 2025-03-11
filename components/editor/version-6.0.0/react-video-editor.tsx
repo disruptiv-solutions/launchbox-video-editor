@@ -21,7 +21,7 @@ import { useHistory } from "./hooks/use-history";
 // Types
 import { Overlay } from "./types";
 import { useRendering } from "./hooks/use-rendering";
-import { FPS } from "./constants";
+import { FPS, RENDER_TYPE } from "./constants";
 import { TimelineProvider } from "./contexts/timeline-context";
 
 // Autosave Components
@@ -95,7 +95,7 @@ export default function ReactVideoEditor({ projectId }: { projectId: string }) {
     src: "",
   };
 
-  const RENDER_TYPE: "ssr" | "lambda" = "lambda";
+  // Remove RENDER_TYPE constant definition since it's now imported
   const { renderMedia, state } = useRendering(
     "TestComponent",
     inputProps,
