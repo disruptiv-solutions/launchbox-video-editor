@@ -16,6 +16,9 @@
 # production
 /build
 
+# Render state
+/tmp/render-state
+
 # misc
 .DS_Store
 *.pem
