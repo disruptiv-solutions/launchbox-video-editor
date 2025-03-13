@@ -35,4 +35,4 @@ export const ZOOM_CONSTRAINTS = {
 
 // Render configuration
 // NOTE: TO CHANGE RENDER TYPE, UPDATE THE RENDER_TYPE CONSTANT
-export const RENDER_TYPE: "ssr" | "lambda" = "lambda";
+export const RENDER_TYPE: "ssr" | "lambda" = "ssr";

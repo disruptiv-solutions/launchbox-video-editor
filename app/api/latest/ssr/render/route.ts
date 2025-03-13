@@ -1,5 +1,5 @@
 import { RenderRequest } from "@/components/editor/version-6.0.0/types";
-import { executeApi } from "@/components/editor/version-6.0.0/lambda-helpers/api-response";
+import { executeApi } from "@/components/editor/version-6.0.0/ssr-helpers/api-response";
 import { startRendering } from "@/components/editor/version-6.0.0/ssr-helpers/custom-renderer";
 
 /**
