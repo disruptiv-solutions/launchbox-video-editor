@@ -147,7 +147,6 @@ export default function ReactVideoEditor({ projectId }: { projectId: string }) {
 
   // Handle recovery dialog actions
   const handleRecoverAutosave = async () => {
-    // TODO: Implement this
     const loadedState = await loadState();
     console.log("loadedState", loadedState);
     setShowRecoveryDialog(false);

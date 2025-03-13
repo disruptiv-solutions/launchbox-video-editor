@@ -51,11 +51,16 @@ export const AutosaveRecoveryDialog: React.FC<AutosaveRecoveryDialogProps> = ({
 
   React.useEffect(() => {
     const { id } = toast({
-      title: "Unsaved Changes Found",
+      title: (
+        <div className="flex items-center gap-2 text-base">
+          <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
+          Unsaved Changes Found
+        </div>
+      ) as any,
       description: (
         <div className="flex flex-col space-y-2">
-          <div className="flex items-center space-x-2 mb-6">
-            <span className="text-sm">
+          <div className="flex items-center space-x-2 mb-4">
+            <span className="text-sm font-light mt-1">
               We found an autosaved version of your project from{" "}
               <time
                 dateTime={new Date(timestamp).toISOString()}
@@ -85,19 +90,32 @@ export const AutosaveRecoveryDialog: React.FC<AutosaveRecoveryDialogProps> = ({
           </div>
         </div>
       ),
-      duration: Infinity,
       className:
-        "border border-gray-200 bg-white text-gray-900 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100",
+        "shadow-[0_4px_20px_-1px] shadow-gray-400/50 border border-gray-300 bg-white text-gray-900 dark:shadow-gray-950/70 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100",
+      onOpenChange: (open) => {
+        if (!open) {
+          handleDiscard();
+        }
+      },
     });
     setToastId(id);
+
+    return () => {
+      if (id) {
+        dismiss(id);
+      }
+    };
   }, []);
 
-  const handleRecover = () => {
-    if (toastId) {
-      dismiss(toastId);
+  const handleRecover = async () => {
+    try {
+      if (toastId) {
+        dismiss(toastId);
+      }
+      await onRecover();
+    } finally {
+      onClose();
     }
-    onRecover();
-    onClose();
   };
 
   const handleDiscard = async () => {
