@@ -1,6 +1,7 @@
 import { ProgressRequest } from "@/components/editor/version-6.0.0/types";
-import { executeApi } from "@/components/editor/version-6.0.0/ssr-helpers/api-response";
+
 import { getRenderState } from "@/components/editor/version-6.0.0/ssr-helpers/render-state";
+import { executeApi } from "@/components/editor/version-6.0.0/lambda-helpers/api-response";
 
 /**
  * POST endpoint handler for checking rendering progress

@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { 
-  RenderRequest, 
-  ProgressRequest, 
-  ProgressResponse 
+import {
+  RenderRequest,
+  ProgressRequest,
+  ProgressResponse,
 } from "@/components/editor/version-6.0.0/types";
 import { CompositionProps } from "@/components/editor/version-6.0.0/types";
 
@@ -73,7 +73,7 @@ export const getProgress = async ({
   console.log("Getting progress", { id });
   const body: z.infer<typeof ProgressRequest> = {
     id,
-    bucketName
+    bucketName,
   };
 
   const response = await makeRequest<ProgressResponse>(

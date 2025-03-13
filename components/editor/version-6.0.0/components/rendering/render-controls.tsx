@@ -173,7 +173,10 @@ const RenderControls: React.FC<RenderControlsProps> = ({
                         addSuffix: true,
                       })}
                       {render.error && (
-                        <div className="text-red-400 mt-0.5">
+                        <div
+                          className="text-red-400 mt-0.5 truncate max-w-[180px]"
+                          title={render.error}
+                        >
                           {render.error}
                         </div>
                       )}
