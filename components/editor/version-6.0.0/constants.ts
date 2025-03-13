@@ -19,7 +19,7 @@ export const LAMBDA_FUNCTION_NAME =
 export const REGION = "us-east-1";
 
 // UI configuration
-export const ROW_HEIGHT = 40; // Height of each row in pixels
+export const ROW_HEIGHT = 44; // Slightly increased from 48
 
 // Zoom control configuration
 export const ZOOM_CONSTRAINTS = {

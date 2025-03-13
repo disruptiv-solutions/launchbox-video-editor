@@ -18,6 +18,8 @@ import GhostMarker from "./ghost-marker";
 import TimelineGrid from "./timeline-grid";
 import TimelineMarker from "./timeline-marker";
 import TimeMarkers from "./timeline-markers";
+import { Grip } from "lucide-react";
+import { ROW_HEIGHT } from "../../constants";
 
 interface TimelineProps {
   /** Array of overlay objects to be displayed on the timeline */
@@ -42,6 +44,8 @@ interface TimelineProps {
   onOverlayDuplicate: (id: number) => void;
   /** Callback to split an overlay at a specific position */
   onSplitOverlay: (id: number, splitPosition: number) => void;
+  /** Callback to set the overlays state */
+  setOverlays: (overlays: Overlay[]) => void;
 }
 
 const Timeline: React.FC<TimelineProps> = ({
@@ -56,6 +60,7 @@ const Timeline: React.FC<TimelineProps> = ({
   onOverlayDelete,
   onOverlayDuplicate,
   onSplitOverlay,
+  setOverlays,
 }) => {
   // State for tracking hover position during split operations
   const [lastKnownHoverInfo, setLastKnownHoverInfo] = useState<{
@@ -187,6 +192,54 @@ const Timeline: React.FC<TimelineProps> = ({
     [overlays, onOverlayChange]
   );
 
+  const handleReorderRows = (fromIndex: number, toIndex: number) => {
+    const updatedOverlays = overlays.map((overlay) => {
+      if (overlay.row === fromIndex) {
+        return { ...overlay, row: toIndex };
+      }
+      if (overlay.row === toIndex) {
+        return { ...overlay, row: fromIndex };
+      }
+      return overlay;
+    });
+
+    // Update your overlays state here
+    setOverlays(updatedOverlays);
+  };
+
+  // Add state for row dragging
+  const [draggedRowIndex, setDraggedRowIndex] = useState<number | null>(null);
+  const [dragOverRowIndex, setDragOverRowIndex] = useState<number | null>(null);
+
+  // Add visual feedback state
+  const [isDraggingRow, setIsDraggingRow] = useState(false);
+
+  const handleRowDragStart = (e: React.DragEvent, rowIndex: number) => {
+    setDraggedRowIndex(rowIndex);
+    setIsDraggingRow(true);
+    // Set a transparent drag image to hide the default ghost
+  };
+
+  const handleRowDragOver = (e: React.DragEvent, rowIndex: number) => {
+    e.preventDefault();
+    if (draggedRowIndex === null) return;
+    setDragOverRowIndex(rowIndex);
+  };
+
+  const handleRowDrop = (targetIndex: number) => {
+    if (draggedRowIndex === null) return;
+    handleReorderRows(draggedRowIndex, targetIndex);
+    setDraggedRowIndex(null);
+    setDragOverRowIndex(null);
+    setIsDraggingRow(false);
+  };
+
+  const handleRowDragEnd = () => {
+    setDraggedRowIndex(null);
+    setDragOverRowIndex(null);
+    setIsDraggingRow(false);
+  };
+
   useEffect(() => {
     const element = timelineRef.current;
     if (!element) return;
@@ -198,72 +251,132 @@ const Timeline: React.FC<TimelineProps> = ({
   // Render
   return (
     <div className="flex flex-col">
-      <div
-        className="relative overflow-x-auto scrollbar-hide"
-        style={{
-          width: "100%",
-          scrollbarWidth: "none" /* Firefox */,
-          msOverflowStyle: "none" /* IE and Edge */,
-        }}
-      >
+      <div className="flex ">
+        {/* Row Drag Handles Column */}
+        <div className="w-7 flex-shrink-0 border-l border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
+          {/* Match TimeMarkers height */}
+          <div className="h-[1.3rem] bg-gray-100 dark:bg-gray-800/50" />
+
+          {/* Match the grid layout exactly */}
+          <div
+            className="flex flex-col gap-2 pt-2 pb-2"
+            style={{ height: `${visibleRows * ROW_HEIGHT}px` }}
+          >
+            {Array.from({ length: visibleRows }).map((_, rowIndex) => (
+              <div
+                key={`drag-${rowIndex}`}
+                className={`flex-1 flex items-center justify-center transition-all duration-200 
+                  ${
+                    dragOverRowIndex === rowIndex
+                      ? "bg-blue-50 dark:bg-blue-900/20 border-2 border-dashed border-blue-300 dark:border-blue-500"
+                      : ""
+                  }
+                  ${
+                    draggedRowIndex === rowIndex
+                      ? "opacity-50 bg-gray-100/50 dark:bg-gray-800/50"
+                      : ""
+                  }
+                  ${
+                    isDraggingRow
+                      ? "cursor-grabbing"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-800/30"
+                  }`}
+                onDragOver={(e) => handleRowDragOver(e, rowIndex)}
+                onDrop={() => handleRowDrop(rowIndex)}
+              >
+                <div
+                  className={`w-5 h-5 flex items-center justify-center rounded-md 
+                    transition-all duration-150 
+                    hover:bg-gray-200 dark:hover:bg-gray-700
+                    active:scale-95
+                    ${isDraggingRow ? "cursor-grabbing" : "cursor-grab"} 
+                    active:cursor-grabbing
+                    group`}
+                  draggable
+                  onDragStart={(e) => handleRowDragStart(e, rowIndex)}
+                  onDragEnd={handleRowDragEnd}
+                >
+                  <Grip
+                    className="w-3 h-3 text-gray-400 dark:text-gray-500 
+                    group-hover:text-gray-600 dark:group-hover:text-gray-300
+                    transition-colors duration-150"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Timeline Content */}
         <div
-          ref={timelineRef}
-          className="pl-2 pr-2 pb-2 relative bg-gray-900 dark:bg-gray-900 bg-white"
+          className="relative overflow-x-auto scrollbar-hide flex-1"
           style={{
-            width: `${100 * zoomScale}%`,
-            minWidth: "100%",
-            willChange: "width, transform",
-            transform: `translateZ(0)`,
+            scrollbarWidth: "none" /* Firefox */,
+            msOverflowStyle: "none" /* IE and Edge */,
           }}
-          onMouseMove={handleMouseMove}
-          onTouchMove={handleTouchMove}
-          onMouseUp={handleDragEnd}
-          onTouchEnd={handleDragEnd}
-          onMouseLeave={handleTimelineMouseLeave}
-          onClick={onTimelineClick}
         >
-          <div className="relative h-full">
-            {/* Timeline header with frame markers */}
-            <div className="h-[1.3rem]">
-              <TimeMarkers
-                durationInFrames={durationInFrames}
-                handleTimelineClick={handleTimelineClick}
+          <div
+            ref={timelineRef}
+            className="pr-2 pb-2 relative bg-gray-900 dark:bg-gray-900"
+            style={{
+              width: `${100 * zoomScale}%`,
+              minWidth: "100%",
+              willChange: "width, transform",
+              transform: `translateZ(0)`,
+            }}
+            onMouseMove={handleMouseMove}
+            onTouchMove={handleTouchMove}
+            onMouseUp={handleDragEnd}
+            onTouchEnd={handleDragEnd}
+            onMouseLeave={handleTimelineMouseLeave}
+            onClick={onTimelineClick}
+          >
+            <div className="relative h-full">
+              {/* Timeline header with frame markers */}
+              <div className="h-[1.3rem]">
+                <TimeMarkers
+                  durationInFrames={durationInFrames}
+                  handleTimelineClick={handleTimelineClick}
+                  zoomScale={zoomScale}
+                />
+              </div>
+
+              {/* Current frame indicator */}
+              <TimelineMarker
+                currentFrame={currentFrame}
+                totalDuration={durationInFrames}
+              />
+
+              {/* Drag operation visual feedback */}
+              <GhostMarker
+                position={ghostMarkerPosition}
+                isDragging={isDragging}
+                isContextMenuOpen={isContextMenuOpen}
+              />
+
+              {/* Main timeline grid with overlays */}
+              <TimelineGrid
+                overlays={overlays}
+                currentFrame={currentFrame}
+                isDragging={isDragging}
+                draggedItem={draggedItem}
+                selectedOverlayId={selectedOverlayId}
+                setSelectedOverlayId={setSelectedOverlayId}
+                handleDragStart={combinedHandleDragStart}
+                totalDuration={durationInFrames}
+                ghostElement={ghostElement}
+                onDeleteItem={handleDeleteItem}
+                onDuplicateItem={handleDuplicateItem}
+                onSplitItem={handleSplitItem}
+                onHover={handleItemHover}
+                onContextMenuChange={handleContextMenuChange}
+                onRemoveGap={handleRemoveGap}
                 zoomScale={zoomScale}
+                onReorderRows={handleReorderRows}
+                draggedRowIndex={draggedRowIndex}
+                dragOverRowIndex={dragOverRowIndex}
               />
             </div>
-
-            {/* Current frame indicator */}
-            <TimelineMarker
-              currentFrame={currentFrame}
-              totalDuration={durationInFrames}
-            />
-
-            {/* Drag operation visual feedback */}
-            <GhostMarker
-              position={ghostMarkerPosition}
-              isDragging={isDragging}
-              isContextMenuOpen={isContextMenuOpen}
-            />
-
-            {/* Main timeline grid with overlays */}
-            <TimelineGrid
-              overlays={overlays}
-              currentFrame={currentFrame}
-              isDragging={isDragging}
-              draggedItem={draggedItem}
-              selectedOverlayId={selectedOverlayId}
-              setSelectedOverlayId={setSelectedOverlayId}
-              handleDragStart={combinedHandleDragStart}
-              totalDuration={durationInFrames}
-              ghostElement={ghostElement}
-              onDeleteItem={handleDeleteItem}
-              onDuplicateItem={handleDuplicateItem}
-              onSplitItem={handleSplitItem}
-              onHover={handleItemHover}
-              onContextMenuChange={handleContextMenuChange}
-              onRemoveGap={handleRemoveGap}
-              zoomScale={zoomScale}
-            />
           </div>
         </div>
       </div>
