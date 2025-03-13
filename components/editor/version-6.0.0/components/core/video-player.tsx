@@ -55,7 +55,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
 
   // Constants for player configuration
   const PLAYER_CONFIG = {
-    durationInFrames: durationInFrames,
+    durationInFrames: Math.round(durationInFrames),
     fps: FPS,
   };
 
