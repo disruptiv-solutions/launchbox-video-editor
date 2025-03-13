@@ -21,7 +21,7 @@ import { useHistory } from "./hooks/use-history";
 // Types
 import { Overlay } from "./types";
 import { useRendering } from "./hooks/use-rendering";
-import { FPS, RENDER_TYPE } from "./constants";
+import { AUTO_SAVE_INTERVAL, FPS, RENDER_TYPE } from "./constants";
 import { TimelineProvider } from "./contexts/timeline-context";
 
 // Autosave Components
@@ -95,7 +95,6 @@ export default function ReactVideoEditor({ projectId }: { projectId: string }) {
     src: "",
   };
 
-  // Remove RENDER_TYPE constant definition since it's now imported
   const { renderMedia, state } = useRendering(
     "TestComponent",
     inputProps,
@@ -114,7 +113,7 @@ export default function ReactVideoEditor({ projectId }: { projectId: string }) {
 
   // Implment load state
   const { saveState, loadState } = useAutosave(projectId, editorState, {
-    interval: 10000, // Autosave every 10 seconds
+    interval: AUTO_SAVE_INTERVAL,
     onSave: () => {
       setIsSaving(false);
       setLastSaveTime(Date.now());

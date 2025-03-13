@@ -36,3 +36,6 @@ export const ZOOM_CONSTRAINTS = {
 // Render configuration
 // NOTE: TO CHANGE RENDER TYPE, UPDATE THE RENDER_TYPE CONSTANT
 export const RENDER_TYPE: "ssr" | "lambda" = "ssr";
+
+// Autosave configuration
+export const AUTO_SAVE_INTERVAL = 10000; // Autosave every 10 seconds
