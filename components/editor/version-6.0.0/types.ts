@@ -340,3 +340,15 @@ export interface ImageOverlay extends BaseOverlay {
   content?: string; // Optional thumbnail/preview
   styles: ImageStyles;
 }
+
+// Local media file interface
+export interface LocalMediaFile {
+  id: string;
+  name: string;
+  type: "video" | "image" | "audio";
+  path: string;
+  size: number;
+  lastModified: number;
+  thumbnail?: string;
+  duration?: number;
+}

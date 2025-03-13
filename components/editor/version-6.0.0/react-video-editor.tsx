@@ -21,10 +21,26 @@ import { useHistory } from "./hooks/use-history";
 // Types
 import { Overlay } from "./types";
 import { useRendering } from "./hooks/use-rendering";
-import { FPS } from "./constants";
+import { AUTO_SAVE_INTERVAL, FPS, RENDER_TYPE } from "./constants";
 import { TimelineProvider } from "./contexts/timeline-context";
 
-export default function ReactVideoEditor() {
+// Autosave Components
+import { AutosaveRecoveryDialog } from "./components/autosave/autosave-recovery-dialog";
+import { AutosaveStatus } from "./components/autosave/autosave-status";
+import { useState, useEffect } from "react";
+import { useAutosave } from "./hooks/use-autosave";
+import { LocalMediaProvider } from "./contexts/local-media-context";
+
+export default function ReactVideoEditor({ projectId }: { projectId: string }) {
+  // Autosave state
+  const [showRecoveryDialog, setShowRecoveryDialog] = useState(false);
+  const [autosaveTimestamp, setAutosaveTimestamp] = useState<number | null>(
+    null
+  );
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaveTime, setLastSaveTime] = useState<number | null>(null);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+
   // Overlay management hooks
   const {
     overlays,
@@ -79,10 +95,86 @@ export default function ReactVideoEditor() {
     src: "",
   };
 
-  const { renderMedia, state } = useRendering("TestComponent", inputProps);
+  const { renderMedia, state } = useRendering(
+    "TestComponent",
+    inputProps,
+    RENDER_TYPE
+  );
 
   // Replace history management code with hook
   const { undo, redo, canUndo, canRedo } = useHistory(overlays, setOverlays);
+
+  // Create the editor state object to be saved
+  const editorState = {
+    overlays,
+    aspectRatio,
+    playerDimensions,
+  };
+
+  // Implment load state
+  const { saveState, loadState } = useAutosave(projectId, editorState, {
+    interval: AUTO_SAVE_INTERVAL,
+    onSave: () => {
+      setIsSaving(false);
+      setLastSaveTime(Date.now());
+    },
+    onLoad: (loadedState) => {
+      console.log("loadedState", loadedState);
+      if (loadedState) {
+        // Apply loaded state to editor
+        setOverlays(loadedState.overlays || []);
+        if (loadedState.aspectRatio) setAspectRatio(loadedState.aspectRatio);
+        if (loadedState.playerDimensions)
+          updatePlayerDimensions(
+            loadedState.playerDimensions.width,
+            loadedState.playerDimensions.height
+          );
+      }
+    },
+    onAutosaveDetected: (timestamp) => {
+      // Only show recovery dialog on initial load, not during an active session
+      if (!initialLoadComplete) {
+        setAutosaveTimestamp(timestamp);
+        setShowRecoveryDialog(true);
+      }
+    },
+  });
+
+  // Mark initial load as complete after component mounts
+  useEffect(() => {
+    setInitialLoadComplete(true);
+  }, []);
+
+  // Handle recovery dialog actions
+  const handleRecoverAutosave = async () => {
+    // TODO: Implement this
+    const loadedState = await loadState();
+    console.log("loadedState", loadedState);
+    setShowRecoveryDialog(false);
+  };
+
+  const handleDiscardAutosave = () => {
+    setShowRecoveryDialog(false);
+  };
+
+  // Manual save function for use in keyboard shortcuts or save button
+  const handleManualSave = async () => {
+    setIsSaving(true);
+    await saveState();
+  };
+
+  // Set up keyboard shortcut for manual save (Ctrl+S)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+        handleManualSave();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [editorState]);
 
   // Combine all editor context values
   const editorContextValue = {
@@ -116,7 +208,8 @@ export default function ReactVideoEditor() {
     durationInFrames,
     durationInSeconds,
 
-    // Add rendering related values
+    // Add renderType to the context
+    renderType: RENDER_TYPE,
     renderMedia,
     state,
 
@@ -130,6 +223,9 @@ export default function ReactVideoEditor() {
 
     // New style management
     updateOverlayStyles,
+
+    // Autosave
+    saveProject: handleManualSave,
   };
 
   return (
@@ -137,10 +233,26 @@ export default function ReactVideoEditor() {
       <EditorSidebarProvider>
         <TimelineProvider>
           <EditorProvider value={editorContextValue}>
-            <AppSidebar />
-            <SidebarInset>
-              <Editor />
-            </SidebarInset>
+            <LocalMediaProvider>
+              <AppSidebar />
+              <SidebarInset>
+                <Editor />
+              </SidebarInset>
+
+              {/* Autosave Status Indicator */}
+              <AutosaveStatus isSaving={isSaving} lastSaveTime={lastSaveTime} />
+
+              {/* Autosave Recovery Dialog */}
+              {showRecoveryDialog && autosaveTimestamp && (
+                <AutosaveRecoveryDialog
+                  projectId={projectId}
+                  timestamp={autosaveTimestamp}
+                  onRecover={handleRecoverAutosave}
+                  onDiscard={handleDiscardAutosave}
+                  onClose={() => setShowRecoveryDialog(false)}
+                />
+              )}
+            </LocalMediaProvider>
           </EditorProvider>
         </TimelineProvider>
       </EditorSidebarProvider>

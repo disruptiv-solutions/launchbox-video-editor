@@ -1,14 +1,14 @@
 import { z } from "zod";
 import { useCallback, useMemo, useState } from "react";
 import { CompositionProps } from "../types";
-
 import {
-  getProgress as getLambdaProgress,
-  renderVideo as renderLambdaVideo,
+  getProgress as ssrGetProgress,
+  renderVideo as ssrRenderVideo,
+} from "../ssr-helpers/api";
+import {
+  getProgress as lambdaGetProgress,
+  renderVideo as lambdaRenderVideo,
 } from "../lambda-helpers/api";
-
-const getProgress = getLambdaProgress;
-const renderVideo = renderLambdaVideo;
 
 // Define possible states for the rendering process
 export type State =
@@ -17,9 +17,9 @@ export type State =
   | {
       // Video is being rendered
       renderId: string;
-      bucketName: string;
       progress: number;
       status: "rendering";
+      bucketName?: string; // Make bucketName optional
     }
   | {
       // Error occurred during rendering
@@ -43,10 +43,13 @@ const wait = async (milliSeconds: number) => {
   });
 };
 
+type RenderType = "ssr" | "lambda";
+
 // Custom hook to manage video rendering process
 export const useRendering = (
-  id: string, // Unique identifier for the render
-  inputProps: z.infer<typeof CompositionProps> // Video composition properties
+  id: string,
+  inputProps: z.infer<typeof CompositionProps>,
+  renderType: RenderType = "ssr" // Default to SSR rendering
 ) => {
   // Maintain current state of the rendering process
   const [state, setState] = useState<State>({
@@ -55,21 +58,32 @@ export const useRendering = (
 
   // Main function to handle the rendering process
   const renderMedia = useCallback(async () => {
-    console.log("Starting renderMedia process");
+    console.log(`Starting renderMedia process using ${renderType}`);
     setState({
       status: "invoking",
     });
     try {
+      const renderVideo =
+        renderType === "ssr" ? ssrRenderVideo : lambdaRenderVideo;
+      const getProgress =
+        renderType === "ssr" ? ssrGetProgress : lambdaGetProgress;
+
       console.log("Calling renderVideo API with inputProps", inputProps);
-      const { renderId, bucketName } = await renderVideo({ id, inputProps });
-      console.log(
-        `Render initiated: renderId=${renderId}, bucketName=${bucketName}`
-      );
+      const response = await renderVideo({ id, inputProps });
+      const renderId = response.renderId;
+      const bucketName =
+        "bucketName" in response ? response.bucketName : undefined;
+
+      if (renderType === "ssr") {
+        // Add a small delay for SSR rendering to ensure initialization
+        await wait(3000);
+      }
+
       setState({
         status: "rendering",
         progress: 0,
-        renderId: renderId,
-        bucketName: bucketName,
+        renderId,
+        bucketName: typeof bucketName === "string" ? bucketName : undefined,
       });
 
       let pending = true;
@@ -78,23 +92,16 @@ export const useRendering = (
         console.log(`Checking progress for renderId=${renderId}`);
         const result = await getProgress({
           id: renderId,
-          bucketName: bucketName,
+          bucketName: typeof bucketName === "string" ? bucketName : "",
         });
+        console.log("result", result);
         switch (result.type) {
           case "error": {
             console.error(`Render error: ${result.message}`);
-            const errorMessage = result.message.includes("Failed to fetch")
-              ? `Rendering failed: This might be caused by insufficient disk space in your browser. Try:\n` +
-                `1. Clearing browser cache and temporary files\n` +
-                `2. Freeing up disk space\n` +
-                `3. Using a different browser\n` +
-                `Original error: ${result.message}`
-              : result.message;
-
             setState({
               status: "error",
               renderId: renderId,
-              error: new Error(errorMessage),
+              error: new Error(result.message),
             });
             pending = false;
             break;
@@ -115,7 +122,6 @@ export const useRendering = (
             console.log(`Render progress: ${result.progress}%`);
             setState({
               status: "rendering",
-              bucketName: bucketName ?? "",
               progress: result.progress,
               renderId: renderId,
             });
@@ -131,7 +137,7 @@ export const useRendering = (
         renderId: null,
       });
     }
-  }, [id, inputProps]);
+  }, [id, inputProps, renderType]);
 
   // Reset the rendering state back to initial
   const undo = useCallback(() => {

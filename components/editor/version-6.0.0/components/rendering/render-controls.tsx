@@ -1,5 +1,5 @@
 import React from "react";
-import { Download, Loader2, Bell } from "lucide-react";
+import { Download, Loader2, Bell, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -28,10 +28,14 @@ interface RenderItem {
  * Props for the RenderControls component
  * @property {object} state - Current render state containing status, progress, and URL
  * @property {() => void} handleRender - Function to trigger a new render
+ * @property {() => void} saveProject - Function to save the project
+ * @property {('ssr' | 'lambda')?} renderType - Type of render (SSR or Lambda)
  */
 interface RenderControlsProps {
   state: any;
   handleRender: () => void;
+  saveProject?: () => Promise<void>;
+  renderType?: "ssr" | "lambda";
 }
 
 /**
@@ -49,6 +53,8 @@ interface RenderControlsProps {
 const RenderControls: React.FC<RenderControlsProps> = ({
   state,
   handleRender,
+  saveProject,
+  renderType = "ssr",
 }) => {
   // Store multiple renders
   const [renders, setRenders] = React.useState<RenderItem[]>([]);
@@ -57,11 +63,10 @@ const RenderControls: React.FC<RenderControlsProps> = ({
 
   // Add new render to the list when completed
   React.useEffect(() => {
-    if (state.status === "done" && state.url) {
+    if (state.status === "done") {
       setRenders((prev) => [
         {
-          url: state.url!,
-
+          url: state.url,
           timestamp: new Date(),
           id: crypto.randomUUID(),
           status: "success",
@@ -75,25 +80,56 @@ const RenderControls: React.FC<RenderControlsProps> = ({
           timestamp: new Date(),
           id: crypto.randomUUID(),
           status: "error",
-          error: "Failed to render video. Please try again.",
+          error:
+            state.error?.message || "Failed to render video. Please try again.",
         },
         ...prev,
       ]);
       setHasNewRender(true);
     }
-  }, [state.status, state.url]);
+  }, [state.status, state.url, state.error]);
 
   const handleDownload = (url: string) => {
+    let downloadUrl = url;
+
+    if (renderType === "ssr") {
+      // Convert the video URL to a download URL for SSR
+      downloadUrl = url
+        .replace("/rendered-videos/", "/api/latest/ssr/download/")
+        .replace(".mp4", "");
+    }
+    // Lambda URLs are already in the correct format for download
+
     const a = document.createElement("a");
-    a.href = url;
+    a.href = downloadUrl;
     a.download = "rendered-video.mp4";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
   };
 
+  const getDisplayFileName = (url: string) => {
+    if (renderType === "ssr") {
+      return url.split("/").pop();
+    }
+    // For Lambda URLs, use the full URL pathname
+    try {
+      return new URL(url).pathname.split("/").pop();
+    } catch {
+      return url.split("/").pop();
+    }
+  };
+
   return (
     <>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="relative hover:bg-accent"
+        onClick={saveProject}
+      >
+        <Save className="w-3.5 h-3.5" />
+      </Button>
       <Popover onOpenChange={() => setHasNewRender(false)}>
         <PopoverTrigger asChild>
           <Button
@@ -129,7 +165,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
                           Render Failed
                         </span>
                       ) : (
-                        new URL(render.url!).pathname.split("/").pop()
+                        getDisplayFileName(render.url!)
                       )}
                     </div>
                     <div className="text-[11px] text-muted-foreground">
@@ -137,7 +173,10 @@ const RenderControls: React.FC<RenderControlsProps> = ({
                         addSuffix: true,
                       })}
                       {render.error && (
-                        <div className="text-red-400 mt-0.5">
+                        <div
+                          className="text-red-400 mt-0.5 truncate max-w-[180px]"
+                          title={render.error}
+                        >
                           {render.error}
                         </div>
                       )}
@@ -178,7 +217,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
             Preparing...
           </>
         ) : (
-          "Render Video"
+          `Render Video (${renderType === "ssr" ? "SSR" : "Lambda"})`
         )}
       </Button>
     </>

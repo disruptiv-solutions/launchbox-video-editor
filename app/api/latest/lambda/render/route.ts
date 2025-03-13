@@ -24,6 +24,7 @@ const LAMBDA_CONFIG = {
  * @throws {TypeError} If AWS credentials are missing
  */
 const validateAwsCredentials = () => {
+  console.log("Validating AWS credentials....");
   if (
     !process.env.AWS_ACCESS_KEY_ID &&
     !process.env.REMOTION_AWS_ACCESS_KEY_ID
@@ -51,13 +52,14 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
   RenderRequest,
   async (req, body) => {
     // Debug logging
-    console.log("Received body:", JSON.stringify(body, null, 2));
-    console.log("inputProps:", JSON.stringify(body.inputProps, null, 2));
+    // console.log("Received body:", JSON.stringify(body, null, 2));
+    // console.log("inputProps:", JSON.stringify(body.inputProps, null, 2));
 
     // Validate AWS credentials
     validateAwsCredentials();
 
     try {
+      console.log("Rendering media on Lambda....");
       const result = await renderMediaOnLambda({
         codec: LAMBDA_CONFIG.CODEC,
         functionName: LAMBDA_CONFIG.FUNCTION_NAME,

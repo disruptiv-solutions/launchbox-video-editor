@@ -16,9 +16,15 @@
 # production
 /build
 
+# Render state
+/tmp/render-state
+
 # misc
 .DS_Store
 *.pem
+
+# rendered videos
+/public/rendered-videos/
 
 # debug
 npm-debug.log*
