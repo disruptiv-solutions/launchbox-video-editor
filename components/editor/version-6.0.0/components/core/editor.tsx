@@ -74,6 +74,7 @@ export const Editor: React.FC = () => {
     duplicateOverlay, // Function to clone an overlay
     splitOverlay, // Function to split an overlay at current position
     durationInFrames, // Total duration in frames
+    setOverlays, // Function to update overlays
   } = useEditorContext();
 
   /**
@@ -145,6 +146,7 @@ export const Editor: React.FC = () => {
             playerRef.current.seekTo(frame / FPS);
           }
         }}
+        setOverlays={setOverlays}
         onTimelineClick={handleTimelineClick}
       />
     </div>

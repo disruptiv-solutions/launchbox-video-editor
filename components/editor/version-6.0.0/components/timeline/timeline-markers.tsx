@@ -128,7 +128,7 @@ const TimeMarkers = ({
 
   return (
     <div
-      className="absolute top-0 left-0 right-0 h-12 
+      className="absolute top-0 left-0 right-0 h-12  
         cursor-pointer
         z-10"
       onClick={handleClick}

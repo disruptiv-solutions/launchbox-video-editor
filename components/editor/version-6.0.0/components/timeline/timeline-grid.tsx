@@ -57,6 +57,12 @@ interface TimelineGridProps {
   currentFrame: number;
   /** Zoom scale of the timeline */
   zoomScale: number;
+  /** Callback when rows are reordered */
+  onReorderRows?: (fromIndex: number, toIndex: number) => void;
+  /** Index of the row being dragged */
+  draggedRowIndex: number | null;
+  /** Index of the row being hovered over */
+  dragOverRowIndex: number | null;
 }
 
 /**
@@ -79,6 +85,8 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
   onRemoveGap,
   currentFrame,
   zoomScale,
+  draggedRowIndex,
+  dragOverRowIndex,
 }) => {
   const { visibleRows } = useTimeline();
 
@@ -138,10 +146,10 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
 
   return (
     <div
-      className="relative mt-3 overflow-x-auto overflow-y-hidden bg-white dark:bg-gray-900"
-      style={{ height: `${visibleRows * ROW_HEIGHT + 8}px` }}
+      className="relative overflow-x-auto overflow-y-hidden bg-white dark:bg-gray-900 h-full"
+      style={{ height: `${visibleRows * ROW_HEIGHT}px` }}
     >
-      <div className="absolute inset-0 flex flex-col space-y-2">
+      <div className="absolute inset-0 flex flex-col gap-2 pt-2 pb-2">
         {Array.from({ length: visibleRows }).map((_, rowIndex) => {
           const rowItems = overlays.filter(
             (overlay) => overlay.row === rowIndex
@@ -151,11 +159,24 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
           return (
             <div
               key={rowIndex}
-              className="flex-1 bg-slate-100/90 dark:bg-gray-800 rounded-md relative"
+              className={`flex-1 bg-slate-100/90 dark:bg-gray-800  relative
+                transition-all duration-200 ease-in-out
+                hover:bg-slate-200/90 dark:hover:bg-gray-700/90
+                ${
+                  dragOverRowIndex === rowIndex
+                    ? "border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                    : ""
+                }
+                ${draggedRowIndex === rowIndex ? "opacity-50" : ""}
+                ${
+                  selectedOverlayId && overlays.some((o) => o.row === rowIndex)
+                    ? "shadow-sm"
+                    : ""
+                }`}
             >
-              {rowItems.map((overlay, index) => (
+              {rowItems.map((overlay) => (
                 <TimelineItem
-                  key={`${overlay.id}-${index}`}
+                  key={overlay.id}
                   item={overlay}
                   isDragging={isDragging}
                   draggedItem={draggedItem}

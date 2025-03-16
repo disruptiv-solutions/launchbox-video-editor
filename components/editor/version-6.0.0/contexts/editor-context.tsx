@@ -12,6 +12,7 @@ interface EditorContextProps {
     id: number,
     updater: Partial<Overlay> | ((overlay: Overlay) => Overlay)
   ) => void;
+  setOverlays: (overlays: Overlay[]) => void;
 
   // Player State
   isPlaying: boolean; // Current playback state
