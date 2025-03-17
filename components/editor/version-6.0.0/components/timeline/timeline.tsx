@@ -317,7 +317,7 @@ const Timeline: React.FC<TimelineProps> = ({
         >
           <div
             ref={timelineRef}
-            className="pr-2 pb-2 relative bg-gray-900 dark:bg-gray-900"
+            className="pr-2 pb-2 relative bg-white dark:bg-gray-900"
             style={{
               width: `${100 * zoomScale}%`,
               minWidth: "100%",
