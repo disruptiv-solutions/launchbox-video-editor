@@ -1,16 +1,24 @@
 import React from "react";
-import { Overlay, OverlayType } from "../types";
+import { ImageOverlay, OverlayType, ClipOverlay } from "../types";
 import { FPS } from "../constants";
+import { useKeyframeContext } from "../contexts/keyframe-context";
+import { parseMedia } from "@remotion/media-parser";
 
 interface UseKeyframesProps {
-  overlay: Overlay;
+  overlay: ClipOverlay | ImageOverlay;
   containerRef: React.RefObject<HTMLDivElement>;
   currentFrame: number;
   zoomScale: number;
 }
 
+interface FrameInfo {
+  frameNumber: number;
+  dataUrl: string;
+}
+
 /**
  * A custom hook that extracts and manages keyframes from video overlays for timeline preview.
+ * Uses an optimized approach combining browser capabilities with Remotion utilities.
  *
  * @param {Object} props - The hook properties
  * @param {Overlay} props.overlay - The video overlay object containing source and duration information
@@ -22,6 +30,7 @@ interface UseKeyframesProps {
  *   - frames: Array of extracted frame data URLs
  *   - previewFrames: Array of frame numbers to show in the timeline
  *   - isFrameVisible: Function to determine if a preview frame should be visible
+ *   - isLoading: Boolean indicating whether frames are currently being extracted
  *
  * @description
  * This hook handles:
@@ -33,139 +42,367 @@ interface UseKeyframesProps {
 export const useKeyframes = ({
   overlay,
   containerRef,
-  currentFrame,
   zoomScale,
 }: UseKeyframesProps) => {
-  // State for frames and container width
-  const [frames, setFrames] = React.useState<string[]>([]);
-  const [containerWidth, setContainerWidth] = React.useState<number>(0);
-  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+  const { getKeyframes, updateKeyframes } = useKeyframeContext();
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [frames, setFrames] = React.useState<FrameInfo[]>([]);
+  const extractionTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  // Set up ResizeObserver to watch for width changes
-  React.useEffect(() => {
-    if (!containerRef.current) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setContainerWidth(entry.contentRect.width);
-      }
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
-
-  // Extract frames when overlay loads
-  React.useEffect(() => {
-    if (overlay.type !== OverlayType.VIDEO || !("src" in overlay)) return;
-
-    const extractFrames = async () => {
-      if (!videoRef.current) {
-        videoRef.current = document.createElement("video");
-        videoRef.current.crossOrigin = "anonymous";
-        videoRef.current.preload = "auto";
-        videoRef.current.muted = true;
-      }
-
-      const video = videoRef.current;
-      video.src = overlay.src;
-
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d", {
-        alpha: false,
-        willReadFrequently: true,
-      });
-
-      await new Promise((resolve) => {
-        video.onloadedmetadata = resolve;
-      });
-
-      const totalFrames = Math.ceil(overlay.durationInFrames / FPS);
-      const extractedFrames: string[] = [];
-
-      canvas.width = Math.min(video.videoWidth, 320);
-      canvas.height = Math.min(video.videoHeight, 180);
-
-      for (let i = 0; i < totalFrames; i++) {
-        const timeInSeconds = (i * FPS) / FPS;
-
-        video.currentTime = timeInSeconds;
-        await new Promise((resolve) => {
-          video.onseeked = resolve;
-        });
-
-        context?.drawImage(video, 0, 0, canvas.width, canvas.height);
-        extractedFrames.push(canvas.toDataURL("image/webp", 0.6));
-      }
-
-      setFrames(extractedFrames);
-    };
-
-    extractFrames().catch(console.error);
-
-    return () => {
-      if (videoRef.current) {
-        videoRef.current.src = "";
-        videoRef.current = null;
-      }
-    };
-  }, [overlay]);
-
-  // Calculate optimal number of keyframes
-  const numberOfKeyframes = React.useMemo(() => {
-    const MINIMUM_KEYFRAME_WIDTH = 60;
-    const MAXIMUM_KEYFRAMES = Math.min(120, overlay.durationInFrames);
-
-    // Create discrete zoom levels instead of continuous scaling
-    let discreteZoomLevel;
-    if (zoomScale <= 1) {
-      discreteZoomLevel = 1;
-    } else if (zoomScale <= 2) {
-      discreteZoomLevel = 1.5;
-    } else if (zoomScale <= 3) {
-      discreteZoomLevel = 2;
-    } else if (zoomScale <= 4) {
-      discreteZoomLevel = 2.5;
-    } else if (zoomScale <= 5) {
-      discreteZoomLevel = 3;
-    } else {
-      discreteZoomLevel = 3.5;
-    }
-
-    const effectiveWidth = containerWidth * discreteZoomLevel;
-    const maxByWidth = Math.floor(effectiveWidth / MINIMUM_KEYFRAME_WIDTH);
-    const durationInSeconds = overlay.durationInFrames / FPS;
-    const suggestedKeyframes = Math.ceil(durationInSeconds * discreteZoomLevel);
-
-    return Math.min(
-      MAXIMUM_KEYFRAMES,
-      Math.min(maxByWidth, suggestedKeyframes)
-    );
-  }, [overlay.durationInFrames, containerWidth, zoomScale]);
-
-  // Calculate frame intervals and preview frames
-  const previewFrames = React.useMemo(() => {
-    const frameInterval = overlay.durationInFrames / numberOfKeyframes;
-    return Array.from({ length: numberOfKeyframes }, (_, index) =>
-      Math.floor(index * frameInterval)
-    );
-  }, [overlay.durationInFrames, numberOfKeyframes]);
-
-  const isFrameVisible = React.useCallback(
-    (previewFrame: number) => {
-      const absolutePreviewFrame = overlay.from + previewFrame;
-      const frameThreshold = FPS / 4;
-      return currentFrame >= absolutePreviewFrame - frameThreshold;
-    },
-    [overlay.from, currentFrame]
+  // Memoize stable overlay values
+  const overlayMeta = React.useMemo(
+    () => ({
+      id: overlay.id,
+      src: "src" in overlay ? overlay.src : undefined,
+      durationInFrames:
+        "durationInFrames" in overlay ? overlay.durationInFrames : undefined,
+      type: overlay.type,
+    }),
+    [
+      overlay.id,
+      "src" in overlay ? overlay.src : null,
+      "durationInFrames" in overlay ? overlay.durationInFrames : null,
+      overlay.type,
+    ]
   );
 
+  // Store previous overlay details
+  const previousOverlayRef = React.useRef<{
+    id: string | number;
+    src?: string;
+    durationInFrames?: number;
+  } | null>(null);
+
+  const calculateFrameCount = React.useCallback(() => {
+    if (!containerRef.current) return 10;
+    const containerWidth = containerRef.current.clientWidth;
+    const baseCount = Math.ceil(containerWidth / (150 * zoomScale));
+    return Math.min(Math.max(baseCount, 5), 30);
+  }, [containerRef, zoomScale]);
+
+  // Memoize frame data transformations
+  const frameData = React.useMemo(() => {
+    return {
+      dataUrls: frames.map((f) => f.dataUrl),
+      frameNumbers: frames.map((f) => f.frameNumber),
+    };
+  }, [frames]);
+
+  // Create a new video and canvas for each extraction
+  const createVideoAndCanvas = React.useCallback(
+    async (dimensions: { width: number; height: number }) => {
+      const video = document.createElement("video");
+      video.crossOrigin = "anonymous";
+      video.muted = true;
+      video.preload = "auto";
+      video.playbackRate = 16;
+
+      const canvas = document.createElement("canvas");
+      const maxWidth = 240;
+      const scale = Math.min(
+        1,
+        (maxWidth * Math.max(1, zoomScale)) / dimensions.width
+      );
+      canvas.width = Math.floor(dimensions.width * scale);
+      canvas.height = Math.floor(dimensions.height * scale);
+
+      const context = canvas.getContext("2d", {
+        willReadFrequently: true,
+        alpha: false,
+      });
+
+      if (!context) {
+        throw new Error("Could not get canvas context");
+      }
+
+      return { video, canvas, context };
+    },
+    [zoomScale]
+  );
+
+  // Cleanup function to release resources
+  const cleanup = React.useCallback((video?: HTMLVideoElement) => {
+    if (extractionTimeoutRef.current) {
+      clearTimeout(extractionTimeoutRef.current);
+      extractionTimeoutRef.current = null;
+    }
+    if (video) {
+      video.src = "";
+      video.load();
+    }
+  }, []);
+
+  const extractFrames = React.useCallback(async () => {
+    if (overlayMeta.type !== OverlayType.VIDEO || !overlayMeta.src) return;
+
+    // Check if we need to re-extract frames
+    const previousOverlay = previousOverlayRef.current;
+    const shouldReextract =
+      !previousOverlay ||
+      String(previousOverlay.id) !== String(overlayMeta.id) ||
+      previousOverlay.src !== overlayMeta.src ||
+      previousOverlay.durationInFrames !== overlayMeta.durationInFrames;
+
+    // Update previous overlay reference
+    previousOverlayRef.current = {
+      id: overlayMeta.id,
+      src: overlayMeta.src,
+      durationInFrames: overlayMeta.durationInFrames,
+    };
+
+    if (!shouldReextract) return;
+
+    let video: HTMLVideoElement | undefined;
+
+    try {
+      setIsLoading(true);
+      setFrames([]); // Reset frames
+
+      // Add error tracking with more lenient retry logic
+      let extractionErrors = 0;
+      const MAX_ERRORS = 5;
+      const MAX_RETRIES = 3;
+
+      // Check cache first but also verify cache integrity
+      const cachedFrames = getKeyframes(overlayMeta.id);
+      if (
+        cachedFrames &&
+        cachedFrames.frames &&
+        cachedFrames.frames.length > 0 &&
+        cachedFrames.frames.every((frame) => frame?.startsWith("data:image")) &&
+        Date.now() - cachedFrames.lastUpdated < 300000
+      ) {
+        setFrames(
+          cachedFrames.previewFrames.map((frameNumber, index) => ({
+            frameNumber,
+            dataUrl: cachedFrames.frames[index],
+          }))
+        );
+        return;
+      }
+
+      // Get video metadata
+      const { dimensions } = await parseMedia({
+        src: overlayMeta.src,
+        fields: { dimensions: true },
+      });
+
+      if (!dimensions) {
+        throw new Error("Could not get video dimensions");
+      }
+
+      // Create new video and canvas elements for this extraction
+      const {
+        video: newVideo,
+        canvas,
+        context,
+      } = await createVideoAndCanvas(dimensions);
+      video = newVideo;
+
+      video.src = overlayMeta.src;
+      await new Promise<void>((resolve, reject) => {
+        let loadAttempts = 0;
+        const MAX_LOAD_ATTEMPTS = 3;
+
+        const attemptLoad = () => {
+          loadAttempts++;
+          video!.load();
+
+          const onLoad = () => {
+            if (video!.readyState >= 2) {
+              cleanup();
+              resolve();
+            } else if (loadAttempts < MAX_LOAD_ATTEMPTS) {
+              cleanup();
+              attemptLoad();
+            } else {
+              cleanup();
+              reject(
+                new Error(
+                  `Video failed to reach ready state after ${MAX_LOAD_ATTEMPTS} attempts`
+                )
+              );
+            }
+          };
+
+          const onError = (e: ErrorEvent) => {
+            cleanup();
+            if (loadAttempts < MAX_LOAD_ATTEMPTS) {
+              attemptLoad();
+            } else {
+              reject(
+                new Error(
+                  `Video load failed after ${MAX_LOAD_ATTEMPTS} attempts: ${e.message}`
+                )
+              );
+            }
+          };
+
+          const cleanup = () => {
+            video!.removeEventListener("loadeddata", onLoad);
+            video!.removeEventListener("error", onError);
+          };
+
+          video!.addEventListener("loadeddata", onLoad);
+          video!.addEventListener("error", onError);
+        };
+
+        attemptLoad();
+      });
+
+      const frameCount = calculateFrameCount();
+      const frameInterval = Math.max(
+        1,
+        Math.floor(overlayMeta.durationInFrames! / frameCount)
+      );
+
+      const frameNumbers = Array.from({ length: frameCount }, (_, i) =>
+        Math.min(
+          Math.floor(i * frameInterval),
+          overlayMeta.durationInFrames! - 1
+        )
+      );
+
+      const extractedFrames: FrameInfo[] = [];
+      const FRAME_TIMEOUT = 8000;
+      const SEEK_TIMEOUT = 1000; // Timeout for seeking operation
+
+      for (const frameNumber of frameNumbers) {
+        let retryCount = 0;
+        let frameExtracted = false;
+
+        while (retryCount < MAX_RETRIES && !frameExtracted) {
+          try {
+            const timeInSeconds = frameNumber / FPS;
+
+            // Seek with timeout
+            const seekPromise = new Promise<void>((resolve, reject) => {
+              const onSeeked = () => {
+                video!.removeEventListener("seeked", onSeeked);
+                resolve();
+              };
+              video!.addEventListener("seeked", onSeeked);
+
+              // Set timeout for seeking
+              setTimeout(() => {
+                video!.removeEventListener("seeked", onSeeked);
+                reject(new Error("Seek timeout"));
+              }, SEEK_TIMEOUT);
+            });
+
+            video!.currentTime = timeInSeconds;
+            await seekPromise;
+
+            // Wait for frame to be ready
+            await new Promise<void>((resolve, reject) => {
+              const extractFrame = () => {
+                try {
+                  context.drawImage(video!, 0, 0, canvas.width, canvas.height);
+                  const dataUrl = canvas.toDataURL("image/jpeg", 0.6);
+
+                  if (!dataUrl.startsWith("data:image")) {
+                    throw new Error("Invalid frame data URL");
+                  }
+
+                  const frame = {
+                    frameNumber,
+                    dataUrl,
+                  };
+
+                  extractedFrames.push(frame);
+                  setFrames([...extractedFrames]);
+                  resolve();
+                } catch (err) {
+                  reject(err);
+                }
+              };
+
+              // Add a small delay to ensure frame is fully loaded
+              setTimeout(extractFrame, 50);
+
+              // Set overall timeout
+              setTimeout(() => {
+                reject(new Error("Frame extraction timeout"));
+              }, FRAME_TIMEOUT);
+            });
+
+            frameExtracted = true;
+          } catch (err) {
+            console.warn(
+              `Frame extraction failed for frame ${frameNumber} (attempt ${
+                retryCount + 1
+              }/${MAX_RETRIES}):`,
+              err
+            );
+            retryCount++;
+
+            if (retryCount === MAX_RETRIES) {
+              extractionErrors++;
+            }
+
+            // If too many errors, but we have some frames, continue with what we have
+            if (extractionErrors >= MAX_ERRORS && extractedFrames.length > 0) {
+              console.warn(
+                `Too many extraction errors (${extractionErrors}), using partial results`
+              );
+              break;
+            }
+
+            // Exponential backoff for retries
+            await new Promise((resolve) =>
+              setTimeout(resolve, Math.min(100 * Math.pow(2, retryCount), 1000))
+            );
+          }
+        }
+
+        // If we've hit max errors, break the main loop
+        if (extractionErrors >= MAX_ERRORS && extractedFrames.length > 0) {
+          break;
+        }
+
+        // If we failed to extract this frame after all retries, log it
+        if (!frameExtracted) {
+          console.error(
+            `Failed to extract frame ${frameNumber} after ${MAX_RETRIES} attempts`
+          );
+        }
+      }
+
+      // Only cache if we got enough frames (increased threshold)
+      if (extractedFrames.length >= Math.ceil(frameCount * 0.7)) {
+        updateKeyframes(overlayMeta.id, {
+          frames: extractedFrames.map((f) => f.dataUrl),
+          previewFrames: extractedFrames.map((f) => f.frameNumber),
+          lastUpdated: Date.now(),
+        });
+      } else {
+        console.warn(
+          `Not enough frames extracted (got ${extractedFrames.length}/${frameCount}), skipping cache update`
+        );
+      }
+    } catch (err) {
+      console.error("[Keyframes] Extraction error:", err);
+    } finally {
+      setIsLoading(false);
+      cleanup(video);
+    }
+  }, [
+    overlayMeta,
+    calculateFrameCount,
+    getKeyframes,
+    updateKeyframes,
+    cleanup,
+    createVideoAndCanvas,
+  ]);
+
+  React.useEffect(() => {
+    extractFrames();
+    return () => cleanup();
+  }, [extractFrames, cleanup]);
+
   return {
-    frames,
-    previewFrames,
-    isFrameVisible,
+    frames: frameData.dataUrls,
+    previewFrames: frameData.frameNumbers,
+    isLoading,
   };
 };

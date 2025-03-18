@@ -18,8 +18,9 @@ import GhostMarker from "./ghost-marker";
 import TimelineGrid from "./timeline-grid";
 import TimelineMarker from "./timeline-marker";
 import TimeMarkers from "./timeline-markers";
-import { Grip } from "lucide-react";
-import { ROW_HEIGHT } from "../../constants";
+import { Grip, Loader2 } from "lucide-react";
+import { ROW_HEIGHT, SHOW_LOADING_PROJECT_ALERT } from "../../constants";
+import { useAssetLoading } from "../../contexts/asset-loading-context";
 
 interface TimelineProps {
   /** Array of overlay objects to be displayed on the timeline */
@@ -248,6 +249,22 @@ const Timeline: React.FC<TimelineProps> = ({
     return () => element.removeEventListener("wheel", handleWheelZoom);
   }, [handleWheelZoom]);
 
+  // Replace the loading state management with context
+  const {
+    isLoadingAssets,
+    isInitialLoad,
+    handleAssetLoadingChange,
+    setInitialLoadComplete,
+  } = useAssetLoading();
+
+  // Effect to handle initial load completion
+  useEffect(() => {
+    // If we have overlays and they're done loading, mark initial load as complete
+    if (overlays.length > 0 && !isLoadingAssets) {
+      setInitialLoadComplete();
+    }
+  }, [overlays, isLoadingAssets, setInitialLoadComplete]);
+
   // Render
   return (
     <div className="flex flex-col">
@@ -375,7 +392,25 @@ const Timeline: React.FC<TimelineProps> = ({
                 onReorderRows={handleReorderRows}
                 draggedRowIndex={draggedRowIndex}
                 dragOverRowIndex={dragOverRowIndex}
+                onAssetLoadingChange={handleAssetLoadingChange}
               />
+
+              {/* Loading Indicator - Only shows during initial project load */}
+              {SHOW_LOADING_PROJECT_ALERT &&
+                (isLoadingAssets || overlays.length === 0) &&
+                isInitialLoad && (
+                  <div
+                    className="absolute inset-0 bg-white/60 dark:bg-gray-900/60 backdrop-blur-[1px] flex items-center justify-center z-50"
+                    style={{ willChange: "opacity" }}
+                  >
+                    <div className="flex items-center gap-2 px-3 py-2 bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-600 dark:text-gray-300" />
+                      <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                        Loading project...
+                      </span>
+                    </div>
+                  </div>
+                )}
             </div>
           </div>
         </div>

@@ -71,6 +71,8 @@ interface TimelineItemProps {
   currentFrame?: number;
   /** Zoom scale of the timeline */
   zoomScale: number;
+  /** Callback when asset loading state changes */
+  onAssetLoadingChange?: (overlayId: number, isLoading: boolean) => void;
 }
 
 /** Height of each timeline item in pixels */
@@ -92,6 +94,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   onContextMenuChange,
   currentFrame,
   zoomScale,
+  onAssetLoadingChange,
 }) => {
   const waveformData = useWaveformProcessor(
     item.type === OverlayType.SOUND ? item.src : undefined,
@@ -240,6 +243,9 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
             overlay={item}
             currentFrame={currentFrame ?? 0}
             zoomScale={zoomScale}
+            onLoadingChange={(isLoading) =>
+              onAssetLoadingChange?.(item.id, isLoading)
+            }
           />
         )}
       </>
