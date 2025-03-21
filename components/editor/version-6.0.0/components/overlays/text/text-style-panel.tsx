@@ -1,5 +1,4 @@
 import React from "react";
-import { Input } from "@/components/ui/input";
 import { TextOverlay } from "../../../types";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { AlignLeft, AlignCenter, AlignRight } from "lucide-react";
@@ -10,6 +9,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import ColorPicker from "react-best-gradient-color-picker";
 
 /**
  * Available font options for text overlays
@@ -123,26 +128,66 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
                 <label className="text-xs text-muted-foreground">
                   Text Color
                 </label>
-                <Input
-                  type="color"
-                  value={localOverlay.styles.color}
-                  className="h-8 w-8 !p-0.5 rounded-md"
-                  onChange={(e) => handleStyleChange("color", e.target.value)}
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div
+                      className="h-8 w-8 rounded-md border cursor-pointer"
+                      style={{ backgroundColor: localOverlay.styles.color }}
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-[330px] dark:bg-gray-900 border border-gray-700"
+                    side="right"
+                  >
+                    <ColorPicker
+                      value={localOverlay.styles.color}
+                      onChange={(color) => handleStyleChange("color", color)}
+                      hideInputs
+                      hideHue
+                      hideControls
+                      hideColorTypeBtns
+                      hideAdvancedSliders
+                      hideColorGuide
+                      hideInputType
+                      height={200}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="space-y-2">
                 <label className="text-xs text-muted-foreground">
                   Highlight
                 </label>
-                <Input
-                  type="color"
-                  value={localOverlay.styles.backgroundColor}
-                  className="h-8 w-8 !p-0.5 rounded-md"
-                  onChange={(e) =>
-                    handleStyleChange("backgroundColor", e.target.value)
-                  }
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div
+                      className="h-8 w-8 rounded-md border cursor-pointer"
+                      style={{
+                        backgroundColor: localOverlay.styles.backgroundColor,
+                      }}
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-[330px] dark:bg-gray-900 border border-gray-700"
+                    side="right"
+                  >
+                    <ColorPicker
+                      value={localOverlay.styles.backgroundColor}
+                      onChange={(color) => {
+                        handleStyleChange("backgroundColor", color);
+                      }}
+                      hideInputs
+                      hideHue
+                      hideControls
+                      hideColorTypeBtns
+                      hideAdvancedSliders
+                      hideColorGuide
+                      hideInputType
+                      height={200}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </>
           ) : (

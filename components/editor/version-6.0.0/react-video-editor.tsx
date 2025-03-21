@@ -57,8 +57,6 @@ export default function ReactVideoEditor({ projectId }: { projectId: string }) {
     resetOverlays,
   } = useOverlays();
 
-  console.log(overlays);
-
   // Video player controls and state
   const { isPlaying, currentFrame, playerRef, togglePlayPause, formatTime } =
     useVideoPlayer();
