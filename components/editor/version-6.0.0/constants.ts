@@ -12,14 +12,15 @@ export const DURATION_IN_FRAMES = 500;
 export const VIDEO_WIDTH = 1280; // 720p HD video dimensions
 export const VIDEO_HEIGHT = 720;
 
+// UI configuration
+export const ROW_HEIGHT = 44; // Slightly increased from 48
+export const SHOW_LOADING_PROJECT_ALERT = true; // Controls visibility of asset loading indicator
+
 // AWS deployment configuration
 export const SITE_NAME = "sams-site";
 export const LAMBDA_FUNCTION_NAME =
   "remotion-render-4-0-272-mem2048mb-disk2048mb-120sec";
 export const REGION = "us-east-1";
-
-// UI configuration
-export const ROW_HEIGHT = 44; // Slightly increased from 48
 
 // Zoom control configuration
 export const ZOOM_CONSTRAINTS = {

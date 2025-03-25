@@ -1,9 +1,23 @@
 import React, { useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Plus, Minus, Settings, Undo2, Redo2 } from "lucide-react";
+import {
+  Play,
+  Pause,
+  Plus,
+  Minus,
+  Settings,
+  Undo2,
+  Redo2,
+  Loader2,
+} from "lucide-react";
 import { useEditorContext } from "../../contexts/editor-context";
 import { useTimeline } from "../../contexts/timeline-context";
-import { MAX_ROWS, INITIAL_ROWS, ZOOM_CONSTRAINTS } from "../../constants";
+import {
+  MAX_ROWS,
+  INITIAL_ROWS,
+  ZOOM_CONSTRAINTS,
+  SHOW_LOADING_PROJECT_ALERT,
+} from "../../constants";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +34,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useTimelineShortcuts } from "../../hooks/use-timeline-shortcuts";
+import { useAssetLoading } from "../../contexts/asset-loading-context";
 
 // Types
 type AspectRatioOption = "16:9" | "9:16" | "1:1" | "4:5";
@@ -97,6 +112,8 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
     zoomScale,
     setZoomScale,
   });
+
+  const { isLoadingAssets } = useAssetLoading();
 
   // Keep track of previous frame to detect resets
   const prevFrameRef = React.useRef(currentFrame);
@@ -208,6 +225,16 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+
+        {/* Loading Indicator - Moved here and simplified */}
+        {!SHOW_LOADING_PROJECT_ALERT && isLoadingAssets && (
+          <div className="flex items-center gap-2 px-2 py-1 bg-blue-50/90 dark:bg-blue-900/20 rounded-md">
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600 dark:text-blue-400" />
+            <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
+              Loading...
+            </span>
+          </div>
+        )}
       </div>
       {/* Center section: Play/Pause control and time display */}
       <div className="flex items-center space-x-2">

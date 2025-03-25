@@ -10,8 +10,17 @@ import { useEditorContext } from "../../contexts/editor-context";
  * This prevents hydration mismatches since theme detection requires browser APIs.
  */
 const ThemeToggleClient = dynamic(
-  () => import("@/components/theme-toggle").then((mod) => mod.ThemeToggle),
-  { ssr: false }
+  () =>
+    import("@/components/theme-toggle")
+      .then((mod) => mod.ThemeToggle)
+      .catch((err) => {
+        console.error("Error loading ThemeToggle:", err);
+        return () => null; // Fallback component
+      }),
+  {
+    ssr: false,
+    loading: () => <></>, // Optional loading state
+  }
 );
 
 /**

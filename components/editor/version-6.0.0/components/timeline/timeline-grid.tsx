@@ -63,6 +63,8 @@ interface TimelineGridProps {
   draggedRowIndex: number | null;
   /** Index of the row being hovered over */
   dragOverRowIndex: number | null;
+  /** Callback when asset loading state changes */
+  onAssetLoadingChange?: (overlayId: number, isLoading: boolean) => void;
 }
 
 /**
@@ -87,6 +89,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
   zoomScale,
   draggedRowIndex,
   dragOverRowIndex,
+  onAssetLoadingChange,
 }) => {
   const { visibleRows } = useTimeline();
 
@@ -202,6 +205,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
                   onContextMenuChange={onContextMenuChange}
                   currentFrame={currentFrame}
                   zoomScale={zoomScale}
+                  onAssetLoadingChange={onAssetLoadingChange}
                 />
               ))}
 

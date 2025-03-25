@@ -208,9 +208,11 @@ export const useTimelineDragAndDrop = ({
 
       switch (dragInfo.current.action) {
         case "move":
-          newLeft =
-            ((dragInfo.current.startPosition + deltaTime) / durationInFrames) *
-            100;
+          const newPosition = Math.max(
+            0,
+            dragInfo.current.startPosition + deltaTime
+          );
+          newLeft = (newPosition / durationInFrames) * 100;
           break;
         case "resize-start": {
           // Keep the end position fixed and adjust start position and width
@@ -278,30 +280,40 @@ export const useTimelineDragAndDrop = ({
         // For video/sound/caption clips, adjust the content when trimming from the start
         let additionalUpdates = {};
         if (dragInfo.current.action === "resize-start") {
-          const trimmedFrames = newFrom - dragInfo.current.startPosition;
+          const trimmedFrames = Math.max(
+            0,
+            newFrom - dragInfo.current.startPosition
+          );
           const trimmedMs = (trimmedFrames / 30) * 1000; // Assuming 30fps
 
           if (updatedOverlay.type === OverlayType.VIDEO) {
             additionalUpdates = {
-              videoStartTime:
-                (updatedOverlay.videoStartTime || 0) + trimmedFrames,
+              videoStartTime: Math.max(
+                0,
+                (updatedOverlay.videoStartTime || 0) + trimmedFrames
+              ),
             };
           } else if (updatedOverlay.type === OverlayType.SOUND) {
             additionalUpdates = {
-              startFromSound:
-                (updatedOverlay.startFromSound || 0) + trimmedFrames,
+              startFromSound: Math.max(
+                0,
+                (updatedOverlay.startFromSound || 0) + trimmedFrames
+              ),
             };
           } else if (updatedOverlay.type === OverlayType.CAPTION) {
-            // Adjust caption timings when trimming from start
+            // Prevent negative timing values when adjusting captions
+            const adjustTiming = (time: number) =>
+              Math.max(0, time - trimmedMs);
+
             additionalUpdates = {
               captions: updatedOverlay.captions.map((caption) => ({
                 ...caption,
-                startMs: caption.startMs - trimmedMs,
-                endMs: caption.endMs - trimmedMs,
+                startMs: adjustTiming(caption.startMs),
+                endMs: adjustTiming(caption.endMs),
                 words: caption.words.map((word) => ({
                   ...word,
-                  startMs: word.startMs - trimmedMs,
-                  endMs: word.endMs - trimmedMs,
+                  startMs: adjustTiming(word.startMs),
+                  endMs: adjustTiming(word.endMs),
                 })),
               })),
             };

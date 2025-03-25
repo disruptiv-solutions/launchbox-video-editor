@@ -30,6 +30,8 @@ import { AutosaveStatus } from "./components/autosave/autosave-status";
 import { useState, useEffect } from "react";
 import { useAutosave } from "./hooks/use-autosave";
 import { LocalMediaProvider } from "./contexts/local-media-context";
+import { KeyframeProvider } from "./contexts/keyframe-context";
+import { AssetLoadingProvider } from "./contexts/asset-loading-context";
 
 export default function ReactVideoEditor({ projectId }: { projectId: string }) {
   // Autosave state
@@ -228,30 +230,37 @@ export default function ReactVideoEditor({ projectId }: { projectId: string }) {
   return (
     <UISidebarProvider>
       <EditorSidebarProvider>
-        <TimelineProvider>
-          <EditorProvider value={editorContextValue}>
-            <LocalMediaProvider>
-              <AppSidebar />
-              <SidebarInset>
-                <Editor />
-              </SidebarInset>
+        <KeyframeProvider>
+          <TimelineProvider>
+            <EditorProvider value={editorContextValue}>
+              <LocalMediaProvider>
+                <AssetLoadingProvider>
+                  <AppSidebar />
+                  <SidebarInset>
+                    <Editor />
+                  </SidebarInset>
 
-              {/* Autosave Status Indicator */}
-              <AutosaveStatus isSaving={isSaving} lastSaveTime={lastSaveTime} />
+                  {/* Autosave Status Indicator */}
+                  <AutosaveStatus
+                    isSaving={isSaving}
+                    lastSaveTime={lastSaveTime}
+                  />
 
-              {/* Autosave Recovery Dialog */}
-              {showRecoveryDialog && autosaveTimestamp && (
-                <AutosaveRecoveryDialog
-                  projectId={projectId}
-                  timestamp={autosaveTimestamp}
-                  onRecover={handleRecoverAutosave}
-                  onDiscard={handleDiscardAutosave}
-                  onClose={() => setShowRecoveryDialog(false)}
-                />
-              )}
-            </LocalMediaProvider>
-          </EditorProvider>
-        </TimelineProvider>
+                  {/* Autosave Recovery Dialog */}
+                  {showRecoveryDialog && autosaveTimestamp && (
+                    <AutosaveRecoveryDialog
+                      projectId={projectId}
+                      timestamp={autosaveTimestamp}
+                      onRecover={handleRecoverAutosave}
+                      onDiscard={handleDiscardAutosave}
+                      onClose={() => setShowRecoveryDialog(false)}
+                    />
+                  )}
+                </AssetLoadingProvider>
+              </LocalMediaProvider>
+            </EditorProvider>
+          </TimelineProvider>
+        </KeyframeProvider>
       </EditorSidebarProvider>
     </UISidebarProvider>
   );
