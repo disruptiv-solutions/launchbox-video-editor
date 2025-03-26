@@ -114,24 +114,6 @@ export const LocalMediaPanel: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-4 p-4 bg-white dark:bg-gray-900/50 h-full">
-      {/* <div className="flex items-center justify-between mb-2">
-        <Button
-          onClick={handleUploadClick}
-          className="bg-blue-500 hover:bg-blue-600 text-white"
-          size="sm"
-        >
-          <Upload className="w-4 h-4 mr-2" />
-          Upload Media
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="video/*,image/*,audio/*"
-          className="hidden"
-          onChange={handleFileSelect}
-          disabled={isLoading}
-        />
-      </div> */}
       <LocalMediaGallery onSelectMedia={handleAddToTimeline} />
     </div>
   );
