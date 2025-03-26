@@ -5,7 +5,7 @@ import {
 } from "@remotion/lambda";
 import dotenv from "dotenv";
 import path from "path";
-import { RAM, REGION, SITE_NAME, TIMEOUT } from "./config.mjs";
+import { RAM, REGION, SITE_NAME, TIMEOUT, DISK } from "./config.mjs";
 
 /**
  * This script deploys the Remotion video rendering infrastructure to AWS Lambda.
@@ -50,6 +50,7 @@ const { functionName, alreadyExisted: functionAlreadyExisted } =
     memorySizeInMb: RAM,
     region: REGION,
     timeoutInSeconds: TIMEOUT,
+    diskSizeInMb: DISK,
   });
 console.log(
   functionName,
