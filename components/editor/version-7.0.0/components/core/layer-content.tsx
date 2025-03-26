@@ -14,6 +14,7 @@ import { ImageLayerContent } from "../overlays/images/image-layer-content";
  */
 interface LayerContentProps {
   overlay: Overlay;
+  baseUrl?: string;
 }
 
 /**
@@ -45,7 +46,10 @@ interface LayerContentProps {
  * }} />
  * ```
  */
-export const LayerContent: React.FC<LayerContentProps> = ({ overlay }) => {
+export const LayerContent: React.FC<LayerContentProps> = ({
+  overlay,
+  baseUrl,
+}) => {
   /**
    * Common styling applied to all layer types
    * Ensures consistent dimensions across different content types
@@ -59,7 +63,7 @@ export const LayerContent: React.FC<LayerContentProps> = ({ overlay }) => {
     case OverlayType.VIDEO:
       return (
         <div style={{ ...commonStyle }}>
-          <VideoLayerContent overlay={overlay} />
+          <VideoLayerContent overlay={overlay} baseUrl={baseUrl} />
         </div>
       );
 
@@ -73,7 +77,7 @@ export const LayerContent: React.FC<LayerContentProps> = ({ overlay }) => {
     case OverlayType.IMAGE:
       return (
         <div style={{ ...commonStyle }}>
-          <ImageLayerContent overlay={overlay} />
+          <ImageLayerContent overlay={overlay} baseUrl={baseUrl} />
         </div>
       );
 

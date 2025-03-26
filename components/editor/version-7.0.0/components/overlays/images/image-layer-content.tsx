@@ -3,14 +3,17 @@ import { useCurrentFrame } from "remotion";
 import { ImageOverlay } from "../../../types";
 import { animationTemplates } from "../../../templates/animation-templates";
 import { Img } from "remotion";
+import { toAbsoluteUrl } from "../../../utils/url-helper";
 
 /**
  * Props for the ImageLayerContent component
  * @interface ImageLayerContentProps
  * @property {ImageOverlay} overlay - The image overlay object containing source and style information
+ * @property {string | undefined} baseUrl - The base URL for the image
  */
 interface ImageLayerContentProps {
   overlay: ImageOverlay;
+  baseUrl?: string;
 }
 
 /**
@@ -46,6 +49,7 @@ interface ImageLayerContentProps {
  */
 export const ImageLayerContent: React.FC<ImageLayerContentProps> = ({
   overlay,
+  baseUrl,
 }) => {
   const frame = useCurrentFrame();
   const isExitPhase = frame >= overlay.durationInFrames - 30;
@@ -89,5 +93,17 @@ export const ImageLayerContent: React.FC<ImageLayerContentProps> = ({
     ...(isExitPhase ? exitAnimation : enterAnimation),
   };
 
-  return <Img src={overlay.src} style={imageStyle} alt="" />;
+  // Determine the image source URL
+  let imageSrc = overlay.src;
+
+  // If it's a relative URL and baseUrl is provided, use baseUrl
+  if (overlay.src.startsWith("/") && baseUrl) {
+    imageSrc = `${baseUrl}${overlay.src}`;
+  }
+  // Otherwise use the toAbsoluteUrl helper for relative URLs
+  else if (overlay.src.startsWith("/")) {
+    imageSrc = toAbsoluteUrl(overlay.src);
+  }
+
+  return <Img src={imageSrc} style={imageStyle} alt="" />;
 };

@@ -6,6 +6,7 @@ export enum OverlayType {
   VIDEO = "clip",
   SOUND = "sound",
   CAPTION = "caption",
+  LOCAL_DIR = "local-dir",
 }
 // Base overlay properties
 type BaseOverlay = {

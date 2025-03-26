@@ -40,7 +40,7 @@ export const uploadMediaFile = async (file: File): Promise<UserMediaItem> => {
     formData.append("userId", userId);
 
     // Upload file to server
-    const response = await fetch("/api/media/upload", {
+    const response = await fetch("/api/latest/local-media/upload", {
       method: "POST",
       body: formData,
     });

@@ -34,6 +34,8 @@ export type MainProps = {
   readonly width: number;
   /** Height of the composition */
   readonly height: number;
+  /** Base URL for media assets (optional) */
+  readonly baseUrl?: string;
 };
 
 const outer: React.CSSProperties = {
@@ -56,6 +58,7 @@ export const Main: React.FC<MainProps> = ({
   setSelectedOverlayId,
   selectedOverlayId,
   changeOverlay,
+  baseUrl,
 }) => {
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
@@ -82,6 +85,7 @@ export const Main: React.FC<MainProps> = ({
               key={overlay.id}
               overlay={overlay}
               selectedOverlayId={selectedOverlayId}
+              baseUrl={baseUrl}
             />
           );
         })}

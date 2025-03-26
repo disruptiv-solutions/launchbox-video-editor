@@ -1,6 +1,7 @@
 import { OffthreadVideo, useCurrentFrame } from "remotion";
 import { ClipOverlay } from "../../../types";
 import { animationTemplates } from "../../../templates/animation-templates";
+import { toAbsoluteUrl } from "../../../utils/url-helper";
 
 /**
  * Interface defining the props for the VideoLayerContent component
@@ -8,6 +9,8 @@ import { animationTemplates } from "../../../templates/animation-templates";
 interface VideoLayerContentProps {
   /** The overlay configuration object containing video properties and styles */
   overlay: ClipOverlay;
+  /** The base URL for the video */
+  baseUrl?: string;
 }
 
 /**
@@ -27,6 +30,7 @@ interface VideoLayerContentProps {
  */
 export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
   overlay,
+  baseUrl,
 }) => {
   const frame = useCurrentFrame();
 
@@ -64,9 +68,21 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
     ...(isExitPhase ? exitAnimation : enterAnimation),
   };
 
+  // Determine the video source URL
+  let videoSrc = overlay.src;
+
+  // If it's a relative URL and baseUrl is provided, use baseUrl
+  if (overlay.src.startsWith("/") && baseUrl) {
+    videoSrc = `${baseUrl}${overlay.src}`;
+  }
+  // Otherwise use the toAbsoluteUrl helper for relative URLs
+  else if (overlay.src.startsWith("/")) {
+    videoSrc = toAbsoluteUrl(overlay.src);
+  }
+
   return (
     <OffthreadVideo
-      src={overlay.src}
+      src={videoSrc}
       startFrom={overlay.videoStartTime || 0}
       style={videoStyle}
       volume={overlay.styles.volume ?? 1}

@@ -9,11 +9,13 @@ import { MAX_ROWS } from "../../constants";
  * @interface LayerProps
  * @property {Overlay} overlay - The overlay object containing position, dimensions, and content information
  * @property {number | null} selectedOverlayId - ID of the currently selected overlay, used for interaction states
+ * @property {string | undefined} baseUrl - The base URL for the video
  */
 export const Layer: React.FC<{
   overlay: Overlay;
   selectedOverlayId: number | null;
-}> = ({ overlay, selectedOverlayId }) => {
+  baseUrl?: string;
+}> = ({ overlay, selectedOverlayId, baseUrl }) => {
   /**
    * Memoized style calculations for the layer
    * Handles positioning, dimensions, rotation, and z-index based on:
@@ -63,7 +65,7 @@ export const Layer: React.FC<{
         from={overlay.from}
         durationInFrames={overlay.durationInFrames}
       >
-        <LayerContent overlay={overlay} />
+        <LayerContent overlay={overlay} baseUrl={baseUrl} />
       </Sequence>
     );
   }
@@ -81,7 +83,7 @@ export const Layer: React.FC<{
       layout="none"
     >
       <div style={style}>
-        <LayerContent overlay={overlay} />
+        <LayerContent overlay={overlay} baseUrl={baseUrl} />
       </div>
     </Sequence>
   );
