@@ -1,7 +1,7 @@
-import ReactVideoEditor from "@/components/editor/version-6.0.0/react-video-editor";
+import ReactVideoEditor from "@/components/editor/version-7.0.0/react-video-editor";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
-export default function Version6() {
+export default function Version7() {
   /**
    * A project ID represents a unique editing session or workspace for a user.
    *

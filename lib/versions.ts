@@ -24,6 +24,7 @@ export function getSortedVersionsData() {
         video?: string;
         founderNotes?: string;
         status?: string;
+        branch?: string;
       }),
     };
   });

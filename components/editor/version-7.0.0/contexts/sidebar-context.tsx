@@ -1,9 +1,12 @@
 import React, { createContext, useContext, useState } from "react";
+import { OverlayType } from "../types";
+import { useSidebar as useUISidebar } from "../../../ui/sidebar";
 
 // Define the shape of our context data
 type SidebarContextType = {
-  activePanel: string; // Stores the currently active panel name
-  setActivePanel: (panel: string) => void; // Function to update the active panel
+  activePanel: OverlayType; // Stores the currently active panel name
+  setActivePanel: (panel: OverlayType) => void; // Function to update the active panel
+  setIsOpen: (open: boolean) => void;
 };
 
 // Create the context with undefined as initial value
@@ -12,24 +15,32 @@ const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 // Custom hook to consume the sidebar context
 export const useSidebar = () => {
   const context = useContext(SidebarContext);
-  // Ensure the hook is used within a provider
+  const uiSidebar = useUISidebar();
+
   if (!context) {
     throw new Error("useSidebar must be used within a SidebarProvider");
   }
-  return context;
+
+  return {
+    ...context,
+    setIsOpen: uiSidebar.setOpen,
+  };
 };
 
 // Provider component that wraps parts of the app that need access to sidebar state
 export const SidebarProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  // Initialize state with "Text Elements" as the default active panel
-  const [activePanel, setActivePanel] = useState("Text Elements");
+  const [activePanel, setActivePanel] = useState<OverlayType>(OverlayType.TEXT);
+  const { setOpen } = useUISidebar();
 
-  // Provide the sidebar context value to all children components
+  const value = {
+    activePanel,
+    setActivePanel,
+    setIsOpen: setOpen,
+  };
+
   return (
-    <SidebarContext.Provider value={{ activePanel, setActivePanel }}>
-      {children}
-    </SidebarContext.Provider>
+    <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>
   );
 };

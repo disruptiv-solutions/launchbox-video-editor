@@ -8,7 +8,8 @@ changes:
   - Text Overlay Templates
   - Moveable Overlays
   - Performance Improvements
-status: "Legacy"
+status: "Archived"
 founderNotes: >
   While this version introduces text overlay templates, I'm not entirely satisfied with their current implementation. The feature works as intended, but the user experience and flexibility could be significantly improved. The template system feels somewhat rigid and doesn't offer the level of customization I initially envisioned. I plan to revisit and rework this feature in future updates to create a more intuitive and versatile solution for managing text overlays.
+branch: "-"
 ---

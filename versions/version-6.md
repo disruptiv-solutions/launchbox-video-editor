@@ -16,5 +16,6 @@ changes:
   - "Enhanced timeline scrolling and improved tick marks for better time tracking."
   - "Various bug fixes and performance optimizations."
 image: "https://rwxrdxvxndclnqvznxfj.supabase.co/storage/v1/object/public/rve-version-6//transitions.png"
-status: "BETA"
+status: "Stable"
+branch: "version-6"
 ---

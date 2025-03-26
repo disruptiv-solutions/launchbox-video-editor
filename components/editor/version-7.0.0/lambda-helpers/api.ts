@@ -5,8 +5,8 @@ import {
   RenderRequest,
   ProgressRequest,
   ProgressResponse,
-} from "@/components/editor/version-6.0.0/types";
-import { CompositionProps } from "@/components/editor/version-6.0.0/types";
+} from "@/components/editor/version-7.0.0/types";
+import { CompositionProps } from "@/components/editor/version-7.0.0/types";
 
 type ApiResponse<T> = {
   type: "success" | "error";

@@ -22,6 +22,7 @@ founderNotes: >
   versions that feature better architecture and component separation. However,
   this version remains an excellent starting point for learning and prototyping
   video editing functionality in React.
-status: "Legacy"
+status: "Archived"
 image: "/images/video-player-placeholder.png"
+branch: "-"
 ---
