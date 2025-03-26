@@ -1,11 +1,11 @@
 import React from "react";
 import { Overlay } from "../../types";
 import { TextLayerContent } from "../overlays/text/text-layer-content";
-import { Audio } from "remotion";
 import { OverlayType } from "../../types";
 import { CaptionLayerContent } from "../overlays/captions/caption-layer-content";
 import { VideoLayerContent } from "../overlays/video/video-layer-content";
 import { ImageLayerContent } from "../overlays/images/image-layer-content";
+import { SoundLayerContent } from "../overlays/captions/sound-layer-content";
 
 /**
  * Props for the LayerContent component
@@ -96,13 +96,7 @@ export const LayerContent: React.FC<LayerContentProps> = ({
       );
 
     case OverlayType.SOUND:
-      return (
-        <Audio
-          src={overlay.src}
-          startFrom={overlay.startFromSound || 0}
-          volume={overlay.styles?.volume ?? 1}
-        />
-      );
+      return <SoundLayerContent overlay={overlay} baseUrl={baseUrl} />;
 
     default:
       return null;
