@@ -14,16 +14,33 @@ export const useVideoPlayer = () => {
 
   // Frame update effect
   useEffect(() => {
-    const FPS = 30;
+    let animationFrameId: number;
+    let lastUpdateTime = 0;
+    const frameInterval = 1000 / FPS;
+
     const updateCurrentFrame = () => {
-      if (playerRef.current) {
-        setCurrentFrame(playerRef.current.getCurrentFrame());
+      const now = performance.now();
+      if (now - lastUpdateTime >= frameInterval) {
+        if (playerRef.current) {
+          const frame = playerRef.current.getCurrentFrame();
+          setCurrentFrame(frame);
+        }
+        lastUpdateTime = now;
       }
+
+      animationFrameId = requestAnimationFrame(updateCurrentFrame);
     };
 
-    const intervalId = setInterval(updateCurrentFrame, 1000 / FPS);
-    return () => clearInterval(intervalId);
-  }, []);
+    // Start the animation frame loop
+    animationFrameId = requestAnimationFrame(updateCurrentFrame);
+
+    // Clean up
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [FPS, playerRef, setCurrentFrame]);
 
   /**
    * Starts playing the video
@@ -32,7 +49,7 @@ export const useVideoPlayer = () => {
     if (playerRef.current) {
       playerRef.current.play();
     }
-  }, []);
+  }, [playerRef]);
 
   /**
    * Toggles between play and pause states
@@ -47,7 +64,7 @@ export const useVideoPlayer = () => {
       }
       return newIsPlaying;
     });
-  }, []);
+  }, [playerRef]);
 
   /**
    * Converts frame count to formatted time string
@@ -71,13 +88,15 @@ export const useVideoPlayer = () => {
    * Seeks to a specific frame in the video
    * @param frame - Target frame number
    */
-  const seekTo = useCallback((frame: number) => {
-    if (playerRef.current) {
-      const FPS = 30;
-      playerRef.current.seekTo(frame / FPS);
-      setCurrentFrame(frame);
-    }
-  }, []);
+  const seekTo = useCallback(
+    (frame: number) => {
+      if (playerRef.current) {
+        playerRef.current.seekTo(frame / FPS);
+        setCurrentFrame(frame);
+      }
+    },
+    [FPS, playerRef, setCurrentFrame]
+  );
 
   return {
     isPlaying,

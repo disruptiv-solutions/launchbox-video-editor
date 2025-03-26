@@ -59,7 +59,7 @@ export async function startRendering(
           process.cwd(),
           "components",
           "editor",
-          "version-6.0.0",
+          "version-7.0.0",
           "remotion",
           "index.ts"
         ),

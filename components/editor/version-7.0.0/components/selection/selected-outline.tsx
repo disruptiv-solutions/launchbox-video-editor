@@ -55,8 +55,8 @@ export const SelectionOutline: React.FC<{
     const zIndex = baseZIndex + selectionBoost;
 
     return {
-      width: overlay.width,
-      height: overlay.height,
+      width: Number.isFinite(overlay.width) ? overlay.width : 0,
+      height: Number.isFinite(overlay.height) ? overlay.height : 0,
       left: overlay.left,
       top: overlay.top,
       position: "absolute",
