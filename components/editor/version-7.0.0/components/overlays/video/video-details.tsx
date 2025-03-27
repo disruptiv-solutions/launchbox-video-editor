@@ -58,6 +58,22 @@ export const VideoDetails: React.FC<VideoDetailsProps> = ({
     setLocalOverlay(updatedOverlay);
   };
 
+  /**
+   * Handles speed and duration changes for the video overlay
+   *
+   * @param {number} speed - New playback speed
+   * @param {number} newDuration - New duration in frames
+   */
+  const handleSpeedChange = (speed: number, newDuration: number) => {
+    const updatedOverlay = {
+      ...localOverlay,
+      speed,
+      // TODO : Uncomment this if we want the duration to change when the speed changes
+      // durationInFrames: newDuration,
+    };
+    setLocalOverlay(updatedOverlay);
+  };
+
   return (
     <div className="space-y-4">
       {/* Preview */}
@@ -105,6 +121,7 @@ export const VideoDetails: React.FC<VideoDetailsProps> = ({
           <VideoSettingsPanel
             localOverlay={localOverlay}
             handleStyleChange={handleStyleChange}
+            onSpeedChange={handleSpeedChange}
           />
         </TabsContent>
       </Tabs>

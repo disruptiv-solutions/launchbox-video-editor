@@ -84,6 +84,7 @@ export type ClipOverlay = BaseOverlay & {
   content: string;
   src: string;
   videoStartTime?: number;
+  speed?: number;
   styles: BaseStyles & {
     objectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
     objectPosition?: string;

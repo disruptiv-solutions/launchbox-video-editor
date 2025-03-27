@@ -86,6 +86,7 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
       startFrom={overlay.videoStartTime || 0}
       style={videoStyle}
       volume={overlay.styles.volume ?? 1}
+      playbackRate={overlay.speed ?? 1}
     />
   );
 };
