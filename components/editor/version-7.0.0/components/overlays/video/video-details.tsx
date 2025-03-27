@@ -23,6 +23,8 @@ import {
 } from "../../../../../ui/tabs";
 import { VideoStylePanel } from "./video-style-panel";
 import { VideoSettingsPanel } from "./video-settings-panel";
+import { useOverlayOverlapCheck } from "../../../hooks/use-overlay-overlap-check";
+import { useEditorContext } from "../../../contexts/editor-context";
 
 interface VideoDetailsProps {
   /** The current state of the video overlay */
@@ -33,19 +35,16 @@ interface VideoDetailsProps {
 
 /**
  * VideoDetails component for managing video overlay configuration
- *
- * @param {VideoDetailsProps} props - Component props
- * @param {ClipOverlay} props.localOverlay - Current video overlay state
- * @param {Function} props.setLocalOverlay - Function to update overlay state
  */
 export const VideoDetails: React.FC<VideoDetailsProps> = ({
   localOverlay,
   setLocalOverlay,
 }) => {
+  const { checkAndAdjustOverlaps } = useOverlayOverlapCheck();
+  const { overlays, setOverlays } = useEditorContext();
+
   /**
    * Updates the style properties of the video overlay
-   *
-   * @param {Partial<ClipOverlay["styles"]>} updates - Style properties to update
    */
   const handleStyleChange = (updates: Partial<ClipOverlay["styles"]>) => {
     const updatedOverlay = {
@@ -60,18 +59,37 @@ export const VideoDetails: React.FC<VideoDetailsProps> = ({
 
   /**
    * Handles speed and duration changes for the video overlay
-   *
-   * @param {number} speed - New playback speed
-   * @param {number} newDuration - New duration in frames
    */
   const handleSpeedChange = (speed: number, newDuration: number) => {
     const updatedOverlay = {
       ...localOverlay,
       speed,
-      // TODO : Uncomment this if we want the duration to change when the speed changes
-      // durationInFrames: newDuration,
+      durationInFrames: newDuration,
     };
+
+    // First update local state
     setLocalOverlay(updatedOverlay);
+
+    // Then check for overlaps and update global state
+    const { hasOverlap, adjustedOverlays } =
+      checkAndAdjustOverlaps(updatedOverlay);
+
+    // Create the final array of overlays to update
+    const finalOverlays = overlays.map((overlay) => {
+      if (overlay.id === updatedOverlay.id) {
+        return updatedOverlay;
+      }
+      if (hasOverlap) {
+        const adjustedOverlay = adjustedOverlays.find(
+          (adj) => adj.id === overlay.id
+        );
+        return adjustedOverlay || overlay;
+      }
+      return overlay;
+    });
+
+    // Update global state in one operation
+    setOverlays(finalOverlays);
   };
 
   return (
