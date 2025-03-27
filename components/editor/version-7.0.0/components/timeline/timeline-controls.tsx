@@ -24,6 +24,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
@@ -95,6 +96,8 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
     canUndo,
     canRedo,
     resetOverlays,
+    playbackRate,
+    setPlaybackRate,
   } = useEditorContext();
 
   const { visibleRows, addRow, removeRow, zoomScale, setZoomScale } =
@@ -236,8 +239,39 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
           </div>
         )}
       </div>
+
       {/* Center section: Play/Pause control and time display */}
       <div className="flex items-center space-x-2">
+        {/* Playback Speed Control */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="border h-7 p-3 text-xs text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-300 hover:bg-transparent"
+            >
+              {playbackRate}x
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="min-w-[100px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
+            align="center"
+          >
+            {[0.25, 0.5, 1, 1.5, 2].map((speed) => (
+              <DropdownMenuItem
+                key={speed}
+                onClick={() => setPlaybackRate(speed)}
+                className={`text-xs py-1.5 ${
+                  playbackRate === speed
+                    ? "text-blue-600 dark:text-blue-400 font-medium"
+                    : "text-gray-600 dark:text-zinc-400"
+                }`}
+              >
+                {speed}x
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         <TooltipProvider delayDuration={50}>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -271,6 +305,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+
         <div className="flex items-center space-x-1">
           <span className="text-xs font-medium text-gray-900 dark:text-white tabular-nums">
             {formatTime(currentFrame)}

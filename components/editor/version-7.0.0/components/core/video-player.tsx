@@ -28,6 +28,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
     updatePlayerDimensions,
     getAspectRatioDimensions,
     durationInFrames,
+    playbackRate,
   } = useEditorContext();
 
   /**
@@ -93,6 +94,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
               }}
               durationInFrames={PLAYER_CONFIG.durationInFrames}
               fps={PLAYER_CONFIG.fps}
+              playbackRate={playbackRate}
               inputProps={{
                 overlays,
                 setSelectedOverlayId,

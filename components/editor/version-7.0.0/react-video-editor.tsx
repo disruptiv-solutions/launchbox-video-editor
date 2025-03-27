@@ -42,6 +42,7 @@ export default function ReactVideoEditor({ projectId }: { projectId: string }) {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaveTime, setLastSaveTime] = useState<number | null>(null);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
 
   // Overlay management hooks
   const {
@@ -197,6 +198,8 @@ export default function ReactVideoEditor({ projectId }: { projectId: string }) {
     togglePlayPause,
     formatTime,
     handleTimelineClick,
+    playbackRate,
+    setPlaybackRate,
 
     // Dimensions and duration
     aspectRatio,

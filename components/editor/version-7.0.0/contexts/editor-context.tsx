@@ -18,6 +18,8 @@ interface EditorContextProps {
   isPlaying: boolean; // Current playback state
   currentFrame: number; // Current frame position in the video
   playerRef: React.RefObject<any>; // Reference to the video player component
+  playbackRate: number; // Current playback speed multiplier
+  setPlaybackRate: (rate: number) => void; // Update playback speed
 
   // Player Controls
   togglePlayPause: () => void; // Toggle play/pause state
