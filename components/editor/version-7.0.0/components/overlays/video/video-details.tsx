@@ -71,8 +71,10 @@ export const VideoDetails: React.FC<VideoDetailsProps> = ({
     setLocalOverlay(updatedOverlay);
 
     // Then check for overlaps and update global state
-    const { hasOverlap, adjustedOverlays } =
-      checkAndAdjustOverlaps(updatedOverlay);
+    const { hasOverlap, adjustedOverlays } = checkAndAdjustOverlaps(
+      updatedOverlay,
+      overlays
+    );
 
     // Create the final array of overlays to update
     const finalOverlays = overlays.map((overlay) => {

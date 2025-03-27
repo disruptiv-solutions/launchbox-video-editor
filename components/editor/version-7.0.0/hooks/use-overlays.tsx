@@ -494,10 +494,49 @@ export const useOverlays = () => {
       if (!overlayToDuplicate) return prevOverlays;
 
       const newId = Math.max(...prevOverlays.map((o) => o.id)) + 1;
+
+      // Find any overlays that would overlap with the duplicated position
+      const overlaysInRow = prevOverlays.filter(
+        (o) => o.row === overlayToDuplicate.row && o.id !== id
+      );
+
+      // Calculate initial position for duplicate
+      let newFrom =
+        overlayToDuplicate.from + overlayToDuplicate.durationInFrames;
+
+      // Check for overlaps and adjust position if needed
+      let hasOverlap = true;
+      while (hasOverlap) {
+        hasOverlap = overlaysInRow.some((existingOverlay) => {
+          const duplicateEnd = newFrom + overlayToDuplicate.durationInFrames;
+          const existingEnd =
+            existingOverlay.from + existingOverlay.durationInFrames;
+
+          // Check for any overlap
+          return (
+            (newFrom >= existingOverlay.from && newFrom < existingEnd) ||
+            (duplicateEnd > existingOverlay.from &&
+              duplicateEnd <= existingEnd) ||
+            (newFrom <= existingOverlay.from && duplicateEnd >= existingEnd)
+          );
+        });
+
+        if (hasOverlap) {
+          // If there's an overlap, try positioning after the last overlay in the row
+          const lastOverlay = [...overlaysInRow].sort(
+            (a, b) =>
+              b.from + b.durationInFrames - (a.from + a.durationInFrames)
+          )[0];
+          newFrom = lastOverlay
+            ? lastOverlay.from + lastOverlay.durationInFrames + 1
+            : newFrom + 1;
+        }
+      }
+
       const duplicatedOverlay: Overlay = {
         ...overlayToDuplicate,
         id: newId,
-        from: overlayToDuplicate.from + overlayToDuplicate.durationInFrames,
+        from: newFrom,
       };
 
       return [...prevOverlays, duplicatedOverlay];
