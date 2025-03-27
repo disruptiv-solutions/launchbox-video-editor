@@ -8,7 +8,7 @@ export const FPS = 30;
 export const COMP_NAME = "TestComponent";
 
 // Video configuration
-export const DURATION_IN_FRAMES = 500;
+export const DURATION_IN_FRAMES = 30;
 export const VIDEO_WIDTH = 1280; // 720p HD video dimensions
 export const VIDEO_HEIGHT = 720;
 
