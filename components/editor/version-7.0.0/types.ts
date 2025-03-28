@@ -163,7 +163,7 @@ export interface CaptionOverlay extends BaseOverlay {
   template?: string;
 }
 
-export type StickerCategory = "Shapes" | "Discounts" | "Emojis";
+export type StickerCategory = "Shapes" | "Discounts" | "Emojis" | "Reviews";
 
 // Sticker overlay specific
 export type StickerOverlay = BaseOverlay & {
