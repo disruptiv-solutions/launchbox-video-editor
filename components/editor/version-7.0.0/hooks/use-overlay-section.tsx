@@ -34,6 +34,15 @@ export const useOverlaySelection = () => {
         case OverlayType.SOUND:
           setActivePanel(OverlayType.SOUND);
           break;
+        case OverlayType.STICKER:
+          setActivePanel(OverlayType.STICKER);
+          break;
+        case OverlayType.IMAGE:
+          setActivePanel(OverlayType.IMAGE);
+          break;
+        case OverlayType.CAPTION:
+          setActivePanel(OverlayType.CAPTION);
+          break;
       }
     },
     [setSelectedOverlayId, setActivePanel]

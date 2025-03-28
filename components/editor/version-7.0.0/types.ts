@@ -7,6 +7,7 @@ export enum OverlayType {
   SOUND = "sound",
   CAPTION = "caption",
   LOCAL_DIR = "local-dir",
+  STICKER = "sticker",
 }
 // Base overlay properties
 type BaseOverlay = {
@@ -162,13 +163,31 @@ export interface CaptionOverlay extends BaseOverlay {
   template?: string;
 }
 
+export type StickerCategory = "Shapes" | "Discounts" | "Emojis";
+
+// Sticker overlay specific
+export type StickerOverlay = BaseOverlay & {
+  type: OverlayType.STICKER;
+  content: string;
+  category: StickerCategory;
+  styles: BaseStyles & {
+    fill?: string;
+    stroke?: string;
+    strokeWidth?: number;
+    scale?: number;
+    filter?: string;
+    animation?: AnimationConfig;
+  };
+};
+
 export type Overlay =
   | TextOverlay
   | ImageOverlay
   | ShapeOverlay
   | ClipOverlay
   | SoundOverlay
-  | CaptionOverlay;
+  | CaptionOverlay
+  | StickerOverlay;
 
 export type MainProps = {
   readonly overlays: Overlay[];

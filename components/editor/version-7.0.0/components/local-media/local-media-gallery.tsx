@@ -194,7 +194,7 @@ export function LocalMediaGallery({
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-sm font-semibold">Saved Uploads</h2>
+        <h2 className="text-sm">Saved Uploads</h2>
         <div>
           <Button
             variant="outline"

@@ -8,6 +8,7 @@ import {
   Subtitles,
   ImageIcon,
   FolderOpen,
+  Sticker,
 } from "lucide-react";
 import Image from "next/image";
 import {
@@ -35,6 +36,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ImageOverlayPanel } from "../overlays/images/image-overlay-panel";
 import { LocalMediaPanel } from "../overlays/local-media/local-media-panel";
+import { StickersPanel } from "../overlays/stickers/stickers-panel";
 
 /**
  * AppSidebar Component
@@ -64,6 +66,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         return "Image";
       case OverlayType.LOCAL_DIR:
         return "Local Media";
+      case OverlayType.STICKER:
+        return "Stickers";
       default:
         return "Unknown";
     }
@@ -106,6 +110,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       type: OverlayType.IMAGE,
     },
     {
+      title: getPanelTitle(OverlayType.STICKER),
+      url: "#",
+      icon: Sticker,
+      panel: OverlayType.STICKER,
+      type: OverlayType.STICKER,
+    },
+    {
       title: getPanelTitle(OverlayType.LOCAL_DIR),
       url: "#",
       icon: FolderOpen,
@@ -130,6 +141,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         return <CaptionsPanel />;
       case OverlayType.IMAGE:
         return <ImageOverlayPanel />;
+      case OverlayType.STICKER:
+        return <StickersPanel />;
       case OverlayType.LOCAL_DIR:
         return <LocalMediaPanel />;
       default:

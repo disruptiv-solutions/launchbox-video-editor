@@ -6,6 +6,7 @@ import { CaptionLayerContent } from "../overlays/captions/caption-layer-content"
 import { VideoLayerContent } from "../overlays/video/video-layer-content";
 import { ImageLayerContent } from "../overlays/images/image-layer-content";
 import { SoundLayerContent } from "../overlays/captions/sound-layer-content";
+import { StickerRenderer } from "../overlays/stickers/sticker-renderer";
 
 /**
  * Props for the LayerContent component
@@ -92,6 +93,13 @@ export const LayerContent: React.FC<LayerContentProps> = ({
           }}
         >
           <CaptionLayerContent overlay={overlay} />
+        </div>
+      );
+
+    case OverlayType.STICKER:
+      return (
+        <div style={{ ...commonStyle }}>
+          <StickerRenderer overlay={overlay} />
         </div>
       );
 
