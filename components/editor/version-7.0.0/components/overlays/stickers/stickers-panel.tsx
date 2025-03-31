@@ -7,9 +7,13 @@ import {
   templatesByCategory,
   getStickerCategories,
 } from "../../../templates/sticker-templates/sticker-helpers";
+import { useTimelinePositioning } from "../../../hooks/use-timeline-positioning";
+import { useTimeline } from "../../../contexts/timeline-context";
 
 export function StickersPanel() {
-  const { addOverlay } = useEditorContext();
+  const { addOverlay, overlays, durationInFrames } = useEditorContext();
+  const { findNextAvailablePosition } = useTimelinePositioning();
+  const { visibleRows } = useTimeline();
   const stickerCategories = getStickerCategories();
 
   const handleStickerClick = (templateId: string) => {
@@ -19,24 +23,30 @@ export function StickersPanel() {
 
     if (!template) return;
 
+    const { from, row } = findNextAvailablePosition(
+      overlays,
+      visibleRows,
+      durationInFrames
+    );
+
     const newOverlay: Overlay = {
       id: Date.now(),
       type: OverlayType.STICKER,
-      content: template.config.id, // This is now the template ID
+      content: template.config.id,
       category: template.config.category as StickerCategory,
       durationInFrames: 50,
-      from: 0,
-      height: 150, // Bigger default size for better visibility
+      from, // Use calculated position instead of 0
+      height: 150,
       width: 150,
       left: 0,
       top: 0,
-      row: 0,
+      row, // Use calculated row instead of 0
       isDragging: false,
       rotation: 0,
       styles: {
         opacity: 1,
         zIndex: 1,
-        ...template.config.defaultProps?.styles, // Get any default styles from the template
+        ...template.config.defaultProps?.styles,
       },
     };
 
