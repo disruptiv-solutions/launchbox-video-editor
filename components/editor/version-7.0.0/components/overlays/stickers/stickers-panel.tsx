@@ -63,7 +63,7 @@ export function StickersPanel() {
 
         {stickerCategories.map((category) => (
           <TabsContent key={category} value={category} className="mt-0">
-            <ScrollArea className="h-[calc(100vh-200px)]">
+            <ScrollArea className="h-[calc(100vh-100px)]">
               <div className="grid grid-cols-2 gap-2 mt-2">
                 {templatesByCategory[category]?.map((template) => {
                   const { Component }: any = template;
@@ -88,6 +88,8 @@ export function StickersPanel() {
                       },
                     },
                     isSelected: false,
+                    // Pass through all defaultProps to the preview component
+                    ...template.config.defaultProps,
                   };
 
                   return (
@@ -109,11 +111,6 @@ export function StickersPanel() {
                       <span className="mt-2 text-xs text-gray-600 dark:text-gray-400">
                         {template.config.name}
                       </span>
-                      {template.config.isPro && (
-                        <div className="absolute top-1 right-1 bg-yellow-500 text-black text-[10px] px-1 rounded">
-                          PRO
-                        </div>
-                      )}
                     </button>
                   );
                 })}

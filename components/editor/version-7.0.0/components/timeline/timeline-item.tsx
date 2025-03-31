@@ -175,6 +175,11 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
         return isHandle
           ? "bg-emerald-500 dark:bg-emerald-500"
           : "bg-emerald-500 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-500 border-emerald-500 dark:border-emerald-500 text-emerald-500 dark:text-white";
+      case OverlayType.STICKER:
+        return isHandle
+          ? "bg-red-500 dark:bg-red-500"
+          : "bg-red-500 hover:bg-red-500 dark:bg-red-500 dark:hover:bg-red-500 border-red-500 dark:border-red-500 text-red-500 dark:text-white";
+
       default:
         return isHandle
           ? "bg-gray-200 dark:bg-gray-700"

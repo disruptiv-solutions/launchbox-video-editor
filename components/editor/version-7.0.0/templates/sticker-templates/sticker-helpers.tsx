@@ -1,14 +1,14 @@
 import { StickerTemplate } from "./base-template";
 import { discountSticker } from "./discount-sticker";
 import { flashSaleSticker } from "./flash-sale";
-import { socialProofSticker } from "./social-proof";
+import { emojiStickers } from "./emoji-sticker";
 // Import other sticker templates here
 
 // This array will grow as you add more sticker templates
 const templates: StickerTemplate[] = [
   discountSticker,
   flashSaleSticker,
-  socialProofSticker,
+  ...emojiStickers,
   // Add other sticker templates here
 ];
 

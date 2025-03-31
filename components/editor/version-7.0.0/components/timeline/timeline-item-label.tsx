@@ -1,5 +1,5 @@
 import React from "react";
-import { Type, Film, Image, Volume2 } from "lucide-react";
+import { Type, Film, Image, Volume2, Sticker } from "lucide-react";
 import { OverlayType, Overlay } from "../../types";
 
 /**
@@ -40,6 +40,8 @@ export const TimelineItemLabel: React.FC<TimelineItemLabelProps> = ({
         return <Image className="w-2 h-2 mr-0.5" />;
       case OverlayType.SOUND:
         return <Volume2 className="w-2 h-2 mr-0.5" />;
+      case OverlayType.STICKER:
+        return <Sticker className="w-2 h-2 mr-0.5" />;
       case OverlayType.CAPTION:
         return <></>;
       default:
@@ -84,6 +86,8 @@ export const TimelineItemLabel: React.FC<TimelineItemLabelProps> = ({
         ${
           item.type === OverlayType.TEXT
             ? "bg-purple-200/30 text-white dark:bg-purple-200/30 dark:text-white"
+            : item.type === OverlayType.STICKER
+            ? "bg-pink-200/30 text-white dark:bg-pink-200/30 dark:text-white"
             : item.type === OverlayType.SOUND
             ? "bg-amber-200/80 text-gray-500 dark:bg-amber-200/80 dark:text-gray-500"
             : item.type === OverlayType.IMAGE
