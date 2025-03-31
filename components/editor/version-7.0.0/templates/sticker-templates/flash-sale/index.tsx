@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { useCurrentFrame, interpolate } from "remotion";
 import { StickerTemplate, StickerTemplateProps } from "../base-template";
 
 interface FlashSaleProps extends StickerTemplateProps {
@@ -16,8 +16,30 @@ const FlashSaleComponent: React.FC<FlashSaleProps> = ({
   accentColor = "#FF4500",
   textColor = "#000000",
 }) => {
+  const frame = useCurrentFrame();
+
+  // Calculate various animation values
+  const scale = interpolate(frame % 60, [0, 30, 60], [0, 1, 0], {
+    extrapolateRight: "clamp",
+  });
+
+  const backgroundProgress = (frame % 120) / 120;
+  const background =
+    backgroundProgress < 0.5
+      ? backgroundColor
+      : `linear-gradient(45deg, ${backgroundColor}, ${accentColor})`;
+
+  const lightningScale = interpolate(frame % 60, [0, 30, 60], [1, 1.2, 1]);
+  const lightningOpacity = interpolate(frame % 60, [0, 30, 60], [1, 0.8, 1]);
+
+  const textScale = interpolate(frame % 90, [0, 45, 90], [1, 1.1, 1]);
+  const textOpacity = interpolate(frame % 120, [0, 60, 120], [0.9, 1, 0.9]);
+
+  const borderScale = interpolate(frame % 120, [0, 60, 120], [1, 1.02, 1]);
+  const borderOpacity = interpolate(frame % 120, [0, 60, 120], [0.5, 0.8, 0.5]);
+
   return (
-    <motion.div
+    <div
       style={{
         width: "100%",
         height: "100%",
@@ -26,41 +48,23 @@ const FlashSaleComponent: React.FC<FlashSaleProps> = ({
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
-      }}
-      initial={{ scale: 0 }}
-      animate={{ scale: 1 }}
-      transition={{
-        type: "spring",
-        stiffness: 260,
-        damping: 20,
+        transform: `scale(${scale})`,
       }}
     >
       {/* Background with lightning effect */}
-      <motion.div
+      <div
         style={{
           position: "absolute",
           width: "100%",
           height: "100%",
-          backgroundColor,
+          background,
           borderRadius: "12px",
           boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
-        }}
-        animate={{
-          background: [
-            backgroundColor,
-            `linear-gradient(45deg, ${backgroundColor}, ${accentColor})`,
-            backgroundColor,
-          ],
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          repeatType: "reverse",
         }}
       />
 
       {/* Lightning bolt */}
-      <motion.svg
+      <svg
         viewBox="0 0 24 24"
         style={{
           position: "absolute",
@@ -69,22 +73,15 @@ const FlashSaleComponent: React.FC<FlashSaleProps> = ({
           top: "10%",
           left: "30%",
           fill: accentColor,
-        }}
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [1, 0.8, 1],
-        }}
-        transition={{
-          duration: 1,
-          repeat: Infinity,
-          repeatType: "reverse",
+          transform: `scale(${lightningScale})`,
+          opacity: lightningOpacity,
         }}
       >
         <path d="M13 0L0 14h11l-2 10L24 10h-11l2-10z" />
-      </motion.svg>
+      </svg>
 
       {/* Text content */}
-      <motion.div
+      <div
         style={{
           position: "absolute",
           bottom: "20%",
@@ -95,60 +92,38 @@ const FlashSaleComponent: React.FC<FlashSaleProps> = ({
           padding: "0 10px",
         }}
       >
-        <motion.div
+        <div
           style={{
             fontSize: `${overlay.height * 0.15}px`,
             marginBottom: "4px",
-          }}
-          animate={{
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            repeatType: "reverse",
+            transform: `scale(${textScale})`,
           }}
         >
           FLASH SALE
-        </motion.div>
-        <motion.div
+        </div>
+        <div
           style={{
             fontSize: `${overlay.height * 0.12}px`,
-            opacity: 0.9,
-          }}
-          animate={{
-            opacity: [0.9, 1, 0.9],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
+            opacity: textOpacity,
           }}
         >
           Ends in {duration}
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       {/* Animated border */}
-      <motion.div
+      <div
         style={{
           position: "absolute",
           width: "100%",
           height: "100%",
           border: `2px solid ${accentColor}`,
           borderRadius: "12px",
-          opacity: 0.5,
-        }}
-        animate={{
-          scale: [1, 1.02, 1],
-          opacity: [0.5, 0.8, 0.5],
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          repeatType: "reverse",
+          opacity: borderOpacity,
+          transform: `scale(${borderScale})`,
         }}
       />
-    </motion.div>
+    </div>
   );
 };
 

@@ -7,11 +7,26 @@ import { loadFont as loadRobotoMono } from "@remotion/google-fonts/RobotoMono";
 import { loadFont as loadVT323 } from "@remotion/google-fonts/VT323";
 import { animationTemplates } from "../../../templates/animation-templates";
 
-// Load the fonts
-const { fontFamily: interFontFamily } = loadInter();
-const { fontFamily: merriweatherFontFamily } = loadMerriweather();
-const { fontFamily: robotoMonoFontFamily } = loadRobotoMono();
-const { fontFamily: vt323FontFamily } = loadVT323();
+// Updated font loading with specific weights and subsets
+const { fontFamily: interFontFamily } = loadInter("normal", {
+  weights: ["400", "700"],
+  subsets: ["latin"],
+});
+
+const { fontFamily: merriweatherFontFamily } = loadMerriweather("normal", {
+  weights: ["400", "700"],
+  subsets: ["latin"],
+});
+
+const { fontFamily: robotoMonoFontFamily } = loadRobotoMono("normal", {
+  weights: ["400"],
+  subsets: ["latin"],
+});
+
+const { fontFamily: vt323FontFamily } = loadVT323("normal", {
+  weights: ["400"],
+  subsets: ["latin"],
+});
 
 interface TextLayerContentProps {
   overlay: TextOverlay;
