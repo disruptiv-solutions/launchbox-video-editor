@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "framer-motion";
 import { StickerTemplate, StickerTemplateProps } from "../base-template";
 
 interface DiscountStickerProps extends StickerTemplateProps {
@@ -17,7 +16,7 @@ const DiscountStickerComponent: React.FC<DiscountStickerProps> = ({
   ribbonColor = "#FF2E2E",
 }) => {
   return (
-    <motion.div
+    <div
       style={{
         width: "100%",
         height: "100%",
@@ -25,19 +24,11 @@ const DiscountStickerComponent: React.FC<DiscountStickerProps> = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        animation: "stickerEntrance 0.5s ease-out forwards",
       }}
-      initial={{ scale: 0, rotate: -180 }}
-      animate={{ scale: 1, rotate: 0 }}
-      transition={{
-        type: "spring",
-        stiffness: 260,
-        damping: 20,
-      }}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
     >
       {/* Main circle */}
-      <motion.div
+      <div
         style={{
           width: "90%",
           height: "90%",
@@ -52,7 +43,7 @@ const DiscountStickerComponent: React.FC<DiscountStickerProps> = ({
         }}
       >
         {/* Ribbon */}
-        <motion.div
+        <div
           style={{
             position: "absolute",
             width: "150%",
@@ -61,19 +52,12 @@ const DiscountStickerComponent: React.FC<DiscountStickerProps> = ({
             transform: "rotate(-45deg)",
             top: "20%",
             boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
-          }}
-          animate={{
-            y: [0, 2, 0],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut",
+            animation: "ribbonFloat 2s ease-in-out infinite",
           }}
         />
 
         {/* Discount text */}
-        <motion.div
+        <div
           style={{
             color: textColor,
             fontSize: `${overlay.height * 0.25}px`,
@@ -81,22 +65,15 @@ const DiscountStickerComponent: React.FC<DiscountStickerProps> = ({
             textAlign: "center",
             lineHeight: 1.2,
             zIndex: 1,
-          }}
-          animate={{
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut",
+            animation: "textPulse 2s ease-in-out infinite",
           }}
         >
           <div>{percentage}%</div>
           <div style={{ fontSize: "0.5em" }}>OFF</div>
-        </motion.div>
+        </div>
 
         {/* Decorative elements */}
-        <motion.div
+        <div
           style={{
             position: "absolute",
             width: "100%",
@@ -104,18 +81,50 @@ const DiscountStickerComponent: React.FC<DiscountStickerProps> = ({
             borderRadius: "50%",
             border: `4px dashed ${textColor}`,
             opacity: 0.3,
-          }}
-          animate={{
-            rotate: 360,
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear",
+            animation: "rotate 20s linear infinite",
           }}
         />
-      </motion.div>
-    </motion.div>
+      </div>
+
+      <style>
+        {`
+          @keyframes stickerEntrance {
+            from {
+              transform: scale(0) rotate(-180deg);
+            }
+            to {
+              transform: scale(1) rotate(0);
+            }
+          }
+
+          @keyframes ribbonFloat {
+            0%, 100% { transform: rotate(-45deg) translateY(0); }
+            50% { transform: rotate(-45deg) translateY(2px); }
+          }
+
+          @keyframes textPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+          }
+
+          @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+
+          /* Scope hover effects to only the main sticker container */
+          .discount-sticker:hover {
+            transform: scale(1.05);
+            transition: transform 0.2s ease;
+          }
+
+          .discount-sticker:active {
+            transform: scale(0.95);
+            transition: transform 0.2s ease;
+          }
+        `}
+      </style>
+    </div>
   );
 };
 
@@ -124,7 +133,6 @@ export const discountSticker: StickerTemplate = {
     id: "discount-circle",
     name: "Discount Circle",
     category: "Discounts",
-    thumbnail: "/thumbnails/discount-circle.png", // You'll need to create this
     defaultProps: {
       percentage: 50,
       backgroundColor: "#FF4B4B",

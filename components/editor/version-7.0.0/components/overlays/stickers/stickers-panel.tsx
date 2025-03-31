@@ -6,7 +6,7 @@ import { Overlay, OverlayType, StickerCategory } from "../../../types";
 import {
   templatesByCategory,
   getStickerCategories,
-} from "../../../templates/sticker-templates/loader";
+} from "../../../templates/sticker-templates/sticker-helpers";
 
 export function StickersPanel() {
   const { addOverlay } = useEditorContext();

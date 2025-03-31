@@ -1,14 +1,14 @@
 import React from "react";
-import { StickerOverlay } from "../../types";
-import { templateMap } from "./loader";
+import { StickerOverlay } from "../../../types";
+import { templateMap } from "../../../templates/sticker-templates/sticker-helpers";
 
-interface StickerRendererProps {
+interface StickerLayerContentProps {
   overlay: StickerOverlay;
   isSelected: boolean;
   onUpdate?: (updates: Partial<StickerOverlay>) => void;
 }
 
-export const StickerRenderer: React.FC<StickerRendererProps> = ({
+export const StickerLayerContent: React.FC<StickerLayerContentProps> = ({
   overlay,
   isSelected,
   onUpdate,
