@@ -9,8 +9,7 @@ import { animationTemplates } from "../../../templates/animation-templates";
 
 // Updated font loading with specific weights and subsets
 const { fontFamily: interFontFamily } = loadInter("normal", {
-  weights: ["400", "700"],
-  subsets: ["latin"],
+  weights: ["400"],
 });
 
 const { fontFamily: merriweatherFontFamily } = loadMerriweather("normal", {
