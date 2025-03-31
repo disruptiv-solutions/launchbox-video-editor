@@ -1,5 +1,6 @@
 import React from "react";
 import { StickerTemplate, StickerTemplateProps } from "../base-template";
+import { useCurrentFrame, interpolate } from "remotion";
 
 interface DiscountStickerProps extends StickerTemplateProps {
   percentage?: number;
@@ -15,6 +16,31 @@ const DiscountStickerComponent: React.FC<DiscountStickerProps> = ({
   textColor = "#FFFFFF",
   ribbonColor = "#FF2E2E",
 }) => {
+  const frame = useCurrentFrame();
+
+  // Calculate animations based on current frame
+  const entrance = interpolate(frame, [0, 15], [0, 1], {
+    extrapolateRight: "clamp",
+    extrapolateLeft: "clamp",
+  });
+
+  const entranceRotation = interpolate(frame, [0, 15], [-180, 0], {
+    extrapolateRight: "clamp",
+    extrapolateLeft: "clamp",
+  });
+
+  const ribbonFloat = interpolate(frame % 60, [0, 30, 60], [0, 2, 0], {
+    extrapolateRight: "clamp",
+  });
+
+  const textPulse = interpolate(frame % 60, [0, 30, 60], [1, 1.1, 1], {
+    extrapolateRight: "clamp",
+  });
+
+  const rotation = interpolate(frame % 50, [0, 49], [0, 360], {
+    extrapolateRight: "clamp",
+  });
+
   return (
     <div
       style={{
@@ -24,7 +50,7 @@ const DiscountStickerComponent: React.FC<DiscountStickerProps> = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        animation: "stickerEntrance 0.5s ease-out forwards",
+        transform: `scale(${entrance}) rotate(${entranceRotation}deg)`,
       }}
     >
       {/* Main circle */}
@@ -49,10 +75,9 @@ const DiscountStickerComponent: React.FC<DiscountStickerProps> = ({
             width: "150%",
             height: "30px",
             backgroundColor: ribbonColor,
-            transform: "rotate(-45deg)",
+            transform: `rotate(-45deg) translateY(${ribbonFloat}px)`,
             top: "20%",
             boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
-            animation: "ribbonFloat 2s ease-in-out infinite",
           }}
         />
 
@@ -65,7 +90,7 @@ const DiscountStickerComponent: React.FC<DiscountStickerProps> = ({
             textAlign: "center",
             lineHeight: 1.2,
             zIndex: 1,
-            animation: "textPulse 2s ease-in-out infinite",
+            transform: `scale(${textPulse})`,
           }}
         >
           <div>{percentage}%</div>
@@ -81,49 +106,10 @@ const DiscountStickerComponent: React.FC<DiscountStickerProps> = ({
             borderRadius: "50%",
             border: `4px dashed ${textColor}`,
             opacity: 0.3,
-            animation: "rotate 20s linear infinite",
+            transform: `rotate(${rotation}deg)`,
           }}
         />
       </div>
-
-      <style>
-        {`
-          @keyframes stickerEntrance {
-            from {
-              transform: scale(0) rotate(-180deg);
-            }
-            to {
-              transform: scale(1) rotate(0);
-            }
-          }
-
-          @keyframes ribbonFloat {
-            0%, 100% { transform: rotate(-45deg) translateY(0); }
-            50% { transform: rotate(-45deg) translateY(2px); }
-          }
-
-          @keyframes textPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-          }
-
-          @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-
-          /* Scope hover effects to only the main sticker container */
-          .discount-sticker:hover {
-            transform: scale(1.05);
-            transition: transform 0.2s ease;
-          }
-
-          .discount-sticker:active {
-            transform: scale(0.95);
-            transition: transform 0.2s ease;
-          }
-        `}
-      </style>
     </div>
   );
 };
