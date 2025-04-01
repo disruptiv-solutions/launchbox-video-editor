@@ -78,9 +78,10 @@ export const TimelineItemLabel: React.FC<TimelineItemLabelProps> = ({
 
   return (
     <div className="absolute inset-0 flex items-center z-20">
-      {item.type !== OverlayType.CAPTION && DISABLE_VIDEO_KEYFRAMES && (
-        <div
-          className={`flex items-center text-[9px] rounded-[2px] px-1.5 py-0.5
+      {item.type !== OverlayType.CAPTION &&
+        (item.type !== OverlayType.VIDEO || DISABLE_VIDEO_KEYFRAMES) && (
+          <div
+            className={`flex items-center text-[9px] rounded-[2px] px-1.5 py-0.5
         ${isSelected ? "mx-5" : "mx-2"} 
         group-hover:mx-5
         transition-all duration-200 ease-in-out
@@ -97,15 +98,15 @@ export const TimelineItemLabel: React.FC<TimelineItemLabelProps> = ({
             ? "bg-emerald-100/80 text-emerald-900 dark:bg-emerald-700/90 dark:text-emerald-100"
             : "bg-gray-100/80 text-gray-900 dark:bg-gray-700/90 dark:text-gray-200"
         }`}
-        >
-          <div className="flex items-center gap-0.5">
-            {getItemIcon(item.type)}
-            <span className="capitalize truncate max-w-[100px]">
-              {getLabelContent()}
-            </span>
+          >
+            <div className="flex items-center gap-0.5">
+              {getItemIcon(item.type)}
+              <span className="capitalize truncate max-w-[100px]">
+                {getLabelContent()}
+              </span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 };
