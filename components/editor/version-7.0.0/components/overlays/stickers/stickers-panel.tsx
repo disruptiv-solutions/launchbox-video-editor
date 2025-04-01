@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, memo, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEditorContext } from "../../../contexts/editor-context";
@@ -13,78 +13,81 @@ import { Player } from "@remotion/player";
 import { Sequence } from "remotion";
 
 // Wrapper component for sticker preview with Remotion Player
-const StickerPreview = ({
-  template,
-  onClick,
-}: {
-  template: any;
-  onClick: () => void;
-}) => {
-  const playerRef = useRef<any>(null);
-  const { Component } = template;
+const StickerPreview = memo(
+  ({ template, onClick }: { template: any; onClick: () => void }) => {
+    const playerRef = useRef<any>(null);
+    const { Component } = template;
 
-  const previewProps = {
-    overlay: {
-      id: -1,
-      type: OverlayType.STICKER,
-      content: template.config.id,
-      category: template.config.category as StickerCategory,
-      durationInFrames: 50,
-      from: 0,
-      height: 80,
-      width: 80,
-      left: 0,
-      top: 0,
-      row: 0,
-      isDragging: false,
-      rotation: 0,
-      styles: {
-        opacity: 1,
-        ...template.config.defaultProps?.styles,
+    const previewProps = {
+      overlay: {
+        id: -1,
+        type: OverlayType.STICKER,
+        content: template.config.id,
+        category: template.config.category as StickerCategory,
+        durationInFrames: 50,
+        from: 0,
+        height: 80,
+        width: 80,
+        left: 0,
+        top: 0,
+        row: 0,
+        isDragging: false,
+        rotation: 0,
+        styles: {
+          opacity: 1,
+          ...template.config.defaultProps?.styles,
+        },
       },
-    },
-    isSelected: false,
-    ...template.config.defaultProps,
-  };
+      isSelected: false,
+      ...template.config.defaultProps,
+    };
 
-  return (
-    <button
-      onClick={onClick}
-      className={`
+    const MemoizedComponent = memo(Component);
+
+    return (
+      <button
+        onClick={onClick}
+        className={`
         flex flex-col items-center justify-center p-4 rounded-lg
         border border-gray-200 dark:border-gray-800
         hover:bg-gray-100 dark:hover:bg-gray-800
         transition-colors
         ${template.config.isPro ? "relative" : ""}
       `}
-    >
-      <div className="w-20 h-20 flex items-center justify-center">
-        <Player
-          ref={playerRef}
-          component={() => (
-            <Sequence from={0} durationInFrames={50}>
-              <Component {...previewProps} />
-            </Sequence>
-          )}
-          durationInFrames={50}
-          compositionWidth={80}
-          compositionHeight={80}
-          fps={30}
-          loop
-          autoPlay={true}
-          controls={false}
-          style={{
-            width: "100%",
-            height: "100%",
-          }}
-        />
-      </div>
-      <span className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-        {template.config.name}
-      </span>
-    </button>
-  );
-};
+      >
+        <div className="w-20 h-20 flex items-center justify-center">
+          <Player
+            ref={playerRef}
+            component={() => (
+              <Sequence from={0} durationInFrames={50}>
+                <MemoizedComponent {...previewProps} />
+              </Sequence>
+            )}
+            durationInFrames={50}
+            compositionWidth={80}
+            compositionHeight={80}
+            fps={30}
+            loop
+            autoPlay={true}
+            controls={false}
+            style={{
+              width: "100%",
+              height: "100%",
+            }}
+          />
+        </div>
+        <span className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+          {template.config.name}
+        </span>
+      </button>
+    );
+  },
+  (prevProps, nextProps) => {
+    return prevProps.template.config.id === nextProps.template.config.id;
+  }
+);
+
+StickerPreview.displayName = "StickerPreview";
 
 export function StickersPanel() {
   const { addOverlay, overlays, durationInFrames } = useEditorContext();
@@ -92,42 +95,51 @@ export function StickersPanel() {
   const { visibleRows } = useTimeline();
   const stickerCategories = getStickerCategories();
 
-  const handleStickerClick = (templateId: string) => {
-    const template = Object.values(templatesByCategory)
-      .flat()
-      .find((t) => t.config.id === templateId);
+  const handleStickerClick = useCallback(
+    (templateId: string) => {
+      const template = Object.values(templatesByCategory)
+        .flat()
+        .find((t) => t.config.id === templateId);
 
-    if (!template) return;
+      if (!template) return;
 
-    const { from, row } = findNextAvailablePosition(
+      const { from, row } = findNextAvailablePosition(
+        overlays,
+        visibleRows,
+        durationInFrames
+      );
+
+      const newOverlay: Overlay = {
+        id: Date.now(),
+        type: OverlayType.STICKER,
+        content: template.config.id,
+        category: template.config.category as StickerCategory,
+        durationInFrames: 50,
+        from,
+        height: 150,
+        width: 150,
+        left: 0,
+        top: 0,
+        row,
+        isDragging: false,
+        rotation: 0,
+        styles: {
+          opacity: 1,
+          zIndex: 1,
+          ...template.config.defaultProps?.styles,
+        },
+      };
+
+      addOverlay(newOverlay);
+    },
+    [
+      addOverlay,
       overlays,
       visibleRows,
-      durationInFrames
-    );
-
-    const newOverlay: Overlay = {
-      id: Date.now(),
-      type: OverlayType.STICKER,
-      content: template.config.id,
-      category: template.config.category as StickerCategory,
-      durationInFrames: 50,
-      from, // Use calculated position instead of 0
-      height: 150,
-      width: 150,
-      left: 0,
-      top: 0,
-      row, // Use calculated row instead of 0
-      isDragging: false,
-      rotation: 0,
-      styles: {
-        opacity: 1,
-        zIndex: 1,
-        ...template.config.defaultProps?.styles,
-      },
-    };
-
-    addOverlay(newOverlay);
-  };
+      durationInFrames,
+      findNextAvailablePosition,
+    ]
+  );
 
   return (
     <div className="flex flex-col gap-4 pl-4 pr-4 pt-2 bg-white dark:bg-gray-900/50 h-full">
