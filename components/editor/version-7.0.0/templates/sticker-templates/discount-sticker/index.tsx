@@ -118,7 +118,7 @@ export const discountSticker: StickerTemplate = {
   config: {
     id: "discount-circle",
     name: "Discount Circle",
-    category: "Discounts",
+    category: "Default",
     defaultProps: {
       percentage: 50,
       backgroundColor: "#FF4B4B",

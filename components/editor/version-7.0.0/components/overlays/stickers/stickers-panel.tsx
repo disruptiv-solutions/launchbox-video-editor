@@ -24,7 +24,7 @@ const StickerPreview = memo(
         type: OverlayType.STICKER,
         content: template.config.id,
         category: template.config.category as StickerCategory,
-        durationInFrames: 50,
+        durationInFrames: 200,
         from: 0,
         height: 80,
         width: 80,

@@ -2,6 +2,8 @@ import { StickerTemplate } from "./base-template";
 import { discountSticker } from "./discount-sticker";
 import { flashSaleSticker } from "./flash-sale";
 import { emojiStickers } from "./emoji-sticker";
+import { shapeStickers } from "./shapes";
+
 // Import other sticker templates here
 
 // This array will grow as you add more sticker templates
@@ -9,6 +11,7 @@ const templates: StickerTemplate[] = [
   discountSticker,
   flashSaleSticker,
   ...emojiStickers,
+  ...shapeStickers,
   // Add other sticker templates here
 ];
 

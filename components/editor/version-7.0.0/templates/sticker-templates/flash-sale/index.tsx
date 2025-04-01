@@ -131,7 +131,7 @@ export const flashSaleSticker: StickerTemplate = {
   config: {
     id: "flash-sale",
     name: "Flash Sale",
-    category: "Discounts",
+    category: "Default",
     defaultProps: {
       duration: "24h",
       backgroundColor: "#FFD700",
