@@ -3,6 +3,7 @@ import { ClipOverlay, ImageOverlay } from "../../types";
 import { FPS } from "../../constants";
 import { useKeyframes } from "../../hooks/use-keyframes";
 import Image from "next/image";
+import { DISABLE_VIDEO_KEYFRAMES } from "../../constants";
 
 /**
  * Props for the TimelineKeyframes component
@@ -70,6 +71,12 @@ export const TimelineKeyframes: React.FC<TimelineKeyframesProps> = ({
       // Fill remaining slots with the last loaded frame
       return loadedFrames[loadedFrames.length - 1] || null;
     });
+
+  if (DISABLE_VIDEO_KEYFRAMES) {
+    return (
+      <div className="flex h-full overflow-hidden w-full bg-pink-100 hover:bg-pink-200 dark:bg-pink-600 dark:hover:bg-pink-500"></div>
+    );
+  }
 
   return (
     <div

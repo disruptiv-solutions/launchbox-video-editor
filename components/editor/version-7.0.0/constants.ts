@@ -16,6 +16,14 @@ export const VIDEO_HEIGHT = 720;
 export const ROW_HEIGHT = 44; // Slightly increased from 48
 export const SHOW_LOADING_PROJECT_ALERT = true; // Controls visibility of asset loading indicator
 
+/**
+ * This constant disables video keyframe extraction in the browser. Enable this if you're working with
+ * multiple videos or large video files to improve performance. Keyframe extraction is CPU-intensive and can
+ * cause browser lag. For production use, consider moving keyframe extraction to the server side.
+ * Future versions of Remotion may provide more efficient keyframe handling.
+ */
+export const DISABLE_VIDEO_KEYFRAMES = false;
+
 // AWS deployment configuration
 export const SITE_NAME = "sams-site";
 export const LAMBDA_FUNCTION_NAME =
@@ -24,7 +32,7 @@ export const REGION = "us-east-1";
 
 // Zoom control configuration
 export const ZOOM_CONSTRAINTS = {
-  min: 1, // Minimum zoom level
+  min: 0.2, // Minimum zoom level
   max: 10, // Maximum zoom level
   step: 0.1, // Smallest increment for manual zoom controls
   default: 1, // Default zoom level
@@ -36,7 +44,7 @@ export const ZOOM_CONSTRAINTS = {
 
 // Render configuration
 // NOTE: TO CHANGE RENDER TYPE, UPDATE THE RENDER_TYPE CONSTANT
-export const RENDER_TYPE: "ssr" | "lambda" = "ssr";
+export const RENDER_TYPE: "ssr" | "lambda" = "lambda";
 
 // Autosave configuration
 export const AUTO_SAVE_INTERVAL = 10000; // Autosave every 10 seconds

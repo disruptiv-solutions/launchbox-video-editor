@@ -1,6 +1,6 @@
 import React from "react";
 import { ImageOverlay, OverlayType, ClipOverlay } from "../types";
-import { FPS } from "../constants";
+import { DISABLE_VIDEO_KEYFRAMES, FPS } from "../constants";
 import { useKeyframeContext } from "../contexts/keyframe-context";
 import { parseMedia } from "@remotion/media-parser";
 
@@ -132,7 +132,8 @@ export const useKeyframes = ({
     }
   }, []);
 
-  const extractFrames = React.useCallback(async () => {
+  // Move the extraction logic into a separate function
+  const performExtraction = React.useCallback(async () => {
     if (overlayMeta.type !== OverlayType.VIDEO || !overlayMeta.src) return;
 
     // Check if we need to re-extract frames
@@ -396,9 +397,20 @@ export const useKeyframes = ({
   ]);
 
   React.useEffect(() => {
-    extractFrames();
+    if (!DISABLE_VIDEO_KEYFRAMES) {
+      performExtraction();
+    }
     return () => cleanup();
-  }, [extractFrames, cleanup]);
+  }, [performExtraction, cleanup]);
+
+  // Return empty arrays if disabled, but after all hooks are called
+  if (DISABLE_VIDEO_KEYFRAMES) {
+    return {
+      frames: [],
+      previewFrames: [],
+      isLoading: false,
+    };
+  }
 
   return {
     frames: frameData.dataUrls,

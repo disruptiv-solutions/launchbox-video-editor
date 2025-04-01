@@ -1,6 +1,7 @@
 import React from "react";
 import { Type, Film, Image, Volume2, Sticker } from "lucide-react";
 import { OverlayType, Overlay } from "../../types";
+import { DISABLE_VIDEO_KEYFRAMES } from "../../constants";
 
 /**
  * Props for the TimelineItemLabel component
@@ -77,7 +78,7 @@ export const TimelineItemLabel: React.FC<TimelineItemLabelProps> = ({
 
   return (
     <div className="absolute inset-0 flex items-center z-20">
-      {item.type !== OverlayType.CAPTION && item.type !== OverlayType.VIDEO && (
+      {item.type !== OverlayType.CAPTION && DISABLE_VIDEO_KEYFRAMES && (
         <div
           className={`flex items-center text-[9px] rounded-[2px] px-1.5 py-0.5
         ${isSelected ? "mx-5" : "mx-2"} 
@@ -90,6 +91,8 @@ export const TimelineItemLabel: React.FC<TimelineItemLabelProps> = ({
             ? "bg-pink-200/30 text-white dark:bg-pink-200/30 dark:text-white"
             : item.type === OverlayType.SOUND
             ? "bg-amber-200/80 text-gray-500 dark:bg-amber-200/80 dark:text-gray-500"
+            : item.type === OverlayType.VIDEO
+            ? "bg-purple-200/30 text-white dark:bg-purple-200/30 dark:text-white"
             : item.type === OverlayType.IMAGE
             ? "bg-emerald-100/80 text-emerald-900 dark:bg-emerald-700/90 dark:text-emerald-100"
             : "bg-gray-100/80 text-gray-900 dark:bg-gray-700/90 dark:text-gray-200"
