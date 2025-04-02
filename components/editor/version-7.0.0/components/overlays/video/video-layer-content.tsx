@@ -1,7 +1,13 @@
-import { OffthreadVideo, useCurrentFrame } from "remotion";
+import {
+  OffthreadVideo,
+  useCurrentFrame,
+  delayRender,
+  continueRender,
+} from "remotion";
 import { ClipOverlay } from "../../../types";
 import { animationTemplates } from "../../../templates/animation-templates";
 import { toAbsoluteUrl } from "../../../utils/url-helper";
+import { useEffect, useCallback } from "react";
 
 /**
  * Interface defining the props for the VideoLayerContent component
@@ -33,6 +39,35 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
   baseUrl,
 }) => {
   const frame = useCurrentFrame();
+
+  useEffect(() => {
+    console.log(`Preparing to load video: ${overlay.src}`);
+    const handle = delayRender("Loading video");
+
+    // Create a video element to preload the video
+    const video = document.createElement("video");
+    video.src = videoSrc;
+
+    const handleLoadedMetadata = () => {
+      console.log(`Video metadata loaded: ${overlay.src}`);
+      continueRender(handle);
+    };
+
+    const handleError = (error: ErrorEvent) => {
+      console.error(`Error loading video ${overlay.src}:`, error);
+      continueRender(handle);
+    };
+
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    video.addEventListener("error", handleError);
+
+    return () => {
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      video.removeEventListener("error", handleError);
+      // Ensure we don't leave hanging render delays
+      continueRender(handle);
+    };
+  }, [overlay.src]);
 
   // Calculate if we're in the exit phase (last 30 frames)
   const isExitPhase = frame >= overlay.durationInFrames - 30;

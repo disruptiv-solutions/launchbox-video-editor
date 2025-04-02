@@ -3,12 +3,14 @@ import { ImageOverlay, OverlayType, ClipOverlay } from "../types";
 import { DISABLE_VIDEO_KEYFRAMES, FPS } from "../constants";
 import { useKeyframeContext } from "../contexts/keyframe-context";
 import { parseMedia } from "@remotion/media-parser";
+import { toAbsoluteUrl } from "../utils/url-helper";
 
 interface UseKeyframesProps {
   overlay: ClipOverlay | ImageOverlay;
   containerRef: React.RefObject<HTMLDivElement>;
   currentFrame: number;
   zoomScale: number;
+  baseUrl?: string;
 }
 
 interface FrameInfo {
@@ -43,6 +45,7 @@ export const useKeyframes = ({
   overlay,
   containerRef,
   zoomScale,
+  baseUrl,
 }: UseKeyframesProps) => {
   const { getKeyframes, updateKeyframes } = useKeyframeContext();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -182,9 +185,20 @@ export const useKeyframes = ({
         return;
       }
 
-      // Get video metadata
+      // Process video source URL consistently with video-layer-content
+      let processedVideoSrc = overlayMeta.src;
+      // If it's a relative URL and baseUrl is provided
+      if (overlayMeta.src.startsWith("/") && baseUrl) {
+        processedVideoSrc = `${baseUrl}${overlayMeta.src}`;
+      }
+      // Otherwise use the toAbsoluteUrl helper for relative URLs
+      else if (overlayMeta.src.startsWith("/")) {
+        processedVideoSrc = toAbsoluteUrl(overlayMeta.src);
+      }
+
+      // Get video metadata with processed URL
       const { dimensions } = await parseMedia({
-        src: overlayMeta.src,
+        src: processedVideoSrc,
         fields: { dimensions: true },
       });
 
@@ -199,8 +213,8 @@ export const useKeyframes = ({
         context,
       } = await createVideoAndCanvas(dimensions);
       video = newVideo;
+      video.src = processedVideoSrc;
 
-      video.src = overlayMeta.src;
       await new Promise<void>((resolve, reject) => {
         let loadAttempts = 0;
         const MAX_LOAD_ATTEMPTS = 3;
@@ -266,9 +280,9 @@ export const useKeyframes = ({
 
       const extractedFrames: FrameInfo[] = [];
       const FRAME_TIMEOUT = 8000;
-      const SEEK_TIMEOUT = 1000; // Timeout for seeking operation
+      const SEEK_TIMEOUT = 1000;
 
-      for (const frameNumber of frameNumbers) {
+      extractionLoop: for (const frameNumber of frameNumbers) {
         let retryCount = 0;
         let frameExtracted = false;
 
@@ -284,7 +298,6 @@ export const useKeyframes = ({
               };
               video!.addEventListener("seeked", onSeeked);
 
-              // Set timeout for seeking
               setTimeout(() => {
                 video!.removeEventListener("seeked", onSeeked);
                 reject(new Error("Seek timeout"));
@@ -294,7 +307,7 @@ export const useKeyframes = ({
             video!.currentTime = timeInSeconds;
             await seekPromise;
 
-            // Wait for frame to be ready
+            // Extract frame with timeout
             await new Promise<void>((resolve, reject) => {
               const extractFrame = () => {
                 try {
@@ -305,63 +318,52 @@ export const useKeyframes = ({
                     throw new Error("Invalid frame data URL");
                   }
 
-                  const frame = {
+                  extractedFrames.push({
                     frameNumber,
                     dataUrl,
-                  };
-
-                  extractedFrames.push(frame);
+                  });
                   setFrames([...extractedFrames]);
                   resolve();
-                } catch (err) {
-                  reject(err);
+                } catch (error) {
+                  reject(error);
                 }
               };
 
-              // Add a small delay to ensure frame is fully loaded
               setTimeout(extractFrame, 50);
-
-              // Set overall timeout
               setTimeout(() => {
                 reject(new Error("Frame extraction timeout"));
               }, FRAME_TIMEOUT);
             });
 
             frameExtracted = true;
-          } catch (err) {
+          } catch (error) {
             console.warn(
               `Frame extraction failed for frame ${frameNumber} (attempt ${
                 retryCount + 1
               }/${MAX_RETRIES}):`,
-              err
+              error
             );
             retryCount++;
 
             if (retryCount === MAX_RETRIES) {
               extractionErrors++;
+              if (
+                extractionErrors >= MAX_ERRORS &&
+                extractedFrames.length > 0
+              ) {
+                console.warn(
+                  `Too many extraction errors (${extractionErrors}), using partial results`
+                );
+                break extractionLoop;
+              }
             }
 
-            // If too many errors, but we have some frames, continue with what we have
-            if (extractionErrors >= MAX_ERRORS && extractedFrames.length > 0) {
-              console.warn(
-                `Too many extraction errors (${extractionErrors}), using partial results`
-              );
-              break;
-            }
-
-            // Exponential backoff for retries
             await new Promise((resolve) =>
               setTimeout(resolve, Math.min(100 * Math.pow(2, retryCount), 1000))
             );
           }
         }
 
-        // If we've hit max errors, break the main loop
-        if (extractionErrors >= MAX_ERRORS && extractedFrames.length > 0) {
-          break;
-        }
-
-        // If we failed to extract this frame after all retries, log it
         if (!frameExtracted) {
           console.error(
             `Failed to extract frame ${frameNumber} after ${MAX_RETRIES} attempts`
@@ -369,7 +371,7 @@ export const useKeyframes = ({
         }
       }
 
-      // Only cache if we got enough frames (increased threshold)
+      // Only cache if we got enough frames
       if (extractedFrames.length >= Math.ceil(frameCount * 0.7)) {
         updateKeyframes(overlayMeta.id, {
           frames: extractedFrames.map((f) => f.dataUrl),
@@ -381,8 +383,8 @@ export const useKeyframes = ({
           `Not enough frames extracted (got ${extractedFrames.length}/${frameCount}), skipping cache update`
         );
       }
-    } catch (err) {
-      console.error("[Keyframes] Extraction error:", err);
+    } catch (error) {
+      console.error("[Keyframes] Extraction error:", error);
     } finally {
       setIsLoading(false);
       cleanup(video);
@@ -394,6 +396,7 @@ export const useKeyframes = ({
     updateKeyframes,
     cleanup,
     createVideoAndCanvas,
+    baseUrl,
   ]);
 
   React.useEffect(() => {
@@ -403,7 +406,7 @@ export const useKeyframes = ({
     return () => cleanup();
   }, [performExtraction, cleanup]);
 
-  // Return empty arrays if disabled, but after all hooks are called
+  // Return empty arrays if disabled
   if (DISABLE_VIDEO_KEYFRAMES) {
     return {
       frames: [],

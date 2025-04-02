@@ -14,7 +14,7 @@ import {
  */
 const LAMBDA_CONFIG = {
   FUNCTION_NAME: LAMBDA_FUNCTION_NAME,
-  FRAMES_PER_LAMBDA: 100,
+  FRAMES_PER_LAMBDA: 540,
   MAX_RETRIES: 2,
   CODEC: "h264" as const,
 } as const;
