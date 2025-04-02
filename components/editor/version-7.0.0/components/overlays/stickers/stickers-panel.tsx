@@ -1,4 +1,4 @@
-import React, { useRef, memo, useCallback } from "react";
+import React, { memo, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEditorContext } from "../../../contexts/editor-context";
@@ -12,10 +12,9 @@ import { useTimeline } from "../../../contexts/timeline-context";
 import { Player } from "@remotion/player";
 import { Sequence } from "remotion";
 
-// Wrapper component for sticker preview with Remotion Player
+// Wrapper component for sticker preview with static frame
 const StickerPreview = memo(
   ({ template, onClick }: { template: any; onClick: () => void }) => {
-    const playerRef = useRef<any>(null);
     const { Component } = template;
 
     const previewProps = {
@@ -44,6 +43,12 @@ const StickerPreview = memo(
 
     const MemoizedComponent = memo(Component);
 
+    const PreviewComponent = () => (
+      <Sequence from={0} durationInFrames={16}>
+        <MemoizedComponent {...previewProps} />
+      </Sequence>
+    );
+
     return (
       <button
         onClick={onClick}
@@ -59,18 +64,13 @@ const StickerPreview = memo(
         <div className="relative w-28 h-28 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800/50">
           <div className="absolute inset-0 flex items-center justify-center">
             <Player
-              ref={playerRef}
-              component={() => (
-                <Sequence from={0} durationInFrames={50}>
-                  <MemoizedComponent {...previewProps} />
-                </Sequence>
-              )}
-              durationInFrames={50}
+              component={PreviewComponent}
+              durationInFrames={16}
               compositionWidth={120}
               compositionHeight={120}
               fps={30}
-              loop
-              autoPlay={true}
+              initialFrame={15}
+              autoPlay={false}
               controls={false}
               style={{
                 width: "100%",
