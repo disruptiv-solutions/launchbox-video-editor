@@ -196,13 +196,47 @@ export const useKeyframes = ({
         processedVideoSrc = toAbsoluteUrl(overlayMeta.src);
       }
 
-      // Get video metadata with processed URL
-      const { dimensions } = await parseMedia({
-        src: processedVideoSrc,
-        fields: { dimensions: true },
-      });
+      // Create a temporary video element to get dimensions
+      const tempVideo = document.createElement("video");
+      tempVideo.crossOrigin = "anonymous";
+      tempVideo.muted = true;
+      tempVideo.preload = "metadata";
+      tempVideo.src = processedVideoSrc;
 
-      if (!dimensions) {
+      const dimensions = await new Promise<{ width: number; height: number }>(
+        (resolve, reject) => {
+          const onLoadedMetadata = () => {
+            resolve({
+              width: tempVideo.videoWidth,
+              height: tempVideo.videoHeight,
+            });
+            cleanup();
+          };
+
+          const onError = (e: ErrorEvent) => {
+            reject(new Error(`Failed to load video metadata: ${e.message}`));
+            cleanup();
+          };
+
+          const cleanup = () => {
+            tempVideo.removeEventListener("loadedmetadata", onLoadedMetadata);
+            tempVideo.removeEventListener("error", onError);
+            tempVideo.src = "";
+            tempVideo.load();
+          };
+
+          tempVideo.addEventListener("loadedmetadata", onLoadedMetadata);
+          tempVideo.addEventListener("error", onError);
+
+          // Add timeout for metadata loading
+          setTimeout(() => {
+            cleanup();
+            reject(new Error("Timeout while loading video metadata"));
+          }, 10000);
+        }
+      );
+
+      if (!dimensions.width || !dimensions.height) {
         throw new Error("Could not get video dimensions");
       }
 
@@ -281,93 +315,144 @@ export const useKeyframes = ({
       const extractedFrames: FrameInfo[] = [];
       const FRAME_TIMEOUT = 8000;
       const SEEK_TIMEOUT = 1000;
+      const EXTRACTION_BATCH_SIZE = 5; // Process frames in smaller batches
 
-      extractionLoop: for (const frameNumber of frameNumbers) {
-        let retryCount = 0;
-        let frameExtracted = false;
+      extractionLoop: for (
+        let i = 0;
+        i < frameNumbers.length;
+        i += EXTRACTION_BATCH_SIZE
+      ) {
+        const batchFrameNumbers = frameNumbers.slice(
+          i,
+          i + EXTRACTION_BATCH_SIZE
+        );
 
-        while (retryCount < MAX_RETRIES && !frameExtracted) {
-          try {
-            const timeInSeconds = frameNumber / FPS;
+        for (const frameNumber of batchFrameNumbers) {
+          let retryCount = 0;
+          let frameExtracted = false;
 
-            // Seek with timeout
-            const seekPromise = new Promise<void>((resolve, reject) => {
-              const onSeeked = () => {
-                video!.removeEventListener("seeked", onSeeked);
-                resolve();
-              };
-              video!.addEventListener("seeked", onSeeked);
+          while (retryCount < MAX_RETRIES && !frameExtracted) {
+            try {
+              const timeInSeconds = frameNumber / FPS;
 
-              setTimeout(() => {
-                video!.removeEventListener("seeked", onSeeked);
-                reject(new Error("Seek timeout"));
-              }, SEEK_TIMEOUT);
-            });
+              // Seek with timeout and better error handling
+              const seekPromise = new Promise<void>((resolve, reject) => {
+                let seekTimeout: NodeJS.Timeout;
 
-            video!.currentTime = timeInSeconds;
-            await seekPromise;
-
-            // Extract frame with timeout
-            await new Promise<void>((resolve, reject) => {
-              const extractFrame = () => {
-                try {
-                  context.drawImage(video!, 0, 0, canvas.width, canvas.height);
-                  const dataUrl = canvas.toDataURL("image/jpeg", 0.6);
-
-                  if (!dataUrl.startsWith("data:image")) {
-                    throw new Error("Invalid frame data URL");
-                  }
-
-                  extractedFrames.push({
-                    frameNumber,
-                    dataUrl,
-                  });
-                  setFrames([...extractedFrames]);
+                const onSeeked = () => {
+                  clearTimeout(seekTimeout);
+                  video!.removeEventListener("seeked", onSeeked);
                   resolve();
-                } catch (error) {
-                  reject(error);
+                };
+
+                const onError = (error: ErrorEvent) => {
+                  clearTimeout(seekTimeout);
+                  video!.removeEventListener("seeked", onSeeked);
+                  video!.removeEventListener("error", onError);
+                  reject(new Error(`Seek error: ${error.message}`));
+                };
+
+                video!.addEventListener("seeked", onSeeked);
+                video!.addEventListener("error", onError);
+
+                seekTimeout = setTimeout(() => {
+                  video!.removeEventListener("seeked", onSeeked);
+                  video!.removeEventListener("error", onError);
+                  reject(new Error("Seek timeout"));
+                }, SEEK_TIMEOUT);
+
+                video!.currentTime = timeInSeconds;
+              });
+
+              await seekPromise;
+
+              // Extract frame with timeout and better error handling
+              await new Promise<void>((resolve, reject) => {
+                const extractFrame = () => {
+                  try {
+                    // Ensure video is still valid
+                    if (!video!.videoWidth || !video!.videoHeight) {
+                      throw new Error(
+                        "Invalid video dimensions during extraction"
+                      );
+                    }
+
+                    context.drawImage(
+                      video!,
+                      0,
+                      0,
+                      canvas.width,
+                      canvas.height
+                    );
+                    const dataUrl = canvas.toDataURL("image/jpeg", 0.6);
+
+                    if (!dataUrl.startsWith("data:image")) {
+                      throw new Error("Invalid frame data URL");
+                    }
+
+                    extractedFrames.push({
+                      frameNumber,
+                      dataUrl,
+                    });
+                    setFrames([...extractedFrames]);
+                    resolve();
+                  } catch (error) {
+                    reject(error);
+                  }
+                };
+
+                // Add a small delay before extraction to ensure frame is ready
+                setTimeout(extractFrame, 50);
+
+                // Set timeout for the entire extraction process
+                setTimeout(() => {
+                  reject(new Error("Frame extraction timeout"));
+                }, FRAME_TIMEOUT);
+              });
+
+              frameExtracted = true;
+            } catch (error) {
+              console.warn(
+                `Frame extraction failed for frame ${frameNumber} (attempt ${
+                  retryCount + 1
+                }/${MAX_RETRIES}):`,
+                error
+              );
+              retryCount++;
+
+              if (retryCount === MAX_RETRIES) {
+                extractionErrors++;
+                if (
+                  extractionErrors >= MAX_ERRORS &&
+                  extractedFrames.length > 0
+                ) {
+                  console.warn(
+                    `Too many extraction errors (${extractionErrors}), using partial results`
+                  );
+                  break extractionLoop;
                 }
-              };
-
-              setTimeout(extractFrame, 50);
-              setTimeout(() => {
-                reject(new Error("Frame extraction timeout"));
-              }, FRAME_TIMEOUT);
-            });
-
-            frameExtracted = true;
-          } catch (error) {
-            console.warn(
-              `Frame extraction failed for frame ${frameNumber} (attempt ${
-                retryCount + 1
-              }/${MAX_RETRIES}):`,
-              error
-            );
-            retryCount++;
-
-            if (retryCount === MAX_RETRIES) {
-              extractionErrors++;
-              if (
-                extractionErrors >= MAX_ERRORS &&
-                extractedFrames.length > 0
-              ) {
-                console.warn(
-                  `Too many extraction errors (${extractionErrors}), using partial results`
-                );
-                break extractionLoop;
               }
-            }
 
-            await new Promise((resolve) =>
-              setTimeout(resolve, Math.min(100 * Math.pow(2, retryCount), 1000))
+              // Exponential backoff for retries
+              await new Promise((resolve) =>
+                setTimeout(
+                  resolve,
+                  Math.min(100 * Math.pow(2, retryCount), 1000)
+                )
+              );
+            }
+          }
+
+          if (!frameExtracted) {
+            console.error(
+              `Failed to extract frame ${frameNumber} after ${MAX_RETRIES} attempts`
             );
           }
         }
 
-        if (!frameExtracted) {
-          console.error(
-            `Failed to extract frame ${frameNumber} after ${MAX_RETRIES} attempts`
-          );
+        // Add a small delay between batches to prevent overload
+        if (i + EXTRACTION_BATCH_SIZE < frameNumbers.length) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
       }
 
