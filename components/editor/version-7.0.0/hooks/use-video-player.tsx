@@ -14,8 +14,6 @@ export const useVideoPlayer = () => {
 
   // Frame update effect
   useEffect(() => {
-    if (!isPlaying) return; // Only run animation frame loop when playing
-
     let animationFrameId: number;
     let lastUpdateTime = 0;
     const frameInterval = 1000 / FPS;
