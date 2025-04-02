@@ -1,5 +1,5 @@
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useCurrentFrame, interpolate } from "remotion";
 import { StickerTemplate, StickerTemplateProps } from "../base-template";
 
 interface EmojiStickerProps extends StickerTemplateProps {
@@ -12,13 +12,15 @@ const EmojiStickerComponent: React.FC<EmojiStickerProps> = ({
   onUpdate,
   emoji = "😊",
 }) => {
+  const frame = useCurrentFrame();
   const scale = overlay.styles.scale || 1;
 
   // Calculate size based on scale
   const baseSize = Math.min(overlay.width, overlay.height);
   const fontSize = baseSize * scale;
 
-  const handleResize = React.useCallback(() => {
+  // Handle size updates
+  React.useEffect(() => {
     if (onUpdate) {
       onUpdate({
         width: fontSize,
@@ -27,34 +29,33 @@ const EmojiStickerComponent: React.FC<EmojiStickerProps> = ({
     }
   }, [fontSize, onUpdate]);
 
-  // Update size when scale changes
-  React.useEffect(() => {
-    handleResize();
-  }, [scale, handleResize]);
+  // Remotion animation interpolation
+  const opacity = interpolate(frame, [0, 15], [0, 1], {
+    extrapolateRight: "clamp",
+  });
+  const animatedScale = interpolate(frame, [0, 15], [0, 1], {
+    extrapolateRight: "clamp",
+  });
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0 }}
-        transition={{ duration: 0.3 }}
-        style={{
-          fontSize: `${fontSize}px`,
-          cursor: "pointer",
-          userSelect: "none",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          height: "100%",
-          border: isSelected ? "2px solid #0088ff" : "none",
-          borderRadius: "8px",
-        }}
-      >
-        {emoji}
-      </motion.div>
-    </AnimatePresence>
+    <div
+      style={{
+        fontSize: `${fontSize}px`,
+        cursor: "pointer",
+        userSelect: "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        height: "100%",
+        border: isSelected ? "2px solid #0088ff" : "none",
+        borderRadius: "8px",
+        opacity,
+        transform: `scale(${animatedScale})`,
+      }}
+    >
+      {emoji}
+    </div>
   );
 };
 

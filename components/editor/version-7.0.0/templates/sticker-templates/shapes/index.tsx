@@ -274,6 +274,46 @@ const zigzagDiamond: StickerTemplate = {
   },
 };
 
+const flashingPentagon: StickerTemplate = {
+  config: {
+    id: "flashing-pentagon",
+    name: "Flashing Pentagon",
+    category: "Shapes",
+    isPro: false,
+    defaultProps: {
+      size: 56,
+      color: "#E91E63",
+    },
+  },
+  Component: ({ overlay }) => {
+    const frame = useCurrentFrame();
+    const opacity = interpolate(frame % 30, [0, 15, 30], [1, 0.4, 1], {
+      extrapolateRight: "clamp",
+    });
+
+    const size = overlay.height || 56;
+    const color = "#E91E63";
+
+    return (
+      <CenteredWrapper>
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            width: `${size}px`,
+            height: `${size}px`,
+            backgroundColor: color,
+            opacity: opacity,
+            clipPath: "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
+            transform: "translate(-50%, -50%)",
+          }}
+        />
+      </CenteredWrapper>
+    );
+  },
+};
+
 export const shapeStickers = [
   pulsingCircle,
   spinningSquare,
@@ -283,4 +323,5 @@ export const shapeStickers = [
 
   rotatingOctagon,
   zigzagDiamond,
+  flashingPentagon,
 ];
