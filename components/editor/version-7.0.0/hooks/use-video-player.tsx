@@ -14,6 +14,8 @@ export const useVideoPlayer = () => {
 
   // Frame update effect
   useEffect(() => {
+    if (!isPlaying) return; // Only run animation frame loop when playing
+
     let animationFrameId: number;
     let lastUpdateTime = 0;
     const frameInterval = 1000 / FPS;
@@ -22,7 +24,7 @@ export const useVideoPlayer = () => {
       const now = performance.now();
       if (now - lastUpdateTime >= frameInterval) {
         if (playerRef.current) {
-          const frame = playerRef.current.getCurrentFrame();
+          const frame = Math.round(playerRef.current.getCurrentFrame());
           setCurrentFrame(frame);
         }
         lastUpdateTime = now;
@@ -40,7 +42,7 @@ export const useVideoPlayer = () => {
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [FPS, playerRef, setCurrentFrame]);
+  }, [isPlaying, FPS]);
 
   /**
    * Starts playing the video
@@ -55,16 +57,15 @@ export const useVideoPlayer = () => {
    * Toggles between play and pause states
    */
   const togglePlayPause = useCallback(() => {
-    setIsPlaying((prev) => {
-      const newIsPlaying = !prev;
-      if (newIsPlaying) {
-        playerRef.current?.play();
+    if (playerRef.current) {
+      if (!isPlaying) {
+        playerRef.current.play();
       } else {
-        playerRef.current?.pause();
+        playerRef.current.pause();
       }
-      return newIsPlaying;
-    });
-  }, [playerRef]);
+      setIsPlaying(!isPlaying);
+    }
+  }, [playerRef, isPlaying]);
 
   /**
    * Converts frame count to formatted time string
@@ -91,11 +92,11 @@ export const useVideoPlayer = () => {
   const seekTo = useCallback(
     (frame: number) => {
       if (playerRef.current) {
-        playerRef.current.seekTo(frame / FPS);
         setCurrentFrame(frame);
+        playerRef.current.seekTo(frame);
       }
     },
-    [FPS, playerRef, setCurrentFrame]
+    [playerRef]
   );
 
   return {
