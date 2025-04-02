@@ -2,6 +2,22 @@ import React from "react";
 import { StickerTemplate } from "../base-template";
 import { interpolate, useCurrentFrame } from "remotion";
 
+const CenteredWrapper: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => (
+  <div
+    style={{
+      width: "100%",
+      height: "100%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+  >
+    {children}
+  </div>
+);
+
 const pulsingCircle: StickerTemplate = {
   config: {
     id: "pulsing-circle",
@@ -21,15 +37,17 @@ const pulsingCircle: StickerTemplate = {
     });
 
     return (
-      <div
-        style={{
-          width: `${overlay.height || 64}px`,
-          height: `${overlay.height || 64}px`,
-          backgroundColor: "#FF4081",
-          borderRadius: "50%",
-          transform: `scale(${scale})`,
-        }}
-      />
+      <CenteredWrapper>
+        <div
+          style={{
+            width: `${overlay.height || 64}px`,
+            height: `${overlay.height || 64}px`,
+            backgroundColor: "#FF4081",
+            borderRadius: "50%",
+            transform: `scale(${scale})`,
+          }}
+        />
+      </CenteredWrapper>
     );
   },
 };
@@ -52,22 +70,20 @@ const spinningSquare: StickerTemplate = {
       extrapolateRight: "clamp",
     });
 
-    const size = overlay.height || 48;
-    const borderWidth = 10;
-    const color = "#2196F3";
-
     return (
-      <div
-        style={{
-          width: `${size}px`,
-          height: `${size}px`,
-          borderWidth: `${borderWidth}px`,
-          borderStyle: "solid",
-          borderColor: color,
-          borderRadius: "4px",
-          transform: `rotate(${rotation}deg)`,
-        }}
-      />
+      <CenteredWrapper>
+        <div
+          style={{
+            width: `${overlay.height || 48}px`,
+            height: `${overlay.height || 48}px`,
+            borderWidth: "10px",
+            borderStyle: "solid",
+            borderColor: "#2196F3",
+            borderRadius: "4px",
+            transform: `rotate(${rotation}deg)`,
+          }}
+        />
+      </CenteredWrapper>
     );
   },
 };
@@ -90,20 +106,19 @@ const bouncingTriangle: StickerTemplate = {
       extrapolateRight: "clamp",
     });
 
-    const size = overlay.height || 56;
-    const color = "#4CAF50";
-
     return (
-      <div
-        style={{
-          width: 0,
-          height: 0,
-          borderLeft: `${size / 2}px solid transparent`,
-          borderRight: `${size / 2}px solid transparent`,
-          borderBottom: `${size}px solid ${color}`,
-          transform: `translateY(${translateY}px)`,
-        }}
-      />
+      <CenteredWrapper>
+        <div
+          style={{
+            width: 0,
+            height: 0,
+            borderLeft: `${(overlay.height || 56) / 2}px solid transparent`,
+            borderRight: `${(overlay.height || 56) / 2}px solid transparent`,
+            borderBottom: `${overlay.height || 56}px solid #4CAF50`,
+            transform: `translateY(${translateY}px)`,
+          }}
+        />
+      </CenteredWrapper>
     );
   },
 };
@@ -129,16 +144,21 @@ const expandingHexagon: StickerTemplate = {
     const color = "#9C27B0";
 
     return (
-      <div
-        style={{
-          width: `${size}px`,
-          height: `${size * 0.866}px`,
-          backgroundColor: color,
-          clipPath:
-            "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)",
-          transform: `scale(${scale})`,
-        }}
-      />
+      <CenteredWrapper>
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            width: `${size}px`,
+            height: `${size * 0.866}px`,
+            backgroundColor: color,
+            clipPath:
+              "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)",
+            transform: `translate(-50%, -50%) scale(${scale})`,
+          }}
+        />
+      </CenteredWrapper>
     );
   },
 };
@@ -159,15 +179,21 @@ const morphingStar: StickerTemplate = {
     const color = "#FFC107";
 
     return (
-      <div
-        style={{
-          width: `${size}px`,
-          height: `${size}px`,
-          backgroundColor: color,
-          clipPath:
-            "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
-        }}
-      />
+      <CenteredWrapper>
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            width: `${size}px`,
+            height: `${size}px`,
+            backgroundColor: color,
+            clipPath:
+              "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
+            transform: "translate(-50%, -50%)",
+          }}
+        />
+      </CenteredWrapper>
     );
   },
 };
@@ -193,16 +219,21 @@ const rotatingOctagon: StickerTemplate = {
     const color = "#009688";
 
     return (
-      <div
-        style={{
-          width: `${size}px`,
-          height: `${size}px`,
-          backgroundColor: color,
-          clipPath:
-            "polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)",
-          transform: `rotate(${rotation}deg)`,
-        }}
-      />
+      <CenteredWrapper>
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            width: `${size}px`,
+            height: `${size}px`,
+            backgroundColor: color,
+            clipPath:
+              "polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)",
+            transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+          }}
+        />
+      </CenteredWrapper>
     );
   },
 };
@@ -228,15 +259,17 @@ const zigzagDiamond: StickerTemplate = {
     const color = "#673AB7";
 
     return (
-      <div
-        style={{
-          width: `${size}px`,
-          height: `${size}px`,
-          backgroundColor: color,
-          clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
-          transform: `skew(${skew}deg)`,
-        }}
-      />
+      <CenteredWrapper>
+        <div
+          style={{
+            width: `${size}px`,
+            height: `${size}px`,
+            backgroundColor: color,
+            clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
+            transform: `skew(${skew}deg)`,
+          }}
+        />
+      </CenteredWrapper>
     );
   },
 };

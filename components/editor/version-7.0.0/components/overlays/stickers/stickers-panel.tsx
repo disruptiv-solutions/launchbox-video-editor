@@ -48,43 +48,45 @@ const StickerPreview = memo(
       <button
         onClick={onClick}
         className={`
-        flex flex-col items-center justify-center p-4 rounded-lg
-        border border-gray-200 dark:border-gray-800
-        hover:bg-gray-100 dark:hover:bg-gray-800
-        transition-colors
-        ${template.config.isPro ? "relative" : ""}
-      `}
+          group relative flex flex-col items-center justify-center p-3
+          rounded-xl border border-gray-200/50 dark:border-gray-800/50
+          hover:border-blue-500/20 dark:hover:border-blue-500/20
+          hover:bg-blue-50/50 dark:hover:bg-blue-900/10
+          transition-all duration-200
+          ${template.config.isPro ? "relative" : ""}
+        `}
       >
-        <div className="w-20 h-20 flex items-center justify-center">
-          <Player
-            ref={playerRef}
-            component={() => (
-              <Sequence from={0} durationInFrames={50}>
-                <MemoizedComponent {...previewProps} />
-              </Sequence>
-            )}
-            durationInFrames={50}
-            compositionWidth={80}
-            compositionHeight={80}
-            fps={30}
-            loop
-            autoPlay={true}
-            controls={false}
-            style={{
-              width: "100%",
-              height: "100%",
-            }}
-          />
+        <div className="relative w-28 h-28 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800/50">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Player
+              ref={playerRef}
+              component={() => (
+                <Sequence from={0} durationInFrames={50}>
+                  <MemoizedComponent {...previewProps} />
+                </Sequence>
+              )}
+              durationInFrames={50}
+              compositionWidth={120}
+              compositionHeight={120}
+              fps={30}
+              loop
+              autoPlay={true}
+              controls={false}
+              style={{
+                width: "100%",
+                height: "100%",
+              }}
+            />
+          </div>
         </div>
-        <span className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+        {/* <span className="mt-2 text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
           {template.config.name}
-        </span>
+        </span> */}
       </button>
     );
   },
-  (prevProps, nextProps) => {
-    return prevProps.template.config.id === nextProps.template.config.id;
-  }
+  (prevProps, nextProps) =>
+    prevProps.template.config.id === nextProps.template.config.id
 );
 
 StickerPreview.displayName = "StickerPreview";
@@ -142,27 +144,29 @@ export function StickersPanel() {
   );
 
   return (
-    <div className="flex flex-col gap-4 pl-4 pr-4 pt-2 bg-white dark:bg-gray-900/50 h-full">
+    <div className="flex flex-col gap-4 p-4 bg-white dark:bg-gray-900/50 h-full">
       <Tabs defaultValue={stickerCategories[0]} className="w-full">
-        <TabsList className="w-full grid grid-cols-3 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-sm border border-gray-200 dark:border-gray-700 gap-1">
+        <TabsList className="w-full flex space-x-1 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg p-1">
           {stickerCategories.map((category) => (
             <TabsTrigger
               key={category}
               value={category}
-              className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white 
-              rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+              className="flex-1 px-3 py-1.5 text-sm font-medium
+                data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800
+                data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400
+                data-[state=active]:shadow-sm
+                rounded-md transition-all duration-200
+                text-gray-600 dark:text-gray-400"
             >
-              <span className="flex items-center gap-2 text-xs">
-                {category}
-              </span>
+              {category}
             </TabsTrigger>
           ))}
         </TabsList>
 
         {stickerCategories.map((category) => (
-          <TabsContent key={category} value={category} className="mt-0">
-            <ScrollArea className="h-[calc(100vh-100px)]">
-              <div className="grid grid-cols-2 gap-2 mt-2">
+          <TabsContent key={category} value={category} className="mt-4">
+            <ScrollArea className="h-[calc(100vh-140px)]">
+              <div className="grid grid-cols-2 gap-3">
                 {templatesByCategory[category]?.map((template) => (
                   <StickerPreview
                     key={template.config.id}
