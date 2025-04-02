@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from "react";
+import React, { memo, useCallback, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEditorContext } from "../../../contexts/editor-context";
@@ -15,7 +15,11 @@ import { Sequence } from "remotion";
 // Wrapper component for sticker preview with static frame
 const StickerPreview = memo(
   ({ template, onClick }: { template: any; onClick: () => void }) => {
+    const playerRef = useRef<any>(null);
     const { Component } = template;
+
+    const stickerDuration =
+      template.config.defaultProps?.durationInFrames || 50;
 
     const previewProps = {
       overlay: {
@@ -23,7 +27,7 @@ const StickerPreview = memo(
         type: OverlayType.STICKER,
         content: template.config.id,
         category: template.config.category as StickerCategory,
-        durationInFrames: 200,
+        durationInFrames: stickerDuration,
         from: 0,
         height: 80,
         width: 80,
@@ -44,14 +48,30 @@ const StickerPreview = memo(
     const MemoizedComponent = memo(Component);
 
     const PreviewComponent = () => (
-      <Sequence from={0} durationInFrames={16}>
+      <Sequence from={0} durationInFrames={stickerDuration}>
         <MemoizedComponent {...previewProps} />
       </Sequence>
     );
 
+    const handleMouseEnter = useCallback(() => {
+      if (playerRef.current) {
+        playerRef.current.seekTo(0);
+        playerRef.current.play();
+      }
+    }, []);
+
+    const handleMouseLeave = useCallback(() => {
+      if (playerRef.current) {
+        playerRef.current.pause();
+        playerRef.current.seekTo(15);
+      }
+    }, []);
+
     return (
       <button
         onClick={onClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         className={`
           group relative flex flex-col items-center justify-center p-3
           rounded-xl border border-gray-200/50 dark:border-gray-800/50
@@ -64,13 +84,15 @@ const StickerPreview = memo(
         <div className="relative w-28 h-28 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800/50">
           <div className="absolute inset-0 flex items-center justify-center">
             <Player
+              ref={playerRef}
               component={PreviewComponent}
-              durationInFrames={16}
+              durationInFrames={stickerDuration}
               compositionWidth={120}
               compositionHeight={120}
               fps={30}
               initialFrame={15}
               autoPlay={false}
+              loop
               controls={false}
               style={{
                 width: "100%",
