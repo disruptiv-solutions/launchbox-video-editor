@@ -1,21 +1,28 @@
 import { StickerTemplate } from "./base-template";
 import { discountSticker } from "./discount-sticker";
-import { flashSaleSticker } from "./flash-sale";
+
 import { emojiStickers } from "./emoji-sticker";
 import { shapeStickers } from "./shapes";
 import { circularProgress } from "./circular-progress";
 import { cardFlip } from "./card-flip";
 import { audioVisualiser } from "./audio-visualiser";
+import { matrixRain } from "./matrix-effect";
+import { boomEffect } from "./boom-effect";
+import { barChart } from "./bar-chart";
+import { arrow } from "./arrow";
 
 // Import other sticker templates here
 
 // This array will grow as you add more sticker templates
 const templates: StickerTemplate[] = [
   discountSticker,
-  flashSaleSticker,
   circularProgress,
-  cardFlip,
   audioVisualiser,
+  cardFlip,
+  matrixRain,
+  boomEffect,
+  barChart,
+  arrow,
   ...emojiStickers,
   ...shapeStickers,
   // Add other sticker templates here

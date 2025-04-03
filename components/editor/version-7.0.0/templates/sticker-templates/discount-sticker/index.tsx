@@ -12,9 +12,9 @@ interface DiscountStickerProps extends StickerTemplateProps {
 const DiscountStickerComponent: React.FC<DiscountStickerProps> = ({
   overlay,
   percentage = 50,
-  backgroundColor = "#FF4B4B",
+  backgroundColor = "#3B82F6",
   textColor = "#FFFFFF",
-  ribbonColor = "#FF2E2E",
+  ribbonColor = "#1E40AF",
 }) => {
   const frame = useCurrentFrame();
 
@@ -53,11 +53,11 @@ const DiscountStickerComponent: React.FC<DiscountStickerProps> = ({
         transform: `scale(${entrance}) rotate(${entranceRotation}deg)`,
       }}
     >
-      {/* Main circle */}
+      {/* Main circle - enforce square aspect ratio */}
       <div
         style={{
-          width: "90%",
-          height: "90%",
+          width: Math.min(overlay.width, overlay.height) * 0.9,
+          height: Math.min(overlay.width, overlay.height) * 0.9,
           borderRadius: "50%",
           backgroundColor,
           display: "flex",
@@ -101,10 +101,14 @@ const DiscountStickerComponent: React.FC<DiscountStickerProps> = ({
         <div
           style={{
             position: "absolute",
+            top: 0,
+            left: 0,
             width: "100%",
             height: "100%",
             borderRadius: "50%",
-            border: `4px dashed ${textColor}`,
+            border: `${
+              Math.min(overlay.width, overlay.height) * 0.04
+            }px dashed ${textColor}`,
             opacity: 0.3,
             transform: `rotate(${rotation}deg)`,
           }}
@@ -121,9 +125,9 @@ export const discountSticker: StickerTemplate = {
     category: "Default",
     defaultProps: {
       percentage: 50,
-      backgroundColor: "#FF4B4B",
+      backgroundColor: "#3B82F6",
       textColor: "#FFFFFF",
-      ribbonColor: "#FF2E2E",
+      ribbonColor: "#1E40AF",
     },
     isPro: true,
   },

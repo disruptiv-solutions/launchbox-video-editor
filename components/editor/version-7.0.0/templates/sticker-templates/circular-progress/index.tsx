@@ -52,8 +52,8 @@ const CircularProgressComponent: React.FC<CircularProgressProps> = ({
       <div
         style={{
           position: "relative",
-          width: "300px",
-          height: "300px",
+          width: Math.min(overlay.width, overlay.height) * 0.9,
+          height: Math.min(overlay.width, overlay.height) * 0.9,
           transform: `scale(${pulse})`,
         }}
       >

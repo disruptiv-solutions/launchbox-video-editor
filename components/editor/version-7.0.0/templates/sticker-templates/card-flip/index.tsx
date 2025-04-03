@@ -54,7 +54,7 @@ const CardFlipComponent: React.FC<CardFlipProps> = ({
             height: "100%",
             backfaceVisibility: "hidden",
             background: frontColor,
-            borderRadius: "20px",
+            borderRadius: "6px",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -98,7 +98,7 @@ export const cardFlip: StickerTemplate = {
     defaultProps: {
       frontColor: "linear-gradient(45deg, #1e3a8a, #3b82f6)",
       backColor: "linear-gradient(45deg, #1e3a8a, #3b82f6)",
-      frontText: "Flip me!",
+      frontText: "React Video Editor!",
       backText: "Flip me!",
     },
     isPro: true,

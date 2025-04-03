@@ -19,7 +19,7 @@ const StickerPreview = memo(
     const { Component } = template;
 
     const stickerDuration =
-      template.config.defaultProps?.durationInFrames || 50;
+      template.config.defaultProps?.durationInFrames || 100;
 
     const previewProps = {
       overlay: {
@@ -29,8 +29,8 @@ const StickerPreview = memo(
         category: template.config.category as StickerCategory,
         durationInFrames: stickerDuration,
         from: 0,
-        height: 80,
-        width: 80,
+        height: 100,
+        width: 200,
         left: 0,
         top: 0,
         row: 0,
@@ -74,7 +74,7 @@ const StickerPreview = memo(
         onMouseLeave={handleMouseLeave}
         className={`
           group relative w-full h-full
-          rounded-lg bg-gray-900/40 dark:bg-gray-800/40
+          rounded-lg bg-gray-100/40 dark:bg-gray-800/40
           border border-gray-800/10 dark:border-gray-700/10
           hover:border-blue-500/20 dark:hover:border-blue-500/20
           hover:bg-blue-500/5 dark:hover:bg-blue-500/5

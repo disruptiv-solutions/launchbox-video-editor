@@ -24,7 +24,7 @@ const AudioVisualiserComponent: React.FC<AudioVisualiserProps> = ({
   const bars = Array.from({ length: barCount }).map((_, i) => {
     const seed = i * 1000;
     const height =
-      Math.abs(Math.sin(frame / 10 + i / 2)) * 100 + random(seed) * 50;
+      Math.abs(Math.sin(frame / 10 + i / 2)) * 60 + random(seed) * 30;
 
     return {
       height,
@@ -41,6 +41,7 @@ const AudioVisualiserComponent: React.FC<AudioVisualiserProps> = ({
         alignItems: "center",
         justifyContent: "center",
         gap: `${barGap}px`,
+        padding: "32px",
       }}
     >
       {bars.map((bar, i) => (

@@ -146,6 +146,7 @@ export default function ReactVideoEditor({ projectId }: { projectId: string }) {
     setInitialLoadComplete(true);
   }, []);
 
+  console.log("DEBUG: overlays", overlays);
   // Handle recovery dialog actions
   const handleRecoverAutosave = async () => {
     const loadedState = await loadState();
