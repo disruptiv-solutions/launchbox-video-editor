@@ -14,6 +14,7 @@ export interface StickerTemplateConfig {
   thumbnail?: string;
   defaultProps?: Record<string, any>;
   isPro?: boolean;
+  layout?: "single" | "double";
 }
 
 export interface StickerTemplate {

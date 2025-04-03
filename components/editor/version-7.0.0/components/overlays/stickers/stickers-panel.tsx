@@ -73,37 +73,33 @@ const StickerPreview = memo(
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={`
-          group relative flex flex-col items-center justify-center p-3
-          rounded-xl border border-gray-200/50 dark:border-gray-800/50
+          group relative w-full h-full
+          rounded-lg bg-gray-900/40 dark:bg-gray-800/40
+          border border-gray-800/10 dark:border-gray-700/10
           hover:border-blue-500/20 dark:hover:border-blue-500/20
-          hover:bg-blue-50/50 dark:hover:bg-blue-900/10
-          transition-all duration-200
+          hover:bg-blue-500/5 dark:hover:bg-blue-500/5
+          transition-all duration-200 overflow-hidden
           ${template.config.isPro ? "relative" : ""}
         `}
       >
-        <div className="relative w-28 h-28 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800/50">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Player
-              ref={playerRef}
-              component={PreviewComponent}
-              durationInFrames={stickerDuration}
-              compositionWidth={120}
-              compositionHeight={120}
-              fps={30}
-              initialFrame={15}
-              autoPlay={false}
-              loop
-              controls={false}
-              style={{
-                width: "100%",
-                height: "100%",
-              }}
-            />
-          </div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Player
+            ref={playerRef}
+            component={PreviewComponent}
+            durationInFrames={stickerDuration}
+            compositionWidth={template.config.layout === "double" ? 280 : 140}
+            compositionHeight={140}
+            fps={30}
+            initialFrame={15}
+            autoPlay={false}
+            loop
+            controls={false}
+            style={{
+              width: template.config.layout === "double" ? "100%" : "140px",
+              height: "140px",
+            }}
+          />
         </div>
-        {/* <span className="mt-2 text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-          {template.config.name}
-        </span> */}
       </button>
     );
   },
@@ -186,15 +182,22 @@ export function StickersPanel() {
         </TabsList>
 
         {stickerCategories.map((category) => (
-          <TabsContent key={category} value={category} className="mt-4">
+          <TabsContent key={category} value={category} className="mt-2">
             <ScrollArea className="h-[calc(100vh-140px)]">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 p-3">
                 {templatesByCategory[category]?.map((template) => (
-                  <StickerPreview
+                  <div
                     key={template.config.id}
-                    template={template}
-                    onClick={() => handleStickerClick(template.config.id)}
-                  />
+                    className={`
+                      h-[140px]
+                      ${template.config.layout === "double" ? "col-span-2" : ""}
+                    `}
+                  >
+                    <StickerPreview
+                      template={template}
+                      onClick={() => handleStickerClick(template.config.id)}
+                    />
+                  </div>
                 ))}
               </div>
             </ScrollArea>

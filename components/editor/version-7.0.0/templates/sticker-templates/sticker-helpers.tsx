@@ -3,6 +3,9 @@ import { discountSticker } from "./discount-sticker";
 import { flashSaleSticker } from "./flash-sale";
 import { emojiStickers } from "./emoji-sticker";
 import { shapeStickers } from "./shapes";
+import { circularProgress } from "./circular-progress";
+import { cardFlip } from "./card-flip";
+import { audioVisualiser } from "./audio-visualiser";
 
 // Import other sticker templates here
 
@@ -10,6 +13,9 @@ import { shapeStickers } from "./shapes";
 const templates: StickerTemplate[] = [
   discountSticker,
   flashSaleSticker,
+  circularProgress,
+  cardFlip,
+  audioVisualiser,
   ...emojiStickers,
   ...shapeStickers,
   // Add other sticker templates here
