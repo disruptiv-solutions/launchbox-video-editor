@@ -8,6 +8,7 @@ import { TimelineItemHandle } from "./timeline-item-handle";
 import { TimelineItemContextMenu } from "./timeline-item-context-menu";
 import { TimelineItemLabel } from "./timeline-item-label";
 import TimelineCaptionBlocks from "./timeline-caption-blocks";
+import { useKeyframeContext } from "../../contexts/keyframe-context";
 
 /**
  * TimelineItem Component
@@ -105,6 +106,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   const isSelected = selectedItem?.id === item.id;
   const itemRef = useRef<HTMLDivElement>(null);
   const { setActivePanel, setIsOpen } = useSidebar();
+  const keyframeContext = useKeyframeContext();
 
   /**
    * Handles mouse and touch interactions with the timeline item
@@ -260,7 +262,17 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   return (
     <TimelineItemContextMenu
       onOpenChange={onContextMenuChange}
-      onDeleteItem={onDeleteItem}
+      onDeleteItem={(itemId) => {
+        // Clear keyframe cache before deletion to prevent memory leaks
+        // and ensure proper cleanup of video overlay keyframe data
+        // NOTE: This breaks the current pattern slightly, but it's the only
+        // way to clear the keyframe cache before deleting the item without
+        // messing around with the useKeyframes context and providers
+        if (item.type === OverlayType.VIDEO) {
+          keyframeContext.clearKeyframes(itemId);
+        }
+        onDeleteItem(itemId);
+      }}
       onDuplicateItem={onDuplicateItem}
       onSplitItem={onSplitItem}
       itemId={item.id}

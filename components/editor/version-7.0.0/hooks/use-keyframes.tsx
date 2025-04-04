@@ -2,7 +2,6 @@ import React from "react";
 import { ImageOverlay, OverlayType, ClipOverlay } from "../types";
 import { DISABLE_VIDEO_KEYFRAMES, FPS } from "../constants";
 import { useKeyframeContext } from "../contexts/keyframe-context";
-import { parseMedia } from "@remotion/media-parser";
 import { toAbsoluteUrl } from "../utils/url-helper";
 
 interface UseKeyframesProps {
@@ -337,7 +336,9 @@ export const useKeyframes = ({
 
               // Seek with timeout and better error handling
               const seekPromise = new Promise<void>((resolve, reject) => {
-                let seekTimeout: NodeJS.Timeout;
+                let seekTimeout = setTimeout(() => {
+                  reject(new Error("Seek timeout"));
+                }, SEEK_TIMEOUT);
 
                 const onSeeked = () => {
                   clearTimeout(seekTimeout);
