@@ -13,6 +13,11 @@ export const useTimelinePositioning = () => {
     visibleRows: number,
     totalDuration: number
   ): { from: number; row: number } => {
+    // If no overlays exist, start at the beginning
+    if (existingOverlays.length === 0) {
+      return { from: 0, row: 0 };
+    }
+
     const sortedOverlays = [...existingOverlays].sort(
       (a, b) => a.from - b.from
     );

@@ -33,7 +33,7 @@ interface WaveformData {
   length: number;
 }
 
-interface TimelineItemProps {
+export interface TimelineItemProps {
   /** The overlay item data to be rendered */
   item: Overlay;
   /** Whether any item is currently being dragged */

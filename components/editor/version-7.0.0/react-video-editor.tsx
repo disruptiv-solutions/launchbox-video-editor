@@ -21,7 +21,12 @@ import { useHistory } from "./hooks/use-history";
 // Types
 import { Overlay } from "./types";
 import { useRendering } from "./hooks/use-rendering";
-import { AUTO_SAVE_INTERVAL, FPS, RENDER_TYPE } from "./constants";
+import {
+  AUTO_SAVE_INTERVAL,
+  DEFAULT_OVERLAYS,
+  FPS,
+  RENDER_TYPE,
+} from "./constants";
 import { TimelineProvider } from "./contexts/timeline-context";
 
 // Autosave Components
@@ -58,7 +63,7 @@ export default function ReactVideoEditor({ projectId }: { projectId: string }) {
     deleteOverlaysByRow,
     updateOverlayStyles,
     resetOverlays,
-  } = useOverlays();
+  } = useOverlays(DEFAULT_OVERLAYS);
 
   // Video player controls and state
   const { isPlaying, currentFrame, playerRef, togglePlayPause, formatTime } =
