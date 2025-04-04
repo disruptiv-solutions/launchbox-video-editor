@@ -29,6 +29,7 @@ interface KeyframeContextValue {
   getKeyframes: (overlayId: number) => KeyframeData | null;
   updateKeyframes: (overlayId: number, data: KeyframeData) => void;
   clearKeyframes: (overlayId: number) => void;
+  clearAllKeyframes: () => void;
 }
 
 /**
@@ -92,9 +93,18 @@ export const KeyframeProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   }, []);
 
+  const clearAllKeyframes = useCallback(() => {
+    setCache({});
+  }, []);
+
   return (
     <KeyframeContext.Provider
-      value={{ getKeyframes, updateKeyframes, clearKeyframes }}
+      value={{
+        getKeyframes,
+        updateKeyframes,
+        clearKeyframes,
+        clearAllKeyframes,
+      }}
     >
       {children}
     </KeyframeContext.Provider>

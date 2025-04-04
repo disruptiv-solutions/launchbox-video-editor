@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useTimelineShortcuts } from "../../hooks/use-timeline-shortcuts";
 import { useAssetLoading } from "../../contexts/asset-loading-context";
+import { useKeyframeContext } from "../../contexts/keyframe-context";
 
 // Types
 type AspectRatioOption = "16:9" | "9:16" | "1:1" | "4:5";
@@ -118,6 +119,8 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
 
   const { isLoadingAssets } = useAssetLoading();
 
+  const { clearAllKeyframes } = useKeyframeContext();
+
   // Keep track of previous frame to detect resets
   const prevFrameRef = React.useRef(currentFrame);
   const isPlayingRef = React.useRef(isPlaying);
@@ -166,7 +169,8 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
 
   const handleReset = () => {
     resetOverlays();
-    setDropdownOpen(false); // Close dropdown properly
+    clearAllKeyframes();
+    setDropdownOpen(false);
   };
 
   return (
