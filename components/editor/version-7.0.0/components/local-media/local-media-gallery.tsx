@@ -85,43 +85,56 @@ export function LocalMediaGallery({
   const renderPreviewContent = () => {
     if (!selectedFile) return null;
 
+    const commonClasses =
+      "max-h-[50vh] w-full object-contain rounded-lg shadow-sm";
+
     switch (selectedFile.type) {
       case "image":
         return (
-          <img
-            src={selectedFile.path}
-            alt={selectedFile.name}
-            className="max-h-[60vh] object-contain"
-          />
+          <div className="relative bg-gray-50 dark:bg-gray-900 rounded-lg p-2">
+            <img
+              src={selectedFile.path}
+              alt={selectedFile.name}
+              className={`${commonClasses} object-contain`}
+            />
+          </div>
         );
       case "video":
         return (
-          <video
-            src={selectedFile.path}
-            controls
-            autoPlay
-            className="max-h-[60vh]"
-          />
+          <div className="relative bg-gray-50 dark:bg-gray-900 rounded-lg p-2">
+            <video
+              src={selectedFile.path}
+              controls
+              className={commonClasses}
+              controlsList="nodownload"
+              playsInline
+            />
+          </div>
         );
       case "audio":
         return (
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-4">
-              <Music className="w-8 h-8 text-gray-500" />
+          <div className="flex flex-col items-center space-y-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+              <Music className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
             <audio
               src={
                 selectedFile.path.startsWith("http")
                   ? selectedFile.path
-                  : window.location.origin + selectedFile.path
+                  : `${window.location.origin}${selectedFile.path}`
               }
               controls
-              autoPlay
+              className="w-[280px] max-w-full"
+              controlsList="nodownload"
             />
           </div>
         );
       default:
-        return <p>Unsupported file type</p>;
+        return (
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Unsupported file type
+          </div>
+        );
     }
   };
 
@@ -309,7 +322,7 @@ export function LocalMediaGallery({
 
       {/* Media Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{selectedFile?.name}</DialogTitle>
             <DialogDescription>
