@@ -116,7 +116,7 @@ export async function startRendering(
           ...inputProps,
           baseUrl,
         },
-        // Set chromium options according to the correct API
+        // Enhanced quality settings for maximum quality output
         chromiumOptions: {
           headless: true,
           disableWebSecurity: false,
@@ -127,6 +127,12 @@ export async function startRendering(
           // Extract just the progress percentage from the detailed progress object
           updateRenderProgress(renderId, progress.progress);
         }) as RenderMediaOnProgress,
+        // Highest quality video settings
+        crf: 1, // Lowest CRF for near-lossless quality (range 1-51, where 1 is highest quality)
+        imageFormat: "png", // Use PNG for highest quality frame captures
+        colorSpace: "bt709", // Better color accuracy
+        x264Preset: "veryslow", // Highest quality compression
+        jpegQuality: 100, // Maximum JPEG quality for any JPEG operations
       });
 
       // Get file size
