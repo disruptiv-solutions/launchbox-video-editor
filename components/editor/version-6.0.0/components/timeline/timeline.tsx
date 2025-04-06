@@ -13,7 +13,7 @@ import { useTimeline } from "../../contexts/timeline-context";
 import { useTimelineDragAndDrop } from "../../hooks/use-timeline-drag-and-drop";
 import { useTimelineEventHandlers } from "../../hooks/use-timeline-event-handlers";
 import { useTimelineState } from "../../hooks/use-timeline-state";
-import { Overlay } from "../../types";
+import { Overlay, OverlayType } from "../../types";
 import GhostMarker from "./ghost-marker";
 import TimelineGrid from "./timeline-grid";
 import TimelineMarker from "./timeline-marker";
@@ -258,12 +258,27 @@ const Timeline: React.FC<TimelineProps> = ({
   } = useAssetLoading();
 
   // Effect to handle initial load completion
+  const [shouldShowInitialLoader, setShouldShowInitialLoader] = useState(false);
+
   useEffect(() => {
-    // If we have overlays and they're done loading, mark initial load as complete
+    const hasVideoOverlay = overlays.some(
+      (overlay) => overlay.type === OverlayType.VIDEO
+    );
+
+    if (!shouldShowInitialLoader && hasVideoOverlay && isInitialLoad) {
+      setShouldShowInitialLoader(true);
+    }
+
     if (overlays.length > 0 && !isLoadingAssets) {
       setInitialLoadComplete();
     }
-  }, [overlays, isLoadingAssets, setInitialLoadComplete]);
+  }, [
+    overlays,
+    isInitialLoad,
+    isLoadingAssets,
+    shouldShowInitialLoader,
+    setInitialLoadComplete,
+  ]);
 
   // Render
   return (
@@ -397,8 +412,9 @@ const Timeline: React.FC<TimelineProps> = ({
 
               {/* Loading Indicator - Only shows during initial project load */}
               {SHOW_LOADING_PROJECT_ALERT &&
-                (isLoadingAssets || overlays.length === 0) &&
-                isInitialLoad && (
+                isLoadingAssets &&
+                isInitialLoad &&
+                shouldShowInitialLoader && (
                   <div
                     className="absolute inset-0 bg-white/60 dark:bg-gray-900/60 backdrop-blur-[1px] flex items-center justify-center z-50"
                     style={{ willChange: "opacity" }}
