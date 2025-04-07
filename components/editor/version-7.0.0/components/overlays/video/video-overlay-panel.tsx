@@ -163,7 +163,7 @@ export const VideoOverlayPanel: React.FC = () => {
               videos.map((video) => (
                 <button
                   key={video.id}
-                  className="relative aspect-video cursor-pointer border border-transparent hover:border-white rounded-md"
+                  className="relative aspect-video cursor-pointer border border-transparent  rounded-md"
                   onClick={() => handleAddClip(video)}
                 >
                   <div className="relative">
