@@ -49,7 +49,7 @@ export const TemplateOverlayPanel: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 bg-gray-100/40 dark:bg-gray-900/40 h-full">
+    <div className="flex flex-col gap-4 p-4 bg-gray-100/40 dark:bg-gray-900/40 h-full scrollbar-hide overflow-hidden">
       <>
         <div className="flex gap-2">
           <form onSubmit={handleSearch} className="flex-1 flex gap-2">
@@ -78,8 +78,8 @@ export const TemplateOverlayPanel: React.FC = () => {
           </div>
         )}
 
-        <ScrollArea className="flex-1">
-          <div className="grid grid-cols-1 gap-2">
+        <ScrollArea className="flex-1 scrollbar-hide overflow-hidden [&_[data-radix-scroll-area-scrollbar]]:!hidden">
+          <div className="grid grid-cols-1 gap-2 scrollbar-hide">
             {isLoading ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <div
