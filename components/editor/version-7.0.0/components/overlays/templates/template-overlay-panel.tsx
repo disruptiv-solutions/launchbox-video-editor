@@ -6,9 +6,22 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTemplates } from "../../../hooks/use-templates";
 import { TemplateThumbnail } from "./template-thumbnail";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const TemplateOverlayPanel: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<TemplateOverlay | null>(null);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const { setOverlays } = useEditorContext();
 
   const { templates, isLoading, error } = useTemplates({
@@ -30,6 +43,12 @@ export const TemplateOverlayPanel: React.FC = () => {
 
     // Update the editor's timeline with the new overlays
     setOverlays(newOverlays);
+    setConfirmDialogOpen(false);
+  };
+
+  const handleSelectTemplate = (template: TemplateOverlay) => {
+    setSelectedTemplate(template);
+    setConfirmDialogOpen(true);
   };
 
   const handleImportTemplate = async (
@@ -41,7 +60,8 @@ export const TemplateOverlayPanel: React.FC = () => {
     try {
       const content = await file.text();
       const template = JSON.parse(content) as TemplateOverlay;
-      handleApplyTemplate(template);
+      setSelectedTemplate(template);
+      setConfirmDialogOpen(true);
     } catch (err) {
       console.error("Failed to import template:", err);
       // You might want to add proper error handling/notification here
@@ -92,7 +112,7 @@ export const TemplateOverlayPanel: React.FC = () => {
                 <Card
                   key={template.id}
                   className="cursor-pointer hover:bg-accent transition-colors duration-200"
-                  onClick={() => handleApplyTemplate(template)}
+                  onClick={() => handleSelectTemplate(template)}
                 >
                   <CardHeader className="p-3 space-y-3">
                     <div className="aspect-video w-full overflow-hidden rounded-md">
@@ -126,6 +146,31 @@ export const TemplateOverlayPanel: React.FC = () => {
             )}
           </div>
         </ScrollArea>
+
+        <AlertDialog
+          open={confirmDialogOpen}
+          onOpenChange={setConfirmDialogOpen}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Apply Template</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to add this template to your timeline? It
+                will replace all existing overlays.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() =>
+                  selectedTemplate && handleApplyTemplate(selectedTemplate)
+                }
+              >
+                Apply Template
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </>
     </div>
   );

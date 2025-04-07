@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Play,
@@ -9,6 +9,7 @@ import {
   Undo2,
   Redo2,
   Loader2,
+  Download,
 } from "lucide-react";
 import { useEditorContext } from "../../contexts/editor-context";
 import { useTimeline } from "../../contexts/timeline-context";
@@ -37,6 +38,15 @@ import {
 import { useTimelineShortcuts } from "../../hooks/use-timeline-shortcuts";
 import { useAssetLoading } from "../../contexts/asset-loading-context";
 import { useKeyframeContext } from "../../contexts/keyframe-context";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { TemplateOverlay } from "../../types";
 
 // Types
 type AspectRatioOption = "16:9" | "9:16" | "1:1" | "4:5";
@@ -99,6 +109,8 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
     resetOverlays,
     playbackRate,
     setPlaybackRate,
+    overlays,
+    durationInFrames,
   } = useEditorContext();
 
   const { visibleRows, addRow, removeRow, zoomScale, setZoomScale } =
@@ -120,6 +132,13 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
   const { isLoadingAssets } = useAssetLoading();
 
   const { clearAllKeyframes } = useKeyframeContext();
+
+  // Export template state
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [templateName, setTemplateName] = useState("My Template");
+  const [templateDescription, setTemplateDescription] = useState(
+    "A custom template created with React Video Editor"
+  );
 
   // Keep track of previous frame to detect resets
   const prevFrameRef = React.useRef(currentFrame);
@@ -171,6 +190,57 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
     resetOverlays();
     clearAllKeyframes();
     setDropdownOpen(false);
+  };
+
+  // Handle exporting the template
+  const handleExportTemplate = () => {
+    setExportDialogOpen(true);
+  };
+
+  // Download template as JSON file
+  const downloadTemplate = () => {
+    // Create template object
+    const template: TemplateOverlay = {
+      id: `template-${Date.now()}`,
+      name: templateName,
+      description: templateDescription,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      // TODO: These can be customised by you
+      createdBy: {
+        id: "user-1",
+        name: "User",
+      },
+      category: "Custom",
+      tags: ["custom", "user-created"],
+      duration: durationInFrames,
+      overlays: overlays,
+    };
+
+    // Convert to JSON string
+    const jsonString = JSON.stringify(template, null, 2);
+
+    // Create a blob from the JSON string
+    const blob = new Blob([jsonString], { type: "application/json" });
+
+    // Create a URL for the blob
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary link element
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${templateName.toLowerCase().replace(/\s+/g, "-")}.json`;
+
+    // Append to the document, click, and remove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Clean up the URL object
+    URL.revokeObjectURL(url);
+
+    // Close dialog
+    setExportDialogOpen(false);
   };
 
   return (
@@ -322,8 +392,35 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
           </span>
         </div>
       </div>
-      {/* Right section: Settings menu */}
-      <div className="flex items-center">
+      {/* Right section: Export Template & Settings menu */}
+      <div className="flex items-center gap-1">
+        {/* Export as Template Button */}
+        <TooltipProvider delayDuration={50}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={handleExportTemplate}
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-gray-700 dark:text-zinc-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-colors rounded-md"
+              >
+                <Download className="h-3.5 w-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              sideOffset={5}
+              className="bg-white dark:bg-gray-900 text-xs px-2 py-1 rounded-md z-[9999] border border-gray-200 dark:border-gray-700"
+              align="end"
+            >
+              <span className="text-gray-700 dark:text-zinc-200">
+                Export as Template
+              </span>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        {/* Settings Dropdown */}
         <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
           <DropdownMenuTrigger asChild>
             <Button
@@ -438,6 +535,64 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Export Template Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+              Export as Template
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label
+                htmlFor="template-name"
+                className="text-sm text-gray-700 dark:text-zinc-300"
+              >
+                Template Name
+              </Label>
+              <Input
+                id="template-name"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                className="border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white bg-white dark:bg-gray-800"
+                placeholder="Enter template name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor="template-description"
+                className="text-sm text-gray-700 dark:text-zinc-300"
+              >
+                Description
+              </Label>
+              <Input
+                id="template-description"
+                value={templateDescription}
+                onChange={(e) => setTemplateDescription(e.target.value)}
+                className="border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white bg-white dark:bg-gray-800"
+                placeholder="Enter template description"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setExportDialogOpen(false)}
+              className="border-gray-300 dark:border-gray-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={downloadTemplate}
+              className="bg-blue-600 hover:bg-blue-500 text-white"
+            >
+              Export
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
