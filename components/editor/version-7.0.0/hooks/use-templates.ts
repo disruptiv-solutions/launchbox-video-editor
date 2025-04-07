@@ -3,9 +3,23 @@ import { TemplateOverlay, Overlay, OverlayType } from "../types";
 import { templateFiles } from "../templates/full-templates/index";
 
 interface UseTemplatesOptions {
+  /** Optional search query to filter templates by name, description, or tags */
   searchQuery?: string;
 }
 
+/**
+ * A custom hook that manages the loading and filtering of video editor templates.
+ *
+ * This hook handles:
+ * - Loading templates from the full-templates directory
+ * - Filtering templates based on a search query
+ * - Managing loading and error states
+ * - Finding thumbnails from template overlays
+ *
+ * @param options - Configuration options for the hook
+ * @param options.searchQuery - Optional search string to filter templates
+ * @returns An object containing the filtered templates, loading state, error state, and refresh function
+ */
 export const useTemplates = ({
   searchQuery = "",
 }: UseTemplatesOptions = {}) => {
@@ -13,6 +27,13 @@ export const useTemplates = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Finds a suitable thumbnail URL from a list of overlays.
+   * Prioritizes video overlays first, then falls back to image overlays.
+   *
+   * @param overlays - Array of template overlays to search through
+   * @returns The content URL of the first suitable overlay, or undefined if none found
+   */
   const findThumbnailFromOverlays = (
     overlays: Overlay[]
   ): string | undefined => {
