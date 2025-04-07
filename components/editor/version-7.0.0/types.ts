@@ -8,6 +8,7 @@ export enum OverlayType {
   CAPTION = "caption",
   LOCAL_DIR = "local-dir",
   STICKER = "sticker",
+  TEMPLATE = "template",
 }
 // Base overlay properties
 type BaseOverlay = {
@@ -184,6 +185,25 @@ export type StickerOverlay = BaseOverlay & {
     animation?: AnimationConfig;
   };
 };
+
+export interface TemplateCreator {
+  id: string;
+  name: string;
+}
+
+export interface TemplateOverlay {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: TemplateCreator;
+  category: string;
+  tags: string[];
+  thumbnail?: string;
+  duration: number;
+  overlays: Overlay[];
+}
 
 export type Overlay =
   | TextOverlay

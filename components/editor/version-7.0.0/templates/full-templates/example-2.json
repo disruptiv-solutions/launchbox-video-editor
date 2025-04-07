@@ -1,0 +1,50 @@
+{
+  "id": "template-1",
+  "name": "Example Template 2",
+  "description": "Very boring template with no thubmnail",
+  "createdAt": "2024-04-07T00:00:00Z",
+  "updatedAt": "2024-04-07T00:00:00Z",
+  "createdBy": {
+    "id": "user-1",
+    "name": "Sam Smith"
+  },
+  "category": "Intros",
+  "tags": ["professional", "dynamic", "business"],
+  "duration": 156,
+  "overlays": [
+    {
+      "left": 163,
+      "top": 148,
+      "width": 987,
+      "height": 377,
+      "durationInFrames": 50,
+      "from": 14,
+      "id": 1,
+      "row": 2,
+      "rotation": 0,
+      "isDragging": false,
+      "type": "TEXT",
+      "content": "Stickers and templateS?",
+      "styles": {
+        "fontSize": "3rem",
+        "fontWeight": "900",
+        "color": "#FFFFFF",
+        "backgroundColor": "",
+        "fontFamily": "font-sans",
+        "fontStyle": "normal",
+        "textDecoration": "none",
+        "lineHeight": "1",
+        "textAlign": "center",
+        "letterSpacing": "0.02em",
+        "textShadow": "2px 2px 0px rgba(0, 0, 0, 0.2)",
+        "opacity": 1,
+        "zIndex": 1,
+        "transform": "none",
+        "animation": {
+          "enter": "fade",
+          "exit": "none"
+        }
+      }
+    }
+  ]
+}
