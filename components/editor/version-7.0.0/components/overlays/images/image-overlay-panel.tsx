@@ -135,6 +135,8 @@ export const ImageOverlayPanel: React.FC = () => {
               value={searchQuery}
               className="bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-blue-400"
               onChange={(e) => setSearchQuery(e.target.value)}
+              // NOTE: Stops zooming in on input focus on iPhone
+              style={{ fontSize: "16px" }}
             />
             <Button
               type="submit"

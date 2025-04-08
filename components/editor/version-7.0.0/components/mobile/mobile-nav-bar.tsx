@@ -11,12 +11,12 @@ import {
   Sticker,
   Layout,
   Plus,
+  X,
 } from "lucide-react";
 import { useSidebar } from "../../contexts/sidebar-context";
 import { OverlayType } from "../../types";
 import {
   Tooltip,
-  TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
@@ -25,6 +25,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetClose,
 } from "@/components/ui/sheet";
 import { useEffect, useState, useRef } from "react";
 import { VideoOverlayPanel } from "../overlays/video/video-overlay-panel";
@@ -210,7 +211,7 @@ export function MobileNavBar() {
 
   return (
     <>
-      <div className="md:hidden flex border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-900/30 backdrop-blur-sm px-2 py-1">
+      <div className="md:hidden flex flex-col border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-900/30 backdrop-blur-sm">
         <div className="relative flex-1 flex">
           {/* Left fade gradient to indicate scrollable content */}
           {showScrollIndicator && (
@@ -219,7 +220,7 @@ export function MobileNavBar() {
 
           <div
             ref={scrollableRef}
-            className="flex-1 flex items-center overflow-x-auto scrollbar-hide px-1 py-0.5 gap-1 relative"
+            className={`flex-1 flex items-center overflow-x-auto scrollbar-hide px-1 py-2 overflow-auto gap-1.5 relative`}
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -232,7 +233,7 @@ export function MobileNavBar() {
                     <button
                       data-panel={item.panel}
                       onClick={() => handleItemClick(item)}
-                      className={`h-5 min-w-5 px-1.5 rounded flex items-center justify-center gap-1
+                      className={`rounded flex flex-col items-center px-2 py-1.5
                       ${
                         clickedItemId === item.title
                           ? "scale-95 opacity-80"
@@ -244,16 +245,9 @@ export function MobileNavBar() {
                           : "text-gray-700 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                       } transition-all`}
                     >
-                      <item.icon className="h-3 w-3" />
+                      <item.icon className="h-4 w-4" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    sideOffset={5}
-                    className="bg-white dark:bg-gray-900 text-xs px-2 py-1 rounded-md z-[9999] border border-gray-200 dark:border-gray-700"
-                  >
-                    {item.title}
-                  </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             ))}
@@ -269,9 +263,9 @@ export function MobileNavBar() {
                     });
                   }
                 }}
-                className="flex items-center justify-center h-5 min-w-5 px-1.5 rounded bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400"
+                className="flex items-center justify-center h-9 min-w-9 px-2 rounded bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400"
               >
-                <Plus className="h-3 w-3" />
+                <Plus className="h-4 w-4" />
               </button>
             )}
           </div>
@@ -281,19 +275,30 @@ export function MobileNavBar() {
             <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-white/90 to-transparent dark:from-gray-900/90 z-10 pointer-events-none" />
           )}
         </div>
+
+        {/* Bottom swipe indicator for the panel */}
+        {isSheetOpen && (
+          <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-1 pointer-events-none">
+            <div className="h-1 w-10 bg-gray-300 dark:bg-gray-700 rounded-full opacity-50" />
+          </div>
+        )}
       </div>
 
       {/* Bottom Sheet for Mobile */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent
           side="bottom"
-          className="h-[60vh] rounded-t-xl pb-0 px-0 overflow-hidden"
+          className="pt-4 h-[70vh] rounded-t-xl pb-0 px-0 overflow-hidden"
         >
           <div className="flex flex-col h-full">
-            <SheetHeader className="px-4 py-2 flex flex-row items-center justify-between border-b">
-              <SheetTitle className="text-base">
+            <SheetHeader className="px-4 pb-3 border-b">
+              <SheetTitle className="text-left text-lg font-light">
                 {activePanel && getPanelTitle(activePanel)}
               </SheetTitle>
+              <SheetClose className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </SheetClose>
             </SheetHeader>
             <div className="flex-1 overflow-y-auto p-0">
               {renderActivePanel()}

@@ -11,6 +11,7 @@ import { useTimelinePositioning } from "../../../hooks/use-timeline-positioning"
 import { useTimeline } from "../../../contexts/timeline-context";
 import { Player } from "@remotion/player";
 import { Sequence } from "remotion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Wrapper component for sticker preview with static frame
 const StickerPreview = memo(
@@ -114,6 +115,7 @@ export function StickersPanel() {
   const { findNextAvailablePosition } = useTimelinePositioning();
   const { visibleRows } = useTimeline();
   const stickerCategories = getStickerCategories();
+  const isMobile = useIsMobile();
 
   const handleStickerClick = useCallback(
     (templateId: string) => {
@@ -161,6 +163,25 @@ export function StickersPanel() {
     ]
   );
 
+  const renderStickerContent = (category: string) => (
+    <div className="grid grid-cols-2 gap-3 pt-3 pb-3">
+      {templatesByCategory[category]?.map((template) => (
+        <div
+          key={template.config.id}
+          className={`
+            h-[140px]
+            ${template.config.layout === "double" ? "col-span-2" : ""}
+          `}
+        >
+          <StickerPreview
+            template={template}
+            onClick={() => handleStickerClick(template.config.id)}
+          />
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="flex flex-col gap-4 p-4 bg-white dark:bg-gray-900/50 h-full">
       <Tabs defaultValue={stickerCategories[0]} className="w-full">
@@ -183,24 +204,13 @@ export function StickersPanel() {
 
         {stickerCategories.map((category) => (
           <TabsContent key={category} value={category} className="mt-2">
-            <ScrollArea className="h-[calc(100vh-140px)]">
-              <div className="grid grid-cols-2 gap-3 p-3">
-                {templatesByCategory[category]?.map((template) => (
-                  <div
-                    key={template.config.id}
-                    className={`
-                      h-[140px]
-                      ${template.config.layout === "double" ? "col-span-2" : ""}
-                    `}
-                  >
-                    <StickerPreview
-                      template={template}
-                      onClick={() => handleStickerClick(template.config.id)}
-                    />
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
+            {isMobile ? (
+              renderStickerContent(category)
+            ) : (
+              <ScrollArea className="h-[calc(100vh-140px)]">
+                {renderStickerContent(category)}
+              </ScrollArea>
+            )}
           </TabsContent>
         ))}
       </Tabs>

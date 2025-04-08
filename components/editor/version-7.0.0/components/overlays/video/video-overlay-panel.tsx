@@ -140,6 +140,8 @@ export const VideoOverlayPanel: React.FC = () => {
               value={searchQuery}
               className="bg-white dark:bg-gray-800 border-gray-200 dark:border-white/5 text-gray-900 dark:text-zinc-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus-visible:ring-blue-400"
               onChange={(e) => setSearchQuery(e.target.value)}
+              // NOTE: Stops zooming in on input focus on iPhone
+              style={{ fontSize: "16px" }}
             />
             <Button
               type="submit"

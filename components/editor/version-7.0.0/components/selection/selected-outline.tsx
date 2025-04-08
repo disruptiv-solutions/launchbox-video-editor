@@ -54,7 +54,7 @@ export const SelectionOutline: React.FC<{
     const baseZIndex = 1000 - (overlay.row || 0) * 10;
 
     // Selected items get an additional boost
-    const selectionBoost = isSelected ? 2000 : 0;
+    const selectionBoost = isSelected ? 1000 : 0;
     const zIndex = baseZIndex + selectionBoost;
 
     return {
@@ -73,6 +73,7 @@ export const SelectionOutline: React.FC<{
       touchAction: "none",
       zIndex,
       pointerEvents: "all",
+      // hovered || isDragging ? "all" : isSelected ? "none" : "all",
       cursor: "pointer",
     };
   }, [overlay, hovered, isDragging, isSelected, scaledBorder]);

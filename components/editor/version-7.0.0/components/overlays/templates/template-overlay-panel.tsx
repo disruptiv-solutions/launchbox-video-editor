@@ -69,15 +69,17 @@ export const TemplateOverlayPanel: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 bg-gray-100/40 dark:bg-gray-900/40 h-full scrollbar-hide overflow-hidden">
+    <div className="flex flex-col gap-2 p-2 sm:gap-4 sm:p-4 bg-gray-100/40 dark:bg-gray-900/40 h-full scrollbar-hide overflow-hidden">
       <>
         <div className="flex gap-2">
           <form onSubmit={handleSearch} className="flex-1 flex gap-2">
             <Input
               placeholder="Search templates..."
               value={searchQuery}
-              className="flex-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-white/5 text-gray-900 dark:text-zinc-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus-visible:ring-blue-400"
+              className="flex-1 h-8 sm:h-10 text-xs sm:text-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-white/5 text-gray-900 dark:text-zinc-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus-visible:ring-blue-400 md:text-base"
               onChange={(e) => setSearchQuery(e.target.value)}
+              // NOTE: Stops zooming in on input focus on iPhone
+              style={{ fontSize: "16px" }}
             />
           </form>
 
@@ -93,13 +95,13 @@ export const TemplateOverlayPanel: React.FC = () => {
         </div>
 
         {error && (
-          <div className="text-red-500 text-sm p-2">
+          <div className="text-red-500 text-xs sm:text-sm p-2">
             Error loading templates: {error}
           </div>
         )}
 
         <ScrollArea className="flex-1 scrollbar-hide overflow-hidden [&_[data-radix-scroll-area-scrollbar]]:!hidden">
-          <div className="grid grid-cols-1 gap-2 scrollbar-hide">
+          <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 scrollbar-hide">
             {isLoading ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <div
@@ -114,24 +116,24 @@ export const TemplateOverlayPanel: React.FC = () => {
                   className="cursor-pointer hover:bg-accent transition-colors duration-200"
                   onClick={() => handleSelectTemplate(template)}
                 >
-                  <CardHeader className="p-3 space-y-3">
+                  <CardHeader className="p-2 sm:p-3 space-y-2">
                     <div className="aspect-video w-full overflow-hidden rounded-md">
                       <TemplateThumbnail
                         thumbnail={template.thumbnail}
                         name={template.name}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <CardTitle className="text-sm font-medium">
+                    <div className="space-y-1 sm:space-y-2">
+                      <CardTitle className="text-xs sm:text-sm font-light">
                         {template.name}
                       </CardTitle>
-                      <p className="text-xs text-muted-foreground line-clamp-2">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2">
                         {template.description}
                       </p>
                     </div>
-                    <div className="pt-2 border-t border-border">
-                      <div className="flex float-right gap-2 text-xs text-muted-foreground">
-                        <span className="text-xs float-right">
+                    <div className="pt-1 sm:pt-2 border-t border-border">
+                      <div className="flex float-right gap-1 sm:gap-2 text-[10px] sm:text-xs text-muted-foreground">
+                        <span>
                           {new Date(template.updatedAt).toLocaleDateString()}
                         </span>
                       </div>
@@ -140,7 +142,7 @@ export const TemplateOverlayPanel: React.FC = () => {
                 </Card>
               ))
             ) : (
-              <div className="col-span-2 flex flex-col items-center justify-center py-8 text-gray-500">
+              <div className="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-4 sm:py-8 text-gray-500 text-xs sm:text-sm">
                 No templates found
               </div>
             )}
@@ -151,17 +153,22 @@ export const TemplateOverlayPanel: React.FC = () => {
           open={confirmDialogOpen}
           onOpenChange={setConfirmDialogOpen}
         >
-          <AlertDialogContent className="w-[90%] max-w-md mx-auto rounded-md">
+          <AlertDialogContent className="w-[90%] max-w-md mx-auto rounded-md p-3 sm:p-6">
             <AlertDialogHeader>
-              <AlertDialogTitle>Apply Template</AlertDialogTitle>
-              <AlertDialogDescription>
+              <AlertDialogTitle className="text-sm sm:text-base">
+                Apply Template
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-xs sm:text-sm">
                 Are you sure you want to add this template to your timeline? It
                 will replace all existing overlays.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogFooter className="gap-2 sm:gap-3">
+              <AlertDialogCancel className="h-8 sm:h-10 text-xs sm:text-sm">
+                Cancel
+              </AlertDialogCancel>
               <AlertDialogAction
+                className="h-8 sm:h-10 text-xs sm:text-sm"
                 onClick={() =>
                   selectedTemplate && handleApplyTemplate(selectedTemplate)
                 }
