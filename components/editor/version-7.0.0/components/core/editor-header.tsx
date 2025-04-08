@@ -62,10 +62,10 @@ export function EditorHeader() {
       p-2.5 px-4"
     >
       {/* Sidebar toggle button with theme-aware styling */}
-      <SidebarTrigger className="-ml-1 text-gray-700 dark:text-gray-300" />
+      <SidebarTrigger className="hidden sm:block -ml-1 text-gray-700 dark:text-gray-300" />
 
       {/* Vertical separator for visual organization */}
-      <Separator orientation="vertical" className="mr-2 h-5" />
+      <Separator orientation="vertical" className="hidden sm:block mr-2 h-5" />
 
       {/* Theme toggle component (client-side only) */}
       <ThemeToggleClient />

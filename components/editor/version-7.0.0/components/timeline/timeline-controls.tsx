@@ -322,7 +322,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              className="border h-7 p-3 text-xs text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-300 hover:bg-transparent"
+              className="hidden sm:block border h-7 p-3 text-xs text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-300 hover:bg-transparent"
             >
               {playbackRate}x
             </Button>
@@ -402,7 +402,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
                 onClick={handleExportTemplate}
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-gray-700 dark:text-zinc-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-colors rounded-md"
+                className="hidden sm:block h-7 w-7 text-gray-700 dark:text-zinc-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-colors rounded-md"
               >
                 <Download className="h-3.5 w-3.5" />
               </Button>

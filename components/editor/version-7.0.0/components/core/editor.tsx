@@ -56,6 +56,34 @@ export const Editor: React.FC = () => {
   }, []);
 
   /**
+   * Effect to prevent any scrolling and handle mobile viewport issues
+   */
+  React.useEffect(() => {
+    // Function to handle viewport issues on mobile
+    const handleResize = () => {
+      // Set CSS custom property for viewport height to use instead of h-screen
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
+    };
+
+    // Initial call
+    handleResize();
+
+    // Handle orientation changes and resizes
+    window.addEventListener("resize", handleResize);
+
+    // Prevent any scrolling on body
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, []);
+
+  /**
    * Destructure values and functions from the editor context
    * These provide core functionality for the editor's features
    */
@@ -117,7 +145,13 @@ export const Editor: React.FC = () => {
    * 4. Timeline visualization
    */
   return (
-    <div className="flex flex-col h-screen">
+    <div
+      className="flex flex-col overflow-hidden"
+      style={{
+        height: "calc(var(--vh, 1vh) * 100)",
+        maxHeight: "-webkit-fill-available" /* Safari fix */,
+      }}
+    >
       <EditorHeader />
       <div className="flex-grow flex flex-col lg:flex-row overflow-hidden">
         <VideoPlayer playerRef={playerRef} />

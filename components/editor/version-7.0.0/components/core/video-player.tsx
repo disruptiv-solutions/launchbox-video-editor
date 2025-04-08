@@ -60,7 +60,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full overflow-hidden">
       {/* Grid background container */}
       <div
         className="z-0 video-container relative w-full h-full
