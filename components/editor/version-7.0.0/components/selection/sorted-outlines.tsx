@@ -5,7 +5,7 @@ import { Overlay } from "../../types";
 
 /**
  * Sorts overlays by their row number to maintain proper stacking order
- * Higher row numbers should appear earlier in the array (bottom)
+ * Lower row numbers should appear later in the array (top)
  */
 const sortOverlaysByRow = (overlays: Overlay[]): Overlay[] => {
   const sorted = [...overlays].sort((a, b) => (a.row || 0) - (b.row || 0));

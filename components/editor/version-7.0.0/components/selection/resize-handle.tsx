@@ -39,8 +39,8 @@ export const ResizeHandle: React.FC<{
     const zIndex = (MAX_ROWS - (overlay.row || 0)) * 10 + 20000;
     return {
       position: "absolute",
-      height: size,
-      width: size,
+      height: Number.isFinite(size) ? size : HANDLE_SIZE,
+      width: Number.isFinite(size) ? size : HANDLE_SIZE,
       backgroundColor: "white",
       border: `${borderSize}px solid #3B8BF2`,
       zIndex,

@@ -39,11 +39,11 @@ export const SelectionOutline: React.FC<{
 
   const onMouseEnter = useCallback(() => {
     setHovered(true);
-  }, [overlay]);
+  }, []);
 
   const onMouseLeave = useCallback(() => {
     setHovered(false);
-  }, [overlay]);
+  }, []);
 
   const isSelected = overlay.id === selectedOverlayId;
 
@@ -72,13 +72,8 @@ export const SelectionOutline: React.FC<{
       userSelect: "none",
       touchAction: "none",
       zIndex,
-      // If this item is selected AND it's a background element (high row number),
-      // use pointer-events: none to let events pass through to elements above it
-      pointerEvents: isSelected && overlay.row > 2 ? "none" : "all",
+      pointerEvents: "all",
       cursor: "pointer",
-      // Add a transparent background only for non-selected items
-      // This ensures selected items don't block pointer events
-      background: isSelected ? undefined : "rgba(0,0,0,0)",
     };
   }, [overlay, hovered, isDragging, isSelected, scaledBorder]);
 

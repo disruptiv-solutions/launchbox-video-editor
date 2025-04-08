@@ -30,6 +30,7 @@ export const Layer: React.FC<{
     // Higher row numbers should be at the bottom
     // e.g. row 4 = z-index 60, row 0 = z-index 100
     const zIndex = 100 - (overlay.row || 0) * 10;
+    const isSelected = overlay.id === selectedOverlayId;
 
     return {
       position: "absolute",
@@ -40,8 +41,7 @@ export const Layer: React.FC<{
       transform: `rotate(${overlay.rotation || 0}deg)`,
       transformOrigin: "center center",
       zIndex,
-      pointerEvents: "none",
-      background: "transparent",
+      pointerEvents: isSelected ? "all" : "none",
     };
   }, [
     overlay.height,
