@@ -1,4 +1,11 @@
-import React, { useCallback, useMemo, memo, useRef } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  memo,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
 import { CaptionOverlay, Overlay, OverlayType } from "../../types";
 import { useWaveformProcessor } from "../../hooks/use-waveform-processor";
 import WaveformVisualizer from "../overlays/sounds/waveform-visualizer";
@@ -108,6 +115,19 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   const { setActivePanel, setIsOpen } = useSidebar();
   const keyframeContext = useKeyframeContext();
 
+  // New state variables for touch interactions
+  const [touchStartTime, setTouchStartTime] = useState<number | null>(null);
+  const [touchStartPosition, setTouchStartPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const [isTouching, setIsTouching] = useState(false);
+  const touchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Constants for touch interactions
+  const LONG_PRESS_DURATION = 500; // milliseconds
+  const TOUCH_MOVEMENT_THRESHOLD = 10; // pixels
+
   /**
    * Handles mouse and touch interactions with the timeline item
    * Prevents event bubbling and triggers appropriate handlers based on the action
@@ -122,9 +142,115 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
     } else if (action === "mousedown") {
       handleMouseDown("move", e as React.MouseEvent<HTMLDivElement>);
     } else if (action === "touchstart") {
-      handleTouchStart("move", e as React.TouchEvent<HTMLDivElement>);
+      // Instead of immediately starting drag, we'll delay to distinguish between tap and drag
+      const touchEvent = e as React.TouchEvent<HTMLDivElement>;
+      const touch = touchEvent.touches[0];
+
+      // Record touch start time and position
+      setTouchStartTime(Date.now());
+      setTouchStartPosition({ x: touch.clientX, y: touch.clientY });
+      setIsTouching(true);
+
+      // Set timeout for long press (for potential context menu)
+      if (touchTimeoutRef.current) {
+        clearTimeout(touchTimeoutRef.current);
+      }
+
+      touchTimeoutRef.current = setTimeout(() => {
+        // If still touching after delay, this might be a long press
+        if (isTouching) {
+          // Could trigger context menu here
+          // For now, just provide visual feedback
+          setIsTouching(false);
+        }
+      }, LONG_PRESS_DURATION);
     }
   };
+
+  // Handle touch move to distinguish between tap and drag
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent<HTMLDivElement>) => {
+      if (!touchStartPosition) return;
+
+      const touch = e.touches[0];
+      const moveX = Math.abs(touch.clientX - touchStartPosition.x);
+      const moveY = Math.abs(touch.clientY - touchStartPosition.y);
+
+      // If moved beyond threshold, consider it a drag operation
+      if (
+        moveX > TOUCH_MOVEMENT_THRESHOLD ||
+        moveY > TOUCH_MOVEMENT_THRESHOLD
+      ) {
+        // Clear the long press timeout
+        if (touchTimeoutRef.current) {
+          clearTimeout(touchTimeoutRef.current);
+          touchTimeoutRef.current = null;
+        }
+
+        // Start the actual drag operation
+        handleTouchStart("move", e);
+
+        // Reset touch state
+        setTouchStartTime(null);
+        setTouchStartPosition(null);
+        setIsTouching(false);
+      }
+    },
+    [touchStartPosition, handleTouchStart]
+  );
+
+  // Handle touch end to detect taps
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent<HTMLDivElement>) => {
+      e.preventDefault();
+
+      // Clear the long press timeout
+      if (touchTimeoutRef.current) {
+        clearTimeout(touchTimeoutRef.current);
+        touchTimeoutRef.current = null;
+      }
+
+      // If touch start time exists and the duration is short, it's a tap
+      if (touchStartTime && Date.now() - touchStartTime < LONG_PRESS_DURATION) {
+        // This was a tap/click, so select the item
+        setSelectedItem({ id: item.id });
+
+        // Also open the sidebar panel if appropriate
+        if (
+          item.type === OverlayType.VIDEO ||
+          item.type === OverlayType.TEXT ||
+          item.type === OverlayType.SOUND ||
+          item.type === OverlayType.CAPTION ||
+          item.type === OverlayType.IMAGE
+        ) {
+          setActivePanel(item.type);
+          setIsOpen(true);
+        }
+      }
+
+      // Reset touch state
+      setTouchStartTime(null);
+      setTouchStartPosition(null);
+      setIsTouching(false);
+    },
+    [
+      touchStartTime,
+      item.id,
+      item.type,
+      setSelectedItem,
+      setActivePanel,
+      setIsOpen,
+    ]
+  );
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (touchTimeoutRef.current) {
+        clearTimeout(touchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   /**
    * Calculates and reports the hover position within the item
@@ -282,6 +408,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
         className={`absolute inset-y-[0.9px] rounded-md shadow-md cursor-grab group 
         ${itemClasses} 
         ${isDragging && draggedItem?.id === item.id ? "opacity-50" : ""} 
+        ${isTouching ? "scale-[0.98] opacity-80" : ""} 
         ${
           isSelected
             ? "border-2 border-black dark:border-white"
@@ -292,9 +419,12 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
           left: `${(item.from / totalDuration) * 100}%`,
           width: `${(item.durationInFrames / totalDuration) * 100}%`,
           zIndex: isDragging ? 1 : 30,
+          transition: "transform 0.2s, opacity 0.2s",
         }}
         onMouseDown={(e) => handleItemInteraction(e, "mousedown")}
         onTouchStart={(e) => handleItemInteraction(e, "touchstart")}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         onClick={handleSelect}
         onMouseMove={handleMouseMove}
       >

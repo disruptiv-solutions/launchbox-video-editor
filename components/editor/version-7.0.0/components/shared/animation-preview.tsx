@@ -61,7 +61,7 @@ export const AnimationPreview: React.FC<AnimationPreviewProps> = ({
           : "border-border bg-background hover:border-muted-foreground/50 hover:bg-muted/10 dark:bg-muted/30 dark:hover:bg-muted/50"
       } p-3 transition-all duration-200 group backdrop-blur-sm`}
     >
-      <div className="flex h-full flex-col items-center justify-center gap-3">
+      <div className="flex h-full flex-col items-center justify-center gap-0 sm:gap-3">
         {/* Container for animation circles with subtle glow effect */}
         <div className="relative h-6 w-6">
           {/* Static circle with fade out */}
