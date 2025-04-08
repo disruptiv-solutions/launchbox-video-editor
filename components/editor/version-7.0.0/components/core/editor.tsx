@@ -165,6 +165,12 @@ export const Editor: React.FC = () => {
         formatTime={formatTime}
       />
 
+      {/* 
+        Timeline Component
+        Note: On mobile devices, this component also renders the MobileNavBar 
+        at the bottom with a scrollable interface similar to TimelineControls
+        for easy access to content creation tools.
+      */}
       <Timeline
         currentFrame={currentFrame}
         overlays={overlays}

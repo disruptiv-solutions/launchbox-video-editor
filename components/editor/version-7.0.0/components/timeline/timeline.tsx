@@ -21,6 +21,7 @@ import TimeMarkers from "./timeline-markers";
 import { Grip, Loader2 } from "lucide-react";
 import { ROW_HEIGHT, SHOW_LOADING_PROJECT_ALERT } from "../../constants";
 import { useAssetLoading } from "../../contexts/asset-loading-context";
+import { MobileNavBar } from "../mobile/mobile-nav-bar";
 
 interface TimelineProps {
   /** Array of overlay objects to be displayed on the timeline */
@@ -431,6 +432,15 @@ const Timeline: React.FC<TimelineProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Mobile Navigation Bar
+       * Only shows on mobile devices (md:hidden)
+       * Improved scrollable design inspired by TimelineControls
+       * Horizontal scrolling with fade indicators for better UX
+       * Touch-friendly buttons with tooltips for content creation
+       * Placed at the bottom of the timeline for easy access
+       */}
+      <MobileNavBar />
     </div>
   );
 };
