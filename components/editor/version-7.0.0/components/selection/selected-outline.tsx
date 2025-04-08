@@ -3,7 +3,6 @@ import { useCurrentScale } from "remotion";
 import { ResizeHandle } from "./resize-handle";
 import { Overlay, OverlayType } from "../../types";
 import { RotateHandle } from "./rotate-handle";
-import { MAX_ROWS } from "../../constants";
 
 /**
  * SelectionOutline is a component that renders a draggable, resizable outline around selected overlays.
@@ -40,18 +39,22 @@ export const SelectionOutline: React.FC<{
 
   const onMouseEnter = useCallback(() => {
     setHovered(true);
-  }, []);
+  }, [overlay]);
 
   const onMouseLeave = useCallback(() => {
     setHovered(false);
-  }, []);
+  }, [overlay]);
 
   const isSelected = overlay.id === selectedOverlayId;
 
   const style: React.CSSProperties = useMemo(() => {
-    // Make selected items have highest z-index
-    const baseZIndex = (MAX_ROWS - (overlay.row || 0)) * 10;
-    const selectionBoost = isSelected ? 10000 : 1000;
+    // Selection outlines should match layer stacking
+    // But start at 1000 to be above content
+    // e.g. row 4 = z-index 960, row 0 = z-index 1000
+    const baseZIndex = 1000 - (overlay.row || 0) * 10;
+
+    // Selected items get an additional boost
+    const selectionBoost = isSelected ? 2000 : 0;
     const zIndex = baseZIndex + selectionBoost;
 
     return {
@@ -69,9 +72,15 @@ export const SelectionOutline: React.FC<{
       userSelect: "none",
       touchAction: "none",
       zIndex,
-      pointerEvents: "all",
+      // If this item is selected AND it's a background element (high row number),
+      // use pointer-events: none to let events pass through to elements above it
+      pointerEvents: isSelected && overlay.row > 2 ? "none" : "all",
+      cursor: "pointer",
+      // Add a transparent background only for non-selected items
+      // This ensures selected items don't block pointer events
+      background: isSelected ? undefined : "rgba(0,0,0,0)",
     };
-  }, [overlay, hovered, isDragging, isSelected, scaledBorder, overlay.row]);
+  }, [overlay, hovered, isDragging, isSelected, scaledBorder]);
 
   const startDragging = useCallback(
     (e: PointerEvent | React.MouseEvent) => {
@@ -128,41 +137,43 @@ export const SelectionOutline: React.FC<{
   }
 
   return (
-    <div
-      onPointerDown={onPointerDown}
-      onPointerEnter={onMouseEnter}
-      onPointerLeave={onMouseLeave}
-      style={style}
-    >
-      {isSelected ? (
-        <>
-          <ResizeHandle
-            overlay={overlay}
-            setOverlay={changeOverlay}
-            type="top-left"
-          />
-          <ResizeHandle
-            overlay={overlay}
-            setOverlay={changeOverlay}
-            type="top-right"
-          />
-          <ResizeHandle
-            overlay={overlay}
-            setOverlay={changeOverlay}
-            type="bottom-left"
-          />
-          <ResizeHandle
-            overlay={overlay}
-            setOverlay={changeOverlay}
-            type="bottom-right"
-          />
-          <RotateHandle
-            overlay={overlay}
-            setOverlay={changeOverlay}
-            scale={scale}
-          />
-        </>
-      ) : null}
-    </div>
+    <>
+      <div
+        onPointerDown={onPointerDown}
+        onPointerEnter={onMouseEnter}
+        onPointerLeave={onMouseLeave}
+        style={style}
+      >
+        {isSelected ? (
+          <>
+            <ResizeHandle
+              overlay={overlay}
+              setOverlay={changeOverlay}
+              type="top-left"
+            />
+            <ResizeHandle
+              overlay={overlay}
+              setOverlay={changeOverlay}
+              type="top-right"
+            />
+            <ResizeHandle
+              overlay={overlay}
+              setOverlay={changeOverlay}
+              type="bottom-left"
+            />
+            <ResizeHandle
+              overlay={overlay}
+              setOverlay={changeOverlay}
+              type="bottom-right"
+            />
+            <RotateHandle
+              overlay={overlay}
+              setOverlay={changeOverlay}
+              scale={scale}
+            />
+          </>
+        ) : null}
+      </div>
+    </>
   );
 };

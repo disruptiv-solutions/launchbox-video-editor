@@ -4,28 +4,17 @@ import { SelectionOutline } from "./selected-outline";
 import { Overlay } from "../../types";
 
 /**
- * Reorders overlays to ensure selected overlay appears on top of others
- * @param overlays - Array of overlay objects to sort
- * @param selectedOverlayId - ID of the currently selected overlay
- * @returns Reordered array with selected overlay at the end (top)
+ * Sorts overlays by their row number to maintain proper stacking order
+ * Higher row numbers should appear earlier in the array (bottom)
  */
-const displaySelectedOverlayOnTop = (
-  overlays: Overlay[],
-  selectedOverlayId: number | null
-): Overlay[] => {
-  const selectedOverlays = overlays.filter(
-    (overlay) => overlay.id === selectedOverlayId
-  );
-  const unselectedOverlays = overlays.filter(
-    (overlay) => overlay.id !== selectedOverlayId
-  );
-
-  return [...unselectedOverlays, ...selectedOverlays];
+const sortOverlaysByRow = (overlays: Overlay[]): Overlay[] => {
+  const sorted = [...overlays].sort((a, b) => (a.row || 0) - (b.row || 0));
+  return sorted;
 };
 
 /**
  * Renders a sorted list of selection outlines for overlays
- * The selected overlay is always rendered last (on top)
+ * Maintains natural stacking order based on row numbers
  * Each outline is wrapped in a Remotion Sequence component for timeline positioning
  *
  * @param props
@@ -44,8 +33,8 @@ export const SortedOutlines: React.FC<{
   setSelectedOverlayId: React.Dispatch<React.SetStateAction<number | null>>;
 }> = ({ overlays, selectedOverlayId, changeOverlay, setSelectedOverlayId }) => {
   const overlaysToDisplay = React.useMemo(
-    () => displaySelectedOverlayOnTop(overlays, selectedOverlayId),
-    [overlays, selectedOverlayId]
+    () => sortOverlaysByRow(overlays),
+    [overlays]
   );
 
   const isDragging = React.useMemo(

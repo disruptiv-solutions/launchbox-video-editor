@@ -2,7 +2,6 @@ import React, { useMemo } from "react";
 import { Sequence } from "remotion";
 import { LayerContent } from "./layer-content";
 import { Overlay } from "../../types";
-import { MAX_ROWS } from "../../constants";
 
 /**
  * Props for the Layer component
@@ -28,8 +27,9 @@ export const Layer: React.FC<{
    * @returns {React.CSSProperties} Computed styles for the layer
    */
   const style: React.CSSProperties = useMemo(() => {
-    const isSelected = overlay.id === selectedOverlayId;
-    const zIndex = (MAX_ROWS - (overlay.row || 0)) * 10;
+    // Higher row numbers should be at the bottom
+    // e.g. row 4 = z-index 60, row 0 = z-index 100
+    const zIndex = 100 - (overlay.row || 0) * 10;
 
     return {
       position: "absolute",
@@ -40,7 +40,8 @@ export const Layer: React.FC<{
       transform: `rotate(${overlay.rotation || 0}deg)`,
       transformOrigin: "center center",
       zIndex,
-      pointerEvents: isSelected ? "all" : "none",
+      pointerEvents: "none",
+      background: "transparent",
     };
   }, [
     overlay.height,
