@@ -151,7 +151,7 @@ export const TemplateOverlayPanel: React.FC = () => {
           open={confirmDialogOpen}
           onOpenChange={setConfirmDialogOpen}
         >
-          <AlertDialogContent>
+          <AlertDialogContent className="w-[90%] max-w-md mx-auto rounded-md">
             <AlertDialogHeader>
               <AlertDialogTitle>Apply Template</AlertDialogTitle>
               <AlertDialogDescription>
