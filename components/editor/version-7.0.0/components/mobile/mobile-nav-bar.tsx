@@ -276,7 +276,7 @@ export function MobileNavBar() {
           )}
         </div>
 
-        {/* Bottom swipe indicator for the panel */}
+        {/* Bottom swipe indicator for the pane */}
         {isSheetOpen && (
           <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-1 pointer-events-none">
             <div className="h-1 w-10 bg-gray-300 dark:bg-gray-700 rounded-full opacity-50" />
