@@ -5,7 +5,7 @@ import { EditorHeader } from "./editor-header";
 
 import { useEditorContext } from "../../contexts/editor-context";
 import { TimelineControls } from "../timeline/timeline-controls";
-import { FPS } from "../../constants";
+import { DISABLE_MOBILE_LAYOUT, FPS } from "../../constants";
 import Timeline from "../timeline/timeline";
 import { VideoPlayer } from "./video-player";
 
@@ -81,7 +81,7 @@ export const Editor: React.FC = () => {
    * Mobile fallback UI
    * Displays a message when accessed on mobile devices
    */
-  if (isMobile) {
+  if (isMobile && DISABLE_MOBILE_LAYOUT) {
     return (
       <div className="flex items-center justify-center h-screen bg-white dark:bg-gray-900 p-6">
         <div className="text-center text-gray-900 dark:text-white">

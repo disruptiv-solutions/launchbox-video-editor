@@ -28,7 +28,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
     updatePlayerDimensions,
     getAspectRatioDimensions,
     durationInFrames,
-    playbackRate,
   } = useEditorContext();
 
   /**
@@ -61,7 +60,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
   };
 
   return (
-    <div className="w-full lg:h-full">
+    <div className="w-full h-full">
       {/* Grid background container */}
       <div
         className="z-0 video-container relative w-full h-full
@@ -72,9 +71,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
         shadow-lg"
       >
         {/* Player wrapper with centering */}
-        <div className="z-10 absolute inset-4 flex items-center justify-center">
+        <div className="z-10 absolute inset-2 sm:inset-4 flex items-center justify-center">
           <div
-            className="relative "
+            className="relative mx-2 sm:mx-0"
             style={{
               width: Math.min(playerDimensions.width, compositionWidth),
               height: Math.min(playerDimensions.height, compositionHeight),
@@ -94,7 +93,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
               }}
               durationInFrames={PLAYER_CONFIG.durationInFrames}
               fps={PLAYER_CONFIG.fps}
-              playbackRate={playbackRate}
               inputProps={{
                 overlays,
                 setSelectedOverlayId,

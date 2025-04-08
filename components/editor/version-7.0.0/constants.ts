@@ -17,6 +17,7 @@ export const VIDEO_HEIGHT = 720;
 // UI configuration
 export const ROW_HEIGHT = 44; // Slightly increased from 48
 export const SHOW_LOADING_PROJECT_ALERT = true; // Controls visibility of asset loading indicator
+export const DISABLE_MOBILE_LAYOUT = false;
 
 /**
  * This constant disables video keyframe extraction in the browser. Enable this if you're working with

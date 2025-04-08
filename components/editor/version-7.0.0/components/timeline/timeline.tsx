@@ -285,7 +285,7 @@ const Timeline: React.FC<TimelineProps> = ({
     <div className="flex flex-col">
       <div className="flex ">
         {/* Row Drag Handles Column */}
-        <div className="w-7 flex-shrink-0 border-l border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
+        <div className="hidden md:block w-7 flex-shrink-0 border-l border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
           {/* Match TimeMarkers height */}
           <div className="h-[1.3rem] bg-gray-100 dark:bg-gray-800/50" />
 
@@ -341,7 +341,7 @@ const Timeline: React.FC<TimelineProps> = ({
 
         {/* Timeline Content */}
         <div
-          className="relative overflow-x-auto scrollbar-hide flex-1"
+          className="relative overflow-x-auto scrollbar-hide flex-1 md:pl-0 pl-2"
           style={{
             scrollbarWidth: "none" /* Firefox */,
             msOverflowStyle: "none" /* IE and Edge */,
