@@ -25,6 +25,7 @@ const fonts = [
   { value: "font-mono", label: "Roboto Mono (Monospace)" },
   { value: "font-retro", label: "VT323" },
   { value: "font-league-spartan", label: "League Spartan" },
+  { value: "font-bungee-inline", label: "Bungee Inline" },
 ];
 
 /**
