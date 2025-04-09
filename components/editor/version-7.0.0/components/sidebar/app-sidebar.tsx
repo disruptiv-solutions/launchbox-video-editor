@@ -71,7 +71,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       case OverlayType.IMAGE:
         return "Image";
       case OverlayType.LOCAL_DIR:
-        return "Local Media";
+        return "Local";
       case OverlayType.STICKER:
         return "Stickers";
       case OverlayType.TEMPLATE:
@@ -176,25 +176,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {/* First sidebar */}
       <Sidebar
         collapsible="none"
-        className="!w-[calc(var(--sidebar-width-icon)_+_1px)]  bg-background border-r "
+        className="!w-[calc(var(--sidebar-width-icon)_+_1px)] bg-background border-r"
       >
         <SidebarHeader className="">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0 ">
+              <SidebarMenuButton size="lg" asChild className="md:h-8 md:py-4">
                 <a href="#">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg ">
+                  <div className="flex aspect-square size-9 items-center justify-center rounded-lg">
                     <Image
                       src="/icons/logo-rve.png"
                       alt="Logo"
-                      width={24}
-                      height={24}
+                      width={27}
+                      height={27}
                     />
-                  </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
-                      React Video Editor
-                    </span>
                   </div>
                 </a>
               </SidebarMenuButton>
@@ -213,14 +208,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         setIsOpen(true);
                       }}
                       size="lg"
-                      className={`flex flex-col items-center gap-2 p-1.5 ${
+                      className={`flex flex-col items-center gap-2 px-1.5 py-2 ${
                         activePanel === item.panel
                           ? "bg-primary/10 text-primary hover:bg-primary/10"
                           : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       }`}
                     >
-                      <item.icon className="h-4 w-4 text-gray-700 dark:text-white font-light" />
-                      <span className="text-[7px] font-medium leading-none">
+                      <item.icon
+                        className="h-4 w-4 text-gray-700 dark:text-white font-light"
+                        strokeWidth={1.25}
+                      />
+                      <span className="text-[8px] font-medium leading-none">
                         {item.title}
                       </span>
                     </SidebarMenuButton>
@@ -255,14 +253,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         collapsible="none"
         className="hidden flex-1 md:flex bg-background border-r"
       >
-        <SidebarHeader className="gap-3.5 border-b p-3">
+        <SidebarHeader className="gap-3.5 border-b px-4 py-[12px]">
           <div className="flex w-full items-center justify-between">
             <div className="flex items-center gap-2">
               {selectedOverlayId !== null && (
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-6 w-6"
                   onClick={() => setSelectedOverlayId(null)}
                   aria-label="Back"
                 >

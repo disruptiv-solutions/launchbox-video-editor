@@ -55,17 +55,20 @@ export function EditorHeader() {
 
   return (
     <header
-      className="sticky top-0 flex shrink-0 items-center gap-2 
+      className="sticky top-0 flex shrink-0 items-center gap-2.5 
       bg-white dark:bg-gray-900/10
       border-l 
       border-b border-gray-200 dark:border-gray-800
-      p-2.5 px-4"
+      p-2.5 px-4.5"
     >
       {/* Sidebar toggle button with theme-aware styling */}
-      <SidebarTrigger className="hidden sm:block -ml-1 text-gray-700 dark:text-gray-300" />
+      <SidebarTrigger className="hidden sm:block text-gray-700 dark:text-gray-300" />
 
       {/* Vertical separator for visual organization */}
-      <Separator orientation="vertical" className="hidden sm:block mr-2 h-5" />
+      <Separator
+        orientation="vertical"
+        className="hidden sm:block mr-2.5 h-5"
+      />
 
       {/* Theme toggle component (client-side only) */}
       <ThemeToggleClient />

@@ -245,7 +245,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
   };
 
   return (
-    <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-900/30 px-3 py-2.5 backdrop-blur-sm">
+    <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-900/30 px-3 py-2.5 backdrop-blur-sm border-l">
       {/* Left section: Undo/Redo */}
       <div className="flex items-center gap-1">
         <TooltipProvider delayDuration={50}>
