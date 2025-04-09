@@ -1,6 +1,6 @@
 import React from "react";
 import { ClipOverlay } from "../../../types";
-import { AnimationPreview } from "../../shared/animation-preview";
+import { AnimationSettings } from "../../shared/animation-preview";
 import { animationTemplates } from "../../../templates/animation-templates";
 import {
   Select,
@@ -84,6 +84,25 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
       // Close select after change
       setIsSelectOpen(false);
     }
+  };
+
+  // Handlers for animation selection
+  const handleEnterAnimationSelect = (animationKey: string) => {
+    handleStyleChange({
+      animation: {
+        ...localOverlay?.styles?.animation,
+        enter: animationKey,
+      },
+    });
+  };
+
+  const handleExitAnimationSelect = (animationKey: string) => {
+    handleStyleChange({
+      animation: {
+        ...localOverlay?.styles?.animation,
+        exit: animationKey,
+      },
+    });
   };
 
   return (
@@ -170,97 +189,14 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
         </div>
       </div>
 
-      <div className="space-y-4 rounded-md bg-gray-100/50 dark:bg-gray-800/50 p-3 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Animations
-        </h3>
-
-        {/* Enter Animation */}
-        <div className="space-y-2">
-          <label className="text-xs text-gray-600 dark:text-gray-400">
-            Enter Animation
-          </label>
-          <div className="grid grid-cols-4 gap-2">
-            <AnimationPreview
-              animationKey="none"
-              animation={{
-                name: "None",
-                preview: "No animation",
-                enter: () => ({}),
-                exit: () => ({}),
-              }}
-              isSelected={localOverlay?.styles?.animation?.enter === "none"}
-              onClick={() =>
-                handleStyleChange({
-                  animation: {
-                    ...localOverlay?.styles?.animation,
-                    enter: "none",
-                  },
-                })
-              }
-            />
-            {Object.entries(animationTemplates).map(([key, animation]) => (
-              <AnimationPreview
-                key={key}
-                animationKey={key}
-                animation={animation}
-                isSelected={localOverlay?.styles?.animation?.enter === key}
-                onClick={() =>
-                  handleStyleChange({
-                    animation: {
-                      ...localOverlay?.styles?.animation,
-                      enter: key,
-                    },
-                  })
-                }
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Exit Animation */}
-        <div className="space-y-2">
-          <label className="text-xs text-gray-600 dark:text-gray-400">
-            Exit Animation
-          </label>
-          <div className="grid grid-cols-4 gap-2">
-            <AnimationPreview
-              animationKey="none"
-              animation={{
-                name: "None",
-                preview: "No animation",
-                enter: () => ({}),
-                exit: () => ({}),
-              }}
-              isSelected={localOverlay?.styles?.animation?.exit === "none"}
-              onClick={() =>
-                handleStyleChange({
-                  animation: {
-                    ...localOverlay?.styles?.animation,
-                    exit: "none",
-                  },
-                })
-              }
-            />
-            {Object.entries(animationTemplates).map(([key, animation]) => (
-              <AnimationPreview
-                key={key}
-                animationKey={key}
-                animation={animation}
-                isSelected={localOverlay?.styles?.animation?.exit === key}
-                onClick={() =>
-                  handleStyleChange({
-                    animation: {
-                      ...localOverlay?.styles?.animation,
-                      exit: key,
-                    },
-                  })
-                }
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* Animation Settings - Using the new AnimationSettings component */}
+      <AnimationSettings
+        animations={animationTemplates}
+        selectedEnterAnimation={localOverlay?.styles?.animation?.enter}
+        selectedExitAnimation={localOverlay?.styles?.animation?.exit}
+        onEnterAnimationSelect={handleEnterAnimationSelect}
+        onExitAnimationSelect={handleExitAnimationSelect}
+      />
     </div>
   );
 };

@@ -1,5 +1,10 @@
 import React, { useState } from "react";
 import { AnimationTemplate } from "../../templates/animation-templates";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../../../../ui/collapsible";
 
 /**
  * AnimationPreviewProps interface defines the required props for the AnimationPreview component
@@ -55,7 +60,7 @@ export const AnimationPreview: React.FC<AnimationPreviewProps> = ({
       onClick={onClick}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className={`relative aspect-square w-full rounded-lg border-2 ${
+      className={`relative aspect-square w-full rounded-lg border ${
         isSelected
           ? "border-blue-500 bg-blue-500/10 shadow-[0_0_0_1px_rgba(59,130,246,0.5)]"
           : "border-border bg-background hover:border-muted-foreground/50 hover:bg-muted/10 dark:bg-muted/30 dark:hover:bg-muted/50"
@@ -89,7 +94,7 @@ export const AnimationPreview: React.FC<AnimationPreviewProps> = ({
         </div>
 
         <span
-          className={`mt-4 text-[10px] tracking-wide transition-all duration-200 ${
+          className={`mt-4 text-[7px] tracking-wide transition-all duration-200 ${
             isSelected
               ? "text-blue-500"
               : "text-muted-foreground/80 group-hover:text-foreground dark:text-muted-foreground dark:group-hover:text-foreground"
@@ -99,5 +104,190 @@ export const AnimationPreview: React.FC<AnimationPreviewProps> = ({
         </span>
       </div>
     </button>
+  );
+};
+
+/**
+ * Interface for the AnimationSection component that displays a collapsible section of animations
+ */
+interface AnimationSectionProps {
+  /** Title for the section */
+  title: string;
+  /** Count of animations in this section */
+  count: number;
+  /** Whether the section is currently expanded */
+  isOpen: boolean;
+  /** Function to toggle the section's expanded state */
+  onToggle: () => void;
+  /** Animation previews to display in this section */
+  children: React.ReactNode;
+}
+
+/**
+ * AnimationSection displays a collapsible section of animations with a title and count
+ */
+const AnimationSection: React.FC<AnimationSectionProps> = ({
+  title,
+  count,
+  isOpen,
+  onToggle,
+  children,
+}) => {
+  return (
+    <Collapsible
+      open={isOpen}
+      onOpenChange={onToggle}
+      className="w-full mb-4 px-0 mx-0"
+    >
+      <div className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
+        <CollapsibleTrigger className="w-full flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-800/80 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <div className="flex items-center">
+            <span className="font-medium text-xs text-gray-700 dark:text-gray-300">
+              {title}
+            </span>
+            <span className="ml-2 text-[10px] px-[5.2px] py-0.5 rounded-full bg-gray-200/80 dark:bg-gray-700/80 text-gray-600 dark:text-gray-400">
+              {count}
+            </span>
+          </div>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className={`transform transition-transform ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          >
+            <path
+              d="M4 6L8 10L12 6"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="p-2 bg-white dark:bg-gray-900/50">
+            <div className="grid grid-cols-4 gap-3">{children}</div>
+          </div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
+  );
+};
+
+/**
+ * Interface for AnimationSettings component
+ */
+interface AnimationSettingsProps {
+  /** Animation templates to display */
+  animations: Record<string, AnimationTemplate>;
+  /** Currently selected enter animation */
+  selectedEnterAnimation?: string;
+  /** Currently selected exit animation */
+  selectedExitAnimation?: string;
+  /** Callback for when an enter animation is selected */
+  onEnterAnimationSelect: (key: string) => void;
+  /** Callback for when an exit animation is selected */
+  onExitAnimationSelect: (key: string) => void;
+  /** Optional class name for additional styling */
+  className?: string;
+}
+
+/**
+ * AnimationSettings component provides a unified interface for selecting enter and exit animations
+ * using a collapsible accordion for organization
+ */
+export const AnimationSettings: React.FC<AnimationSettingsProps> = ({
+  animations,
+  selectedEnterAnimation = "none",
+  selectedExitAnimation = "none",
+  onEnterAnimationSelect,
+  onExitAnimationSelect,
+  className = "",
+}) => {
+  // State to track which sections are open - Enter is open by default, Exit is closed
+  const [openSections, setOpenSections] = useState({
+    enter: true,
+    exit: false,
+  });
+
+  // Calculate the count of animations (excluding the "None" option that we add)
+  const animationCount = Object.keys(animations).length;
+
+  // Toggle function for opening/closing sections
+  const toggleSection = (section: "enter" | "exit") => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  // Create the "None" animation option
+  const noneAnimation: AnimationTemplate = {
+    name: "None",
+    preview: "No animation",
+    enter: () => ({}),
+    exit: () => ({}),
+  };
+
+  return (
+    <div className={`space-y-3 ${className}`}>
+      <div className="rounded-md bg-gray-100/50 dark:bg-gray-800/50 p-4 border border-gray-200 dark:border-gray-700">
+        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3.5">
+          Animations
+        </h3>
+
+        {/* Enter Animation Section */}
+        <AnimationSection
+          title="Enter Animation"
+          count={animationCount}
+          isOpen={openSections.enter}
+          onToggle={() => toggleSection("enter")}
+        >
+          <AnimationPreview
+            animationKey="none"
+            animation={noneAnimation}
+            isSelected={selectedEnterAnimation === "none"}
+            onClick={() => onEnterAnimationSelect("none")}
+          />
+          {Object.entries(animations).map(([key, animation]) => (
+            <AnimationPreview
+              key={`enter-${key}`}
+              animationKey={key}
+              animation={animation}
+              isSelected={selectedEnterAnimation === key}
+              onClick={() => onEnterAnimationSelect(key)}
+            />
+          ))}
+        </AnimationSection>
+
+        {/* Exit Animation Section */}
+        <AnimationSection
+          title="Exit Animation"
+          count={animationCount}
+          isOpen={openSections.exit}
+          onToggle={() => toggleSection("exit")}
+        >
+          <AnimationPreview
+            animationKey="none"
+            animation={noneAnimation}
+            isSelected={selectedExitAnimation === "none"}
+            onClick={() => onExitAnimationSelect("none")}
+          />
+          {Object.entries(animations).map(([key, animation]) => (
+            <AnimationPreview
+              key={`exit-${key}`}
+              animationKey={key}
+              animation={animation}
+              isSelected={selectedExitAnimation === key}
+              onClick={() => onExitAnimationSelect(key)}
+            />
+          ))}
+        </AnimationSection>
+      </div>
+    </div>
   );
 };

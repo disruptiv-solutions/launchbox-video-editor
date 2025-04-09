@@ -322,7 +322,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              className="hidden sm:block border h-7 p-3 text-xs text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-300 hover:bg-transparent"
+              className="hidden sm:flex border h-7 p-3 text-xs text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-300 hover:bg-transparent"
             >
               {playbackRate}x
             </Button>
