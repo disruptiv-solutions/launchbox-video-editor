@@ -202,6 +202,7 @@ export interface TemplateOverlay {
   tags: string[];
   thumbnail?: string;
   duration: number;
+  aspectRatio?: AspectRatio;
   overlays: Overlay[];
 }
 

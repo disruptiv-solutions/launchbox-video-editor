@@ -22,7 +22,7 @@ export const TemplateOverlayPanel: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] =
     useState<TemplateOverlay | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const { setOverlays } = useEditorContext();
+  const { setOverlays, setAspectRatio } = useEditorContext();
 
   const { templates, isLoading, error } = useTemplates({
     searchQuery,
@@ -44,6 +44,9 @@ export const TemplateOverlayPanel: React.FC = () => {
     // Update the editor's timeline with the new overlays
     setOverlays(newOverlays);
     setConfirmDialogOpen(false);
+    if (template.aspectRatio) {
+      setAspectRatio(template.aspectRatio);
+    }
   };
 
   const handleSelectTemplate = (template: TemplateOverlay) => {

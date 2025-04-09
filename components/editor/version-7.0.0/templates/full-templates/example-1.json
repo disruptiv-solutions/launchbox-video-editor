@@ -11,6 +11,7 @@
   "category": "Intros",
   "tags": ["professional", "dynamic", "business"],
   "duration": 156,
+  "aspectRatio": "4:5",
   "overlays": [
     {
       "left": 5,

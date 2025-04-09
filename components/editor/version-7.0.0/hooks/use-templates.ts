@@ -96,6 +96,7 @@ export const useTemplates = ({
           category: templateData.category,
           tags: templateData.tags,
           duration: templateData.duration,
+          aspectRatio: templateData.aspectRatio,
           overlays: processedOverlays,
         };
 
