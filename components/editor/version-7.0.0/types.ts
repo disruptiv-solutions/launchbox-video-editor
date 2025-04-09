@@ -3,7 +3,7 @@ export enum OverlayType {
   TEXT = "text",
   IMAGE = "image",
   SHAPE = "shape",
-  VIDEO = "clip",
+  VIDEO = "video",
   SOUND = "sound",
   CAPTION = "caption",
   LOCAL_DIR = "local-dir",

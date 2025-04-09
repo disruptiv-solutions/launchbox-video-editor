@@ -135,6 +135,21 @@ export const TemplateOverlayPanel: React.FC = () => {
                       </p>
                     </div>
                     <div className="pt-1 sm:pt-2 border-t border-border">
+                      <div className="flex flex-wrap float-left gap-1 sm:gap-2">
+                        {template.tags.slice(0, 3).map((tag, index) => (
+                          <span
+                            key={index}
+                            className="px-1.5 py-0.5 bg-sky-200 dark:bg-sky-400/30 rounded-sm text-[8px] sm:text-[9px] text-gray-800/70 dark:text-white"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                        {template.tags.length > 3 && (
+                          <span className="text-[8px] sm:text-[10px] text-muted-foreground">
+                            +{template.tags.length - 3}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex float-right gap-1 sm:gap-2 text-[10px] sm:text-xs text-muted-foreground">
                         <span>
                           {new Date(template.updatedAt).toLocaleDateString()}

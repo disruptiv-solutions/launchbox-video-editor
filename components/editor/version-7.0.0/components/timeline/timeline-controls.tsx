@@ -197,6 +197,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
     setExportDialogOpen(true);
   };
 
+  console.log("overlays", overlays);
   // Download template as JSON file
   const downloadTemplate = () => {
     // Create template object
