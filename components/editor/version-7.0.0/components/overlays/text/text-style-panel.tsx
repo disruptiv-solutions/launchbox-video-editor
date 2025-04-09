@@ -24,6 +24,7 @@ const fonts = [
   { value: "font-serif", label: "Merriweather (Serif)" },
   { value: "font-mono", label: "Roboto Mono (Monospace)" },
   { value: "font-retro", label: "VT323" },
+  { value: "font-league-spartan", label: "League Spartan" },
 ];
 
 /**
@@ -142,7 +143,7 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
                     <ColorPicker
                       value={localOverlay.styles.color}
                       onChange={(color) => handleStyleChange("color", color)}
-                      hideInputs
+                      // hideInputs
                       hideHue
                       hideControls
                       hideColorTypeBtns

@@ -10,6 +10,7 @@ import {
   FolderOpen,
   Sticker,
   Layout,
+  ChevronLeft,
 } from "lucide-react";
 import Image from "next/image";
 import {
@@ -39,6 +40,8 @@ import { ImageOverlayPanel } from "../overlays/images/image-overlay-panel";
 import { LocalMediaPanel } from "../overlays/local-media/local-media-panel";
 import { StickersPanel } from "../overlays/stickers/stickers-panel";
 import { TemplateOverlayPanel } from "../overlays/templates/template-overlay-panel";
+import { useEditorContext } from "../../contexts/editor-context";
+import { Button } from "@/components/ui/button";
 
 /**
  * AppSidebar Component
@@ -53,6 +56,7 @@ import { TemplateOverlayPanel } from "../overlays/templates/template-overlay-pan
  */
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { activePanel, setActivePanel, setIsOpen } = useSidebar();
+  const { setSelectedOverlayId, selectedOverlayId } = useEditorContext();
 
   const getPanelTitle = (type: OverlayType): string => {
     switch (type) {
@@ -253,8 +257,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       >
         <SidebarHeader className="gap-3.5 border-b p-3">
           <div className="flex w-full items-center justify-between">
-            <div className="text-base font-medium text-foreground">
-              {activePanel ? getPanelTitle(activePanel) : ""}
+            <div className="flex items-center gap-2">
+              {selectedOverlayId !== null && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setSelectedOverlayId(null)}
+                  aria-label="Back"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              )}
+              <div className="text-base font-medium text-foreground">
+                {activePanel ? getPanelTitle(activePanel) : ""}
+              </div>
             </div>
           </div>
         </SidebarHeader>

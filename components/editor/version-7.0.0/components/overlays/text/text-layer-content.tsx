@@ -5,6 +5,7 @@ import { loadFont as loadInter } from "@remotion/google-fonts/Inter";
 import { loadFont as loadMerriweather } from "@remotion/google-fonts/Merriweather";
 import { loadFont as loadRobotoMono } from "@remotion/google-fonts/RobotoMono";
 import { loadFont as loadVT323 } from "@remotion/google-fonts/VT323";
+import { loadFont as loadLeagueSpartan } from "@remotion/google-fonts/LeagueSpartan";
 import { animationTemplates } from "../../../templates/animation-templates";
 
 // Updated font loading with specific weights and subsets
@@ -27,6 +28,11 @@ const { fontFamily: vt323FontFamily } = loadVT323("normal", {
   subsets: ["latin"],
 });
 
+const { fontFamily: leagueSpartanFontFamily } = loadLeagueSpartan("normal", {
+  weights: ["400", "700"],
+  subsets: ["latin"],
+});
+
 interface TextLayerContentProps {
   overlay: TextOverlay;
 }
@@ -42,6 +48,8 @@ const getFontFamily = (fontClass: string) => {
       return robotoMonoFontFamily;
     case "font-retro":
       return vt323FontFamily;
+    case "font-league-spartan":
+      return leagueSpartanFontFamily;
     default:
       return interFontFamily;
   }
