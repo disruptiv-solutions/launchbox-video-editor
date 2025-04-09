@@ -1,5 +1,6 @@
 import React from "react";
 import { ClipOverlay } from "../../../types";
+import { VideoFilterPresetSelector } from "./video-filter-preset-selector";
 
 /**
  * Props for the VideoStylePanel component
@@ -19,6 +20,7 @@ interface VideoStylePanelProps {
  * - Object fit (cover, contain, fill)
  * - Border radius
  * - Brightness
+ * - Filter presets (retro, vintage, Wes Anderson, etc.)
  *
  * The component uses a local overlay state and propagates changes through the handleStyleChange callback.
  * All style controls maintain both light and dark theme compatibility.
@@ -55,6 +57,12 @@ export const VideoStylePanel: React.FC<VideoStylePanelProps> = ({
             <option value="fill">Fill</option>
           </select>
         </div>
+
+        {/* Filter Preset Selector */}
+        <VideoFilterPresetSelector
+          localOverlay={localOverlay}
+          handleStyleChange={handleStyleChange}
+        />
 
         {/* Border Radius */}
         <div className="space-y-2">
