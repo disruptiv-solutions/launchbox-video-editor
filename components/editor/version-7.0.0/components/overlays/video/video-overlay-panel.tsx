@@ -153,33 +153,37 @@ export const VideoOverlayPanel: React.FC = () => {
             </Button>
           </form>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="columns-2 sm:columns-2 gap-3 space-y-3">
             {isLoading ? (
               Array.from({ length: 16 }).map((_, index) => (
                 <div
                   key={`skeleton-${index}`}
-                  className="relative aspect-video bg-gray-200 dark:bg-gray-800 animate-pulse rounded-sm"
+                  className="relative aspect-video w-full bg-gray-200 dark:bg-gray-800 animate-pulse rounded-sm break-inside-avoid mb-3"
                 />
               ))
             ) : videos.length > 0 ? (
               videos.map((video) => (
                 <button
                   key={video.id}
-                  className="relative aspect-video cursor-pointer border border-transparent  rounded-md"
+                  className="relative block w-full cursor-pointer border border-transparent rounded-md overflow-hidden break-inside-avoid mb-3"
                   onClick={() => handleAddClip(video)}
                 >
                   <div className="relative">
                     <img
                       src={video.image}
                       alt={`Video thumbnail ${video.id}`}
-                      className="rounded-sm object-cover w-full h-full hover:opacity-60 transition-opacity duration-200"
+                      className="w-full h-auto rounded-sm object-cover hover:opacity-60 transition-opacity duration-200"
                     />
                     <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity duration-200" />
                   </div>
                 </button>
               ))
             ) : (
-              <div className="col-span-2 flex flex-col items-center justify-center py-8 text-gray-500"></div>
+              <div className="col-span-full flex flex-col items-center justify-center py-8 text-gray-500">
+                {searchQuery
+                  ? "No videos found. Try another search term."
+                  : "Search for videos to get started."}
+              </div>
             )}
           </div>
         </>
