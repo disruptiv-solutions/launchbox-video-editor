@@ -17,9 +17,9 @@
       "top": 0,
       "width": 1280,
       "height": 720,
-      "durationInFrames": 203,
+      "durationInFrames": 86,
       "from": 0,
-      "id": 0,
+      "id": 337525,
       "rotation": 0,
       "row": 5,
       "isDragging": false,
@@ -40,9 +40,9 @@
       "top": 57,
       "width": 585,
       "height": 296,
-      "durationInFrames": 164,
+      "durationInFrames": 59,
       "from": 19,
-      "id": 1,
+      "id": 863266,
       "row": 0,
       "rotation": 0,
       "isDragging": false,
@@ -63,7 +63,8 @@
         "zIndex": 1,
         "transform": "none",
         "animation": {
-          "enter": "none"
+          "enter": "none",
+          "exit": "scale"
         }
       }
     },
@@ -72,9 +73,9 @@
       "top": 58,
       "width": 585,
       "height": 296,
-      "durationInFrames": 159,
+      "durationInFrames": 54,
       "from": 24,
-      "id": 2,
+      "id": 985874,
       "row": 1,
       "rotation": 0,
       "isDragging": false,
@@ -95,7 +96,8 @@
         "zIndex": 1,
         "transform": "none",
         "animation": {
-          "enter": "none"
+          "enter": "none",
+          "exit": "scale"
         }
       }
     },
@@ -104,9 +106,9 @@
       "top": 58,
       "width": 585,
       "height": 296,
-      "durationInFrames": 154,
+      "durationInFrames": 48,
       "from": 30,
-      "id": 3,
+      "id": 108804,
       "row": 2,
       "rotation": 0,
       "isDragging": false,
@@ -127,7 +129,8 @@
         "zIndex": 1,
         "transform": "none",
         "animation": {
-          "enter": "none"
+          "enter": "none",
+          "exit": "scale"
         }
       }
     },
@@ -136,9 +139,9 @@
       "top": 57,
       "width": 585,
       "height": 296,
-      "durationInFrames": 146,
+      "durationInFrames": 40,
       "from": 38,
-      "id": 4,
+      "id": 51349,
       "row": 3,
       "rotation": 0,
       "isDragging": false,
@@ -159,7 +162,8 @@
         "zIndex": 1,
         "transform": "none",
         "animation": {
-          "enter": "none"
+          "enter": "none",
+          "exit": "scale"
         }
       }
     },
@@ -168,9 +172,9 @@
       "top": 57,
       "width": 585,
       "height": 296,
-      "durationInFrames": 138,
+      "durationInFrames": 32,
       "from": 46,
-      "id": 5,
+      "id": 21742,
       "row": 4,
       "rotation": 0,
       "isDragging": false,
@@ -191,7 +195,8 @@
         "zIndex": 1,
         "transform": "none",
         "animation": {
-          "enter": "none"
+          "enter": "none",
+          "exit": "scale"
         }
       }
     }
