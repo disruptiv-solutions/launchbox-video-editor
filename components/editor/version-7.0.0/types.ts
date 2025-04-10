@@ -370,6 +370,17 @@ export interface EditorContextType {
 }
 
 // Update ImageStyles interface to match ClipOverlay style pattern
+/**
+ * ImageStyles interface defining all the style properties available for image overlays
+ *
+ * @property filter - CSS filter string applying visual effects (can use presets or custom values)
+ * @property borderRadius - Border radius for rounded corners
+ * @property objectFit - How the image should be resized/positioned within its container
+ * @property objectPosition - Positioning of the image within its container
+ * @property boxShadow - CSS box-shadow property for drop shadows
+ * @property border - CSS border property for image borders
+ * @property animation - Enter/exit animation configuration
+ */
 export interface ImageStyles extends BaseStyles {
   filter?: string;
   borderRadius?: string;

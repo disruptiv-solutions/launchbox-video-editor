@@ -1,5 +1,6 @@
 import React from "react";
 import { ImageOverlay } from "../../../types";
+import { MediaFilterPresetSelector } from "../common/media-filter-preset-selector";
 
 /**
  * Props for the ImageStylePanel component
@@ -18,6 +19,7 @@ interface ImageStylePanelProps {
  * Provides controls for various CSS filter properties to modify the image's appearance.
  *
  * Features:
+ * - Filter presets (retro, vintage, noir, etc.)
  * - Brightness adjustment (0-200%)
  * - Maintains existing filters while updating individual properties
  * - Real-time preview of adjustments
@@ -35,7 +37,50 @@ export const ImageStylePanel: React.FC<ImageStylePanelProps> = ({
       <div className="space-y-4 rounded-md bg-muted/50 p-4 border border-border">
         <h3 className="text-sm font-medium text-foreground">Appearance</h3>
 
-        {/* Appearance Settings */}
+        {/* Object Fit Setting */}
+        <div className="space-y-2">
+          <label className="text-xs text-muted-foreground">Fit</label>
+          <select
+            value={localOverlay?.styles?.objectFit ?? "cover"}
+            onChange={(e) =>
+              handleStyleChange({ objectFit: e.target.value as any })
+            }
+            className="w-full bg-background border border-input rounded-md text-xs p-2 hover:border-accent-foreground transition-colors"
+          >
+            <option value="cover">Cover</option>
+            <option value="contain">Contain</option>
+            <option value="fill">Fill</option>
+          </select>
+        </div>
+
+        {/* Filter Preset Selector */}
+        <MediaFilterPresetSelector
+          localOverlay={localOverlay}
+          handleStyleChange={handleStyleChange}
+        />
+
+        {/* Border Radius */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-xs text-muted-foreground">
+              Border Radius
+            </label>
+            <span className="text-xs text-muted-foreground min-w-[40px] text-right">
+              {localOverlay?.styles?.borderRadius ?? "0px"}
+            </span>
+          </div>
+          <input
+            type="number"
+            value={parseInt(localOverlay?.styles?.borderRadius ?? "0")}
+            onChange={(e) =>
+              handleStyleChange({ borderRadius: `${e.target.value}px` })
+            }
+            min="0"
+            className="w-full bg-background border border-input rounded-md text-xs p-2 hover:border-accent-foreground transition-colors"
+          />
+        </div>
+
+        {/* Brightness Control */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <label className="text-xs text-muted-foreground">Brightness</label>

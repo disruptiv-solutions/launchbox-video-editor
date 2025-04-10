@@ -6,5 +6,6 @@ export const templateFiles = [
   "example-4.json",
   "example-5.json",
   "example-6.json",
+  "example-7.json",
   // Add new templates here
 ] as const;

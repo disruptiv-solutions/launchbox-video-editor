@@ -27,6 +27,8 @@ interface ImageLayerContentProps {
  * - Style customization (fit, position, opacity)
  * - Transform effects
  * - Visual effects (filters, shadows, borders)
+ * - Filter presets (retro, vintage, noir, etc.)
+ * - Border radius customization
  *
  * The component handles both the visual presentation and animation
  * timing for image overlays.
@@ -38,6 +40,8 @@ interface ImageLayerContentProps {
  *     src: "path/to/image.jpg",
  *     styles: {
  *       objectFit: "cover",
+ *       filter: "contrast(120%) saturate(110%)", // Can be a preset or custom filter
+ *       borderRadius: "8px",
  *       animation: {
  *         enter: "fadeIn",
  *         exit: "fadeOut"

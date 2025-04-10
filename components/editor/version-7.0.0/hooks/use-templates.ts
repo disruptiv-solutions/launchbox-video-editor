@@ -49,8 +49,8 @@ export const useTemplates = ({
     const imageOverlay = overlays.find(
       (overlay) => overlay.type === OverlayType.IMAGE
     );
-    if (imageOverlay && "content" in imageOverlay) {
-      return imageOverlay.content;
+    if (imageOverlay && "src" in imageOverlay) {
+      return imageOverlay.src;
     }
 
     // Return undefined if no suitable thumbnail found
