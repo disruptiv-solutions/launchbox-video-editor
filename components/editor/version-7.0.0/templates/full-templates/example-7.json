@@ -30,7 +30,9 @@
         "animation": {
           "enter": "fadeIn",
           "exit": "fadeOut"
-        }
+        },
+        "padding": "55px",
+        "paddingBackgroundColor": "#d00120"
       }
     },
     {

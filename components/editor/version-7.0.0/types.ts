@@ -55,6 +55,7 @@ export type TextOverlay = BaseOverlay & {
     textAlign?: "left" | "center" | "right";
     textShadow?: string;
     padding?: string;
+    paddingBackgroundColor?: string;
     borderRadius?: string;
     boxShadow?: string;
     background?: string;
@@ -95,6 +96,8 @@ export type ClipOverlay = BaseOverlay & {
     filter?: string;
     boxShadow?: string;
     border?: string;
+    padding?: string;
+    paddingBackgroundColor?: string;
     animation?: AnimationConfig; // Using shared type
   };
 };
@@ -388,6 +391,8 @@ export interface ImageStyles extends BaseStyles {
   objectPosition?: string;
   boxShadow?: string;
   border?: string;
+  padding?: string;
+  paddingBackgroundColor?: string;
   animation?: AnimationConfig;
 }
 

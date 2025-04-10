@@ -7,7 +7,7 @@ import {
 import { ClipOverlay } from "../../../types";
 import { animationTemplates } from "../../../templates/animation-templates";
 import { toAbsoluteUrl } from "../../../utils/url-helper";
-import { useEffect, useCallback } from "react";
+import { useEffect } from "react";
 
 /**
  * Interface defining the props for the VideoLayerContent component
@@ -103,6 +103,17 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
     ...(isExitPhase ? exitAnimation : enterAnimation),
   };
 
+  // Create a container style that includes padding and background color
+  const containerStyle: React.CSSProperties = {
+    width: "100%",
+    height: "100%",
+    padding: overlay.styles.padding || "0px",
+    backgroundColor: overlay.styles.paddingBackgroundColor || "transparent",
+    display: "flex", // Use flexbox for centering
+    alignItems: "center",
+    justifyContent: "center",
+  };
+
   // Determine the video source URL
   let videoSrc = overlay.src;
 
@@ -116,12 +127,14 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
   }
 
   return (
-    <OffthreadVideo
-      src={videoSrc}
-      startFrom={overlay.videoStartTime || 0}
-      style={videoStyle}
-      volume={overlay.styles.volume ?? 1}
-      playbackRate={overlay.speed ?? 1}
-    />
+    <div style={containerStyle}>
+      <OffthreadVideo
+        src={videoSrc}
+        startFrom={overlay.videoStartTime || 0}
+        style={videoStyle}
+        volume={overlay.styles.volume ?? 1}
+        playbackRate={overlay.speed ?? 1}
+      />
+    </div>
   );
 };

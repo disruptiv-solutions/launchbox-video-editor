@@ -35,7 +35,7 @@ export function usePexelsVideos() {
       // - size: size of videos to fetch
       // - orientation: aspect ratio of videos
       const response = await fetch(
-        `https://api.pexels.com/videos/search?query=${query}&per_page=200&size=medium&orientation=landscape`,
+        `https://api.pexels.com/videos/search?query=${query}&per_page=200&size=medium`,
         {
           headers: {
             Authorization: process.env.NEXT_PUBLIC_PEXELS_API_KEY || "",

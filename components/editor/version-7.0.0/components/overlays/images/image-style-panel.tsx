@@ -1,6 +1,7 @@
 import React from "react";
 import { ImageOverlay } from "../../../types";
 import { MediaFilterPresetSelector } from "../common/media-filter-preset-selector";
+import { MediaPaddingControls } from "../common/media-padding-controls";
 
 /**
  * Props for the ImageStylePanel component
@@ -21,6 +22,7 @@ interface ImageStylePanelProps {
  * Features:
  * - Filter presets (retro, vintage, noir, etc.)
  * - Brightness adjustment (0-200%)
+ * - Padding and padding background controls
  * - Maintains existing filters while updating individual properties
  * - Real-time preview of adjustments
  *
@@ -115,6 +117,12 @@ export const ImageStylePanel: React.FC<ImageStylePanelProps> = ({
             />
           </div>
         </div>
+
+        {/* Media Padding Controls */}
+        <MediaPaddingControls
+          localOverlay={localOverlay}
+          handleStyleChange={handleStyleChange}
+        />
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import React from "react";
 import { ClipOverlay } from "../../../types";
 import { MediaFilterPresetSelector } from "../common/media-filter-preset-selector";
+import { MediaPaddingControls } from "../common/media-padding-controls";
 
 /**
  * Props for the VideoStylePanel component
@@ -21,6 +22,7 @@ interface VideoStylePanelProps {
  * - Border radius
  * - Brightness
  * - Filter presets (retro, vintage, Wes Anderson, etc.)
+ * - Padding and padding background color
  *
  * The component uses a local overlay state and propagates changes through the handleStyleChange callback.
  * All style controls maintain both light and dark theme compatibility.
@@ -120,6 +122,12 @@ export const VideoStylePanel: React.FC<VideoStylePanelProps> = ({
             />
           </div>
         </div>
+
+        {/* Media Padding Controls */}
+        <MediaPaddingControls
+          localOverlay={localOverlay}
+          handleStyleChange={handleStyleChange}
+        />
       </div>
     </div>
   );

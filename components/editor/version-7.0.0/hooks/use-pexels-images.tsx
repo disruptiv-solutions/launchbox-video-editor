@@ -34,7 +34,7 @@ export function usePexelsImages() {
       // - per_page: number of results to return
       // - orientation: aspect ratio of images
       const response = await fetch(
-        `https://api.pexels.com/v1/search?query=${query}&per_page=30&orientation=landscape`,
+        `https://api.pexels.com/v1/search?query=${query}&per_page=200`,
         {
           headers: {
             Authorization: process.env.NEXT_PUBLIC_PEXELS_API_KEY || "",

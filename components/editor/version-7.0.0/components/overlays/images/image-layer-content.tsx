@@ -97,6 +97,19 @@ export const ImageLayerContent: React.FC<ImageLayerContentProps> = ({
     ...(isExitPhase ? exitAnimation : enterAnimation),
   };
 
+  /**
+   * Create a container style that includes padding and background color
+   */
+  const containerStyle: React.CSSProperties = {
+    width: "100%",
+    height: "100%",
+    padding: overlay.styles.padding || "0px",
+    backgroundColor: overlay.styles.paddingBackgroundColor || "transparent",
+    display: "flex", // Use flexbox for centering
+    alignItems: "center",
+    justifyContent: "center",
+  };
+
   // Determine the image source URL
   let imageSrc = overlay.src;
 
@@ -109,5 +122,9 @@ export const ImageLayerContent: React.FC<ImageLayerContentProps> = ({
     imageSrc = toAbsoluteUrl(overlay.src);
   }
 
-  return <Img src={imageSrc} style={imageStyle} alt="" />;
+  return (
+    <div style={containerStyle}>
+      <Img src={imageSrc} style={imageStyle} alt="" />
+    </div>
+  );
 };
