@@ -39,7 +39,7 @@ const GhostMarker: React.FC<GhostMarkerProps> = ({
         height: "calc(100% + 0px)",
       }}
     >
-      <div className="w-0 h-0 border-l-[5px] border-r-[5px] border-t-[8px] border-l-transparent border-r-transparent border-t-sky-500 dark:border-t-blue-500 absolute top-[0px] left-1/2 transform -translate-x-1/2" />
+      <div className="w-0 h-0 border-l-[5px] border-r-[5px] border-t-[8px] border-l-transparent border-r-transparent border-t-sky-500 dark:border-t-blue-500 absolute top-[0px] left-1/2 transform -translate-x-1/2 pointer-events-none" />
     </div>
   );
 };

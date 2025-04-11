@@ -127,24 +127,29 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
       ])
       .sort((a, b) => a.time - b.time);
 
-    return timePoints.reduce((gaps, point, index, points) => {
-      // Handle gap at the start
-      if (index === 0 && point.time > 0) {
-        gaps.push({ start: 0, end: point.time });
+    // Handle special case: if no items start at 0, add a gap from 0
+    const gaps: { start: number; end: number }[] = [];
+
+    // Handle gap at the start
+    if (timePoints.length > 0 && timePoints[0].time > 0) {
+      gaps.push({ start: 0, end: timePoints[0].time });
+    }
+
+    // Handle gaps between items
+    for (let i = 0; i < timePoints.length - 1; i++) {
+      const currentPoint = timePoints[i];
+      const nextPoint = timePoints[i + 1];
+
+      if (
+        currentPoint.type === "end" &&
+        nextPoint.type === "start" &&
+        nextPoint.time > currentPoint.time
+      ) {
+        gaps.push({ start: currentPoint.time, end: nextPoint.time });
       }
+    }
 
-      // Handle gaps between items
-      if (index < points.length - 1) {
-        const currentTime = point.type === "end" ? point.time : null;
-        const nextTime = points[index + 1].time;
-
-        if (currentTime !== null && nextTime - currentTime > 0) {
-          gaps.push({ start: currentTime, end: nextTime });
-        }
-      }
-
-      return gaps;
-    }, [] as { start: number; end: number }[]);
+    return gaps;
   };
 
   return (
@@ -158,6 +163,13 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
             (overlay) => overlay.row === rowIndex
           );
           const gaps = findGapsInRow(rowItems);
+
+          // Debug log for first row gaps
+          if (rowIndex === 0) {
+            console.log("First row items:", rowItems);
+            console.log("First row gaps:", gaps);
+            console.log("isDragging state:", isDragging);
+          }
 
           return (
             <div
@@ -220,6 +232,16 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
                     onRemoveGap={onRemoveGap}
                   />
                 ))}
+
+              {/* Render a debug indicator for the first row if no gaps were found */}
+              {rowIndex === 0 && gaps.length === 0 && !isDragging && (
+                <div
+                  className="absolute top-0 left-0 text-xs text-red-500 p-1 z-50 bg-white/80"
+                  style={{ pointerEvents: "none" }}
+                >
+                  No gaps found in first row
+                </div>
+              )}
 
               {/* Ghost element with updated colors */}
               {ghostElement &&

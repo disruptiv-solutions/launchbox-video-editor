@@ -31,15 +31,22 @@ export default function GapIndicator({
 }: GapIndicatorProps) {
   return (
     <div
-      className="absolute inset-y-0 cursor-pointer group"
+      className="absolute top-0 bottom-0 w-full h-full cursor-pointer group z-10"
       style={{
         left: `${(gap.start / totalDuration) * 100}%`,
         width: `${((gap.end - gap.start) / totalDuration) * 100}%`,
       }}
-      onClick={() => onRemoveGap?.(rowIndex, gap.start, gap.end)}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (onRemoveGap) {
+          onRemoveGap(rowIndex, gap.start, gap.end);
+        } else {
+          console.warn(`No onRemoveGap handler for row ${rowIndex}`);
+        }
+      }}
     >
       <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-200"
+        className="absolute top-0 bottom-0 left-0 right-0 w-full h-full opacity-0 group-hover:opacity-100 transition-all duration-200"
         style={{
           background: `repeating-linear-gradient(
             -45deg,
@@ -48,9 +55,10 @@ export default function GapIndicator({
             rgba(100, 116, 139, 0.05) 8px,
             rgba(100, 116, 139, 0.05) 16px
           )`,
+          border: "1px dashed rgba(100, 116, 139, 0.2)",
         }}
       />
-      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute inset-0 flex items-center justify-center">
+      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute top-0 bottom-0 left-0 right-0 w-full h-full flex items-center justify-center">
         <div className="bg-slate-900/60 dark:bg-black/70 rounded-full p-1.5 backdrop-blur-sm">
           <CloseIcon />
         </div>
