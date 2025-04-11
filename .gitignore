@@ -25,6 +25,7 @@
 
 # rendered videos
 /public/rendered-videos/
+/public/users
 
 # debug
 npm-debug.log*
