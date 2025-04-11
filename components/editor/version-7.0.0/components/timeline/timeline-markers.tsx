@@ -65,6 +65,7 @@ const TimeMarkers = ({
         <div
           key={time}
           className="absolute top-0 flex flex-col items-center"
+          data-timeline-marker="tick"
           style={{
             left: `${(time / totalSeconds) * 100}%`,
             transform: "translateX(-50%)",
@@ -82,6 +83,7 @@ const TimeMarkers = ({
               transition-all duration-150 ease-in-out
               group-hover:bg-blue-500/50 dark:group-hover:bg-blue-300/50
             `}
+            data-timeline-marker="indicator"
           />
           {shouldShowLabel && (
             <span
@@ -95,6 +97,7 @@ const TimeMarkers = ({
                 mt-0.5 select-none
                 duration-150
               `}
+              data-timeline-marker="label"
             >
               {minutes > 0
                 ? `${minutes}m ${seconds.toString().padStart(2, "0")}s`
@@ -113,15 +116,22 @@ const TimeMarkers = ({
   /**
    * Handles click events on the timeline
    * Calculates the relative position of the click and calls the handler
+   * Only processes clicks that originated on the timeline markers, not bubbled from items
    */
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
-      const { left, width } = event.currentTarget.getBoundingClientRect();
-      const clickPosition = (event.clientX - left) / width;
-      // Convert click position to frame-accurate position
-      const framePosition =
-        Math.round(clickPosition * durationInFrames) / durationInFrames;
-      handleTimelineClick(framePosition);
+      // Only process clicks that originated on the timeline itself, not from items
+      if (
+        event.target === event.currentTarget ||
+        (event.target as HTMLElement).closest("[data-timeline-marker]")
+      ) {
+        const { left, width } = event.currentTarget.getBoundingClientRect();
+        const clickPosition = (event.clientX - left) / width;
+        // Convert click position to frame-accurate position
+        const framePosition =
+          Math.round(clickPosition * durationInFrames) / durationInFrames;
+        handleTimelineClick(framePosition);
+      }
     },
     [handleTimelineClick, durationInFrames]
   );
@@ -131,6 +141,7 @@ const TimeMarkers = ({
       className="absolute top-0 left-0 right-0 h-12  
         cursor-pointer
         z-10"
+      data-timeline-marker="root"
       onClick={handleClick}
     >
       {generateMarkers()}

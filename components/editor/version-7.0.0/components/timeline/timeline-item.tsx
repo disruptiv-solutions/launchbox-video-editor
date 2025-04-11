@@ -140,11 +140,20 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
     if (action === "click") {
       setSelectedItem({ id: item.id });
     } else if (action === "mousedown") {
+      // Always select the item first before starting a drag operation
+      if (!isSelected) {
+        setSelectedItem({ id: item.id });
+      }
       handleMouseDown("move", e as React.MouseEvent<HTMLDivElement>);
     } else if (action === "touchstart") {
       // Instead of immediately starting drag, we'll delay to distinguish between tap and drag
       const touchEvent = e as React.TouchEvent<HTMLDivElement>;
       const touch = touchEvent.touches[0];
+
+      // Select the item on touch start (before determining if it's a drag)
+      if (!isSelected) {
+        setSelectedItem({ id: item.id });
+      }
 
       // Record touch start time and position
       setTouchStartTime(Date.now());
@@ -418,14 +427,26 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
         style={{
           left: `${(item.from / totalDuration) * 100}%`,
           width: `${(item.durationInFrames / totalDuration) * 100}%`,
-          zIndex: isDragging ? 1 : 30,
+          zIndex: isDragging ? 1 : isSelected ? 35 : 30, // Increase z-index when selected
           transition: "transform 0.2s, opacity 0.2s",
         }}
-        onMouseDown={(e) => handleItemInteraction(e, "mousedown")}
-        onTouchStart={(e) => handleItemInteraction(e, "touchstart")}
+        onMouseDown={(e) => {
+          e.stopPropagation(); // Prevent event bubbling
+          handleItemInteraction(e, "mousedown");
+        }}
+        onTouchStart={(e) => {
+          e.stopPropagation(); // Prevent event bubbling
+          handleItemInteraction(e, "touchstart");
+        }}
         onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onClick={handleSelect}
+        onTouchEnd={(e) => {
+          e.stopPropagation(); // Prevent event bubbling
+          handleTouchEnd(e);
+        }}
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent event bubbling to timeline click handlers
+          handleSelect(e);
+        }}
         onMouseMove={handleMouseMove}
       >
         {renderContent()}
@@ -434,10 +455,16 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
           isSelected={isSelected}
           onMouseDown={(e) => {
             e.stopPropagation();
+            if (!isSelected) {
+              setSelectedItem({ id: item.id });
+            }
             handleMouseDown("resize-start", e);
           }}
           onTouchStart={(e) => {
             e.stopPropagation();
+            if (!isSelected) {
+              setSelectedItem({ id: item.id });
+            }
             handleTouchStart("resize-start", e);
           }}
         />
@@ -446,10 +473,16 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
           isSelected={isSelected}
           onMouseDown={(e) => {
             e.stopPropagation();
+            if (!isSelected) {
+              setSelectedItem({ id: item.id });
+            }
             handleMouseDown("resize-end", e);
           }}
           onTouchStart={(e) => {
             e.stopPropagation();
+            if (!isSelected) {
+              setSelectedItem({ id: item.id });
+            }
             handleTouchStart("resize-end", e);
           }}
         />

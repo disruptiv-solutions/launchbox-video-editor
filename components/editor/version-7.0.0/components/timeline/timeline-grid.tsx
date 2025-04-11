@@ -233,16 +233,6 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
                   />
                 ))}
 
-              {/* Render a debug indicator for the first row if no gaps were found */}
-              {rowIndex === 0 && gaps.length === 0 && !isDragging && (
-                <div
-                  className="absolute top-0 left-0 text-xs text-red-500 p-1 z-50 bg-white/80"
-                  style={{ pointerEvents: "none" }}
-                >
-                  No gaps found in first row
-                </div>
-              )}
-
               {/* Ghost element with updated colors */}
               {ghostElement &&
                 Math.floor(ghostElement.top / (100 / visibleRows)) ===
