@@ -202,9 +202,9 @@ const RenderControls: React.FC<RenderControlsProps> = ({
       <Button
         onClick={handleRender}
         size="sm"
-        variant="default"
+        variant="outline"
         disabled={state.status === "rendering" || state.status === "invoking"}
-        className="bg-primary hover:bg-primary/90"
+        className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
       >
         {state.status === "rendering" ? (
           <>
@@ -217,7 +217,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
             Preparing...
           </>
         ) : (
-          `Render Video (${renderType === "ssr" ? "SSR" : "Lambda"})`
+          `Render Video`
         )}
       </Button>
     </>
