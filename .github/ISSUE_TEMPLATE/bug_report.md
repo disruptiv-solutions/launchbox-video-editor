@@ -1,34 +1,43 @@
 ---
 name: Bug Report
-about: Report a bug in the project
-title: "[Bug]"
+about: Create a report to help us improve
+title: "[BUG]"
 labels: bug
 assignees: ""
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Describe the Bug**
+A clear and concise description of what the bug is. Please include specific details.
 
 **Version / Branch**
 
 > e.g. version-6
 
-**To Reproduce**
-Steps to reproduce the behavior:
+**Steps to Reproduce**
+Please provide detailed steps to reproduce the behavior:
 
 1. Go to '...'
 2. Click on '...'
+3. Scroll down to '...'
+4. See error
 
-**Expected behavior**
-What you expected to happen.
+**Expected Behavior**
+A clear and concise description of what you expected to happen.
+
+**Actual Behavior**
+A clear and concise description of what actually happened.
 
 **Screenshots**
-If applicable, add screenshots to help explain.
+If applicable, add screenshots to help explain your problem.
 
-**Environment**
+**Environment (please complete the following information):**
 
-- OS: [e.g. MacOS]
-- Browser: [e.g. Chrome]
+- OS: [e.g. macOS Sonoma 14.3]
+- Browser [e.g. Chrome 120.0.6099.129, Safari 17.3]
+- Project Version / Branch [e.g. main, v2.1.0]
 
-**Additional context**
+**Logs**
+If applicable, please provide any relevant logs from your browser's developer console or server logs.
+
+**Additional Context**
 Add any other context about the problem here.
