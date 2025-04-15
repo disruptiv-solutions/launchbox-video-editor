@@ -98,9 +98,23 @@ export default function VersionChangeLog() {
                       {version.status || "Stable"}
                     </span>
                   </div>
-                  <div className="mt-2 mb-4 text-xs md:text-base lg:text-base text-zinc-100 ">
+                  <div className="mt-2 mb-4 text-xs md:text-sm lg:text-sm text-zinc-100 ">
                     <p>{version?.description || "No description available."}</p>
                   </div>
+                  <div className="border-t border-gray-700 mb-0"></div>
+
+                  {version.branch && (
+                    <div className="py-4 flex items-center gap-3 text-sm">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-zinc-400">Branch:</span>
+                          <code className="px-2 py-0.5 rounded bg-slate-700/50 text-blue-300 border border-slate-600">
+                            {version.branch}
+                          </code>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <div className="border-t border-gray-700 mb-4"></div>
                   {version.status === "BETA" && (
                     <div className="mb-6 p-4 rounded-lg bg-amber-900/20 border border-amber-700">
@@ -170,19 +184,6 @@ export default function VersionChangeLog() {
                         {version.founderNotes.split("||").map((note, index) => (
                           <p key={index}>{note.trim()}</p>
                         ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {version.branch && (
-                    <div className="mt-4 flex items-center gap-3 text-sm">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-zinc-400">Branch:</span>
-                          <code className="px-2 py-0.5 rounded bg-slate-700/50 text-blue-300 border border-slate-600">
-                            {version.branch}
-                          </code>
-                        </div>
                       </div>
                     </div>
                   )}
