@@ -37,8 +37,6 @@ export const Layer: React.FC<{
       height: overlay.height,
       transform: `rotate(${overlay.rotation || 0}deg)`,
       transformOrigin: "center center",
-      maxWidth: "100%",
-      maxHeight: "100%",
       zIndex,
       pointerEvents: isSelected ? "all" : "none",
     };
