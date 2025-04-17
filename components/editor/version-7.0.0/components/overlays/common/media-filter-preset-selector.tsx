@@ -1,13 +1,7 @@
 import React, { useState } from "react";
-import { Info, ChevronDown, Check } from "lucide-react";
+import { ChevronDown, Check } from "lucide-react";
 import { MEDIA_FILTER_PRESETS } from "../../../templates/common/media-filter-presets";
 import { ClipOverlay, ImageOverlay } from "../../../types";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface MediaFilterPresetSelectorProps {
   localOverlay: ClipOverlay | ImageOverlay;
@@ -106,19 +100,6 @@ export const MediaFilterPresetSelector: React.FC<
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <label className="text-xs text-muted-foreground">Filter Preset</label>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button className="flex h-4 w-4 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                  <Info className="h-3 w-3" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs text-xs">
-                Apply pre-defined filters. Note: Individual adjustments like
-                brightness may be preserved when switching filters.
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
         </div>
       </div>
 

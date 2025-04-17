@@ -44,6 +44,7 @@ const outer: React.CSSProperties = {
 
 const layerContainer: React.CSSProperties = {
   overflow: "hidden",
+  maxWidth: "3000px",
 };
 
 /**
