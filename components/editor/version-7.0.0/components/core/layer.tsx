@@ -41,10 +41,13 @@ export const Layer: React.FC<{
       transform: `rotate(${overlay.rotation || 0}deg)`,
       transformOrigin: "center center",
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
       maxWidth: "300%",
       maxHeight: "300%",
 >>>>>>> b2bbd55 (Fix image / video resizing where image and video gets cut off)
+=======
+>>>>>>> 47419a4 (Remove max width and height)
       zIndex,
       pointerEvents: isSelected ? "all" : "none",
     };
