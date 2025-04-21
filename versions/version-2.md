@@ -8,5 +8,6 @@ changes:
   - "Implemented context menu for quick actions"
   - "Refactored code into reusable components"
   - "Improved timeline accuracy and visual feedback"
-status: "Legacy"
+status: "Archived"
+branch: "-"
 ---

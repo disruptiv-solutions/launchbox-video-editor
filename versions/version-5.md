@@ -15,5 +15,6 @@ changes:
   - Timeline Space Optimization
   - Comprehensive Bug Fixes and Stability Improvements
 image: "/images/react-video-editor-version-5.png"
-status: "Latest"
+status: "Stable"
+branch: "version-5"
 ---

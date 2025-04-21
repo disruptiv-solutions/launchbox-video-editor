@@ -14,5 +14,6 @@ changes:
   - Versioned Rendering API with Aspect Ratio Support
   - Performance and State Management Optimizations
 image: "/images/react-video-editor-version-4.png"
-status: "Legacy"
+status: "Archived"
+branch: "-"
 ---

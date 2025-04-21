@@ -36,12 +36,12 @@ export default function VersionChangeLog() {
               <article
                 key={version.version}
                 className={`relative group bg-slate-800 md:p-8 p-4 md:mb-0 mb-10 rounded-lg border border-gray-700 ${
-                  version.status !== "Legacy" ? "hover:border-blue-200" : ""
+                  version.status !== "Archived" ? "hover:border-blue-200" : ""
                 }`}
               >
                 <div
                   className={`absolute -inset-y-2.5 -inset-x-4 md:-inset-y-4 md:-inset-x-6 sm:rounded-2xl duration-300 ${
-                    version.status === "Legacy" ? "pointer-events-none" : ""
+                    version.status === "Archived" ? "pointer-events-none" : ""
                   }`}
                 ></div>
                 <svg
@@ -62,13 +62,13 @@ export default function VersionChangeLog() {
                   ></circle>
                 </svg>
                 <div className="relative">
-                  {version.status === "Legacy" && (
+                  {version.status === "Archived" && (
                     <div className="mb-6 p-4 rounded-lg bg-red-900/20 border border-red-700">
                       <div className="flex items-start gap-3">
                         <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5" />
                         <div>
                           <h4 className="text-sm font-medium text-red-400">
-                            Legacy Version Notice
+                            Archived Version Notice
                           </h4>
                           <p className="mt-1 text-xs text-red-300">
                             This version has been removed from the codebase and
@@ -88,19 +88,33 @@ export default function VersionChangeLog() {
                       className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
                         index === 0
                           ? "bg-amber-400/10 text-amber-400 ring-amber-400/30"
-                          : version.status === "Legacy"
+                          : version.status === "Archived"
                           ? "bg-red-400/10 text-red-400 ring-red-400/30"
-                          : version.status === "Beginner"
-                          ? "bg-green-400/10 text-green-400 ring-green-400/30"
-                          : "bg-purple-400/10 text-purple-400 ring-purple-400/30"
+                          : version.status === "Latest"
+                          ? "bg-purple-400/10 text-purple-400 ring-purple-400/30"
+                          : "bg-green-400/10 text-green-400 ring-green-400/30"
                       }`}
                     >
                       {version.status || "Stable"}
                     </span>
                   </div>
-                  <div className="mt-2 mb-4 text-xs md:text-base lg:text-base text-zinc-100 ">
+                  <div className="mt-2 mb-4 text-xs md:text-sm lg:text-sm text-zinc-100 ">
                     <p>{version?.description || "No description available."}</p>
                   </div>
+                  <div className="border-t border-gray-700 mb-0"></div>
+
+                  {version.branch && (
+                    <div className="py-4 flex items-center gap-3 text-sm">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-zinc-400">Branch:</span>
+                          <code className="px-2 py-0.5 rounded bg-slate-700/50 text-blue-300 border border-slate-600">
+                            {version.branch}
+                          </code>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <div className="border-t border-gray-700 mb-4"></div>
                   {version.status === "BETA" && (
                     <div className="mb-6 p-4 rounded-lg bg-amber-900/20 border border-amber-700">
@@ -174,7 +188,7 @@ export default function VersionChangeLog() {
                     </div>
                   )}
                 </div>
-                {version.status !== "Legacy" && (
+                {index === 0 && (
                   <Link
                     href={`/versions/${version.version}`}
                     className="mt-6 flex items-center text-sm text-blue-300 font-medium"
