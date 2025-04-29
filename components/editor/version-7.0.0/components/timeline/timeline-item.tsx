@@ -404,7 +404,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
         // way to clear the keyframe cache before deleting the item without
         // messing around with the useKeyframes context and providers
         if (item.type === OverlayType.VIDEO) {
-          keyframeContext.clearKeyframes(itemId);
+          keyframeContext.clearKeyframes(String(itemId));
         }
         onDeleteItem(itemId);
       }}
