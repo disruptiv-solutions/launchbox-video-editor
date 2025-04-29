@@ -167,12 +167,14 @@ export const useKeyframes = ({
       const MAX_RETRIES = 3;
 
       // Check cache first but also verify cache integrity
-      const cachedFrames = getKeyframes(overlayMeta.id);
+      const overlayIdString = String(overlayMeta.id);
+      const cachedFrames = getKeyframes(overlayIdString);
       if (
         cachedFrames &&
         cachedFrames.frames &&
         cachedFrames.frames.length > 0 &&
         cachedFrames.frames.every((frame) => frame?.startsWith("data:image")) &&
+        cachedFrames.durationInFrames === overlayMeta.durationInFrames &&
         Date.now() - cachedFrames.lastUpdated < 300000
       ) {
         setFrames(
@@ -459,9 +461,10 @@ export const useKeyframes = ({
 
       // Only cache if we got enough frames
       if (extractedFrames.length >= Math.ceil(frameCount * 0.7)) {
-        updateKeyframes(overlayMeta.id, {
+        updateKeyframes(overlayIdString, {
           frames: extractedFrames.map((f) => f.dataUrl),
           previewFrames: extractedFrames.map((f) => f.frameNumber),
+          durationInFrames: overlayMeta.durationInFrames!,
           lastUpdated: Date.now(),
         });
       } else {

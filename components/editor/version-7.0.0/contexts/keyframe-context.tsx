@@ -5,20 +5,22 @@ import React, { createContext, useContext, useCallback, useState } from "react";
  * @interface KeyframeData
  * @property {string[]} frames - Array of keyframe data strings
  * @property {number[]} previewFrames - Array of frame indices used for preview
+ * @property {number} durationInFrames - The duration for which these frames were generated
  * @property {number} lastUpdated - Timestamp of the last update
  */
 interface KeyframeData {
   frames: string[];
   previewFrames: number[];
+  durationInFrames: number;
   lastUpdated: number;
 }
 
 /**
- * Cache structure mapping overlay IDs to their keyframe data
+ * Cache structure mapping overlay IDs (as strings) to their keyframe data
  * @interface KeyframeCache
  */
 interface KeyframeCache {
-  [overlayId: number]: KeyframeData;
+  [overlayId: string]: KeyframeData;
 }
 
 /**
@@ -26,9 +28,9 @@ interface KeyframeCache {
  * @interface KeyframeContextValue
  */
 interface KeyframeContextValue {
-  getKeyframes: (overlayId: number) => KeyframeData | null;
-  updateKeyframes: (overlayId: number, data: KeyframeData) => void;
-  clearKeyframes: (overlayId: number) => void;
+  getKeyframes: (overlayId: string) => KeyframeData | null;
+  updateKeyframes: (overlayId: string, data: KeyframeData) => void;
+  clearKeyframes: (overlayId: string) => void;
   clearAllKeyframes: () => void;
 }
 
@@ -66,7 +68,7 @@ export const KeyframeProvider: React.FC<{ children: React.ReactNode }> = ({
   const [cache, setCache] = useState<KeyframeCache>({});
 
   const getKeyframes = useCallback(
-    (overlayId: number) => {
+    (overlayId: string) => {
       console.log(
         "[KeyframeContext] Getting keyframes for overlay:",
         overlayId,
@@ -79,7 +81,7 @@ export const KeyframeProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const updateKeyframes = useCallback(
-    (overlayId: number, data: KeyframeData) => {
+    (overlayId: string, data: KeyframeData) => {
       console.log(
         "[KeyframeContext] Updating keyframes for overlay:",
         overlayId,
@@ -87,6 +89,7 @@ export const KeyframeProvider: React.FC<{ children: React.ReactNode }> = ({
         {
           framesCount: data.frames.length,
           previewFrames: data.previewFrames,
+          durationInFrames: data.durationInFrames,
           lastUpdated: data.lastUpdated,
         }
       );
@@ -105,7 +108,7 @@ export const KeyframeProvider: React.FC<{ children: React.ReactNode }> = ({
     []
   );
 
-  const clearKeyframes = useCallback((overlayId: number) => {
+  const clearKeyframes = useCallback((overlayId: string) => {
     console.log("[KeyframeContext] Clearing keyframes for overlay:", overlayId);
     setCache((prev) => {
       const newCache = { ...prev };
