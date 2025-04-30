@@ -19,9 +19,14 @@ import TimelineGrid from "./timeline-grid";
 import TimelineMarker from "./timeline-marker";
 import TimeMarkers from "./timeline-markers";
 import { Grip, Loader2 } from "lucide-react";
-import { ROW_HEIGHT, SHOW_LOADING_PROJECT_ALERT } from "../../constants";
+import {
+  ROW_HEIGHT,
+  SHOW_LOADING_PROJECT_ALERT,
+  SNAPPING_CONFIG,
+} from "../../constants";
 import { useAssetLoading } from "../../contexts/asset-loading-context";
 import { MobileNavBar } from "../mobile/mobile-nav-bar";
+import { useTimelineSnapping } from "../../hooks/use-timeline-snapping";
 
 interface TimelineProps {
   /** Array of overlay objects to be displayed on the timeline */
@@ -80,8 +85,9 @@ const Timeline: React.FC<TimelineProps> = ({
   const {
     isDragging,
     draggedItem,
-    ghostElement,
+    ghostElement, // Raw ghost from hook
     ghostMarkerPosition,
+    livePushOffsets,
     dragInfo,
     handleDragStart: timelineStateHandleDragStart,
     updateGhostElement,
@@ -111,6 +117,18 @@ const Timeline: React.FC<TimelineProps> = ({
       setGhostMarkerPosition,
     });
 
+  // Call the new snapping hook
+  const { alignmentLines, snappedGhostElement } = useTimelineSnapping({
+    isDragging,
+    ghostElement,
+    draggedItem,
+    dragInfo,
+    overlays,
+    durationInFrames,
+    visibleRows,
+    snapThreshold: SNAPPING_CONFIG.thresholdFrames,
+  });
+
   // Event Handlers
   const combinedHandleDragStart = useCallback(
     (
@@ -123,14 +141,6 @@ const Timeline: React.FC<TimelineProps> = ({
       handleDragStart(overlay, clientX, clientY, action);
     },
     [timelineStateHandleDragStart, handleDragStart]
-  );
-
-  const handleTimelineClick = useCallback(
-    (clickPosition: number) => {
-      const newFrame = Math.round(clickPosition * durationInFrames);
-      setCurrentFrame(newFrame);
-    },
-    [durationInFrames, setCurrentFrame]
   );
 
   const handleDeleteItem = useCallback(
@@ -168,27 +178,23 @@ const Timeline: React.FC<TimelineProps> = ({
   );
 
   const handleRemoveGap = useCallback(
-    (rowIndex: number, gapStart: number) => {
-      // Find all items that come after the gap in the same row
+    (rowIndex: number, gapStart: number, gapEnd: number) => {
       const overlaysToShift = overlays
-        .filter(
-          (overlay) => overlay.row === rowIndex && overlay.from > gapStart
-        )
+        .filter((overlay) => overlay.row === rowIndex && overlay.from >= gapEnd)
         .sort((a, b) => a.from - b.from);
 
       if (overlaysToShift.length === 0) return;
 
-      // Calculate the gap size based on the first overlay after the gap
       const firstOverlayAfterGap = overlaysToShift[0];
       const gapSize = firstOverlayAfterGap.from - gapStart;
 
-      // Create all updates at once
+      if (gapSize <= 0) return;
+
       const updates = overlaysToShift.map((overlay) => ({
         ...overlay,
         from: overlay.from - gapSize,
       }));
 
-      // Apply all updates
       updates.forEach((update) => onOverlayChange(update));
     },
     [overlays, onOverlayChange]
@@ -369,7 +375,7 @@ const Timeline: React.FC<TimelineProps> = ({
               <div className="h-[1.3rem]">
                 <TimeMarkers
                   durationInFrames={durationInFrames}
-                  handleTimelineClick={handleTimelineClick}
+                  handleTimelineClick={setCurrentFrame}
                   zoomScale={zoomScale}
                 />
               </div>
@@ -397,7 +403,8 @@ const Timeline: React.FC<TimelineProps> = ({
                 setSelectedOverlayId={setSelectedOverlayId}
                 handleDragStart={combinedHandleDragStart}
                 totalDuration={durationInFrames}
-                ghostElement={ghostElement}
+                ghostElement={snappedGhostElement}
+                livePushOffsets={livePushOffsets}
                 onDeleteItem={handleDeleteItem}
                 onDuplicateItem={handleDuplicateItem}
                 onSplitItem={handleSplitItem}
@@ -405,10 +412,10 @@ const Timeline: React.FC<TimelineProps> = ({
                 onContextMenuChange={handleContextMenuChange}
                 onRemoveGap={handleRemoveGap}
                 zoomScale={zoomScale}
-                onReorderRows={handleReorderRows}
                 draggedRowIndex={draggedRowIndex}
                 dragOverRowIndex={dragOverRowIndex}
                 onAssetLoadingChange={handleAssetLoadingChange}
+                alignmentLines={alignmentLines}
               />
 
               {/* Loading Indicator - Only shows during initial project load */}

@@ -45,6 +45,15 @@ export const ZOOM_CONSTRAINTS = {
   easing: "cubic-bezier(0.4, 0.0, 0.2, 1)", // Smooth easing function for zoom transitions
 };
 
+// Timeline Snapping configuration
+export const SNAPPING_CONFIG = {
+  thresholdFrames: 1, // Default snapping sensitivity in frames
+  enableVerticalSnapping: true, // Enable snapping to items in adjacent rows
+};
+
+// Add new constant for push behavior
+export const ENABLE_PUSH_ON_DRAG = false; // Set to false to disable pushing items on drag
+
 // Render configuration
 // NOTE: TO CHANGE RENDER TYPE, UPDATE THE RENDER_TYPE CONSTANT
 export const RENDER_TYPE: "ssr" | "lambda" = "lambda";

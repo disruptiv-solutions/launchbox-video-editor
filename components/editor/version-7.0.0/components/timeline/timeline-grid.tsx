@@ -10,6 +10,7 @@ import { useTimeline } from "../../contexts/timeline-context";
 import { Overlay } from "../../types";
 import GapIndicator from "./timeline-gap-indicator";
 import TimelineItem from "./timeline-item";
+import { SNAPPING_CONFIG } from "../../constants";
 
 /**
  * Props for the TimelineGrid component
@@ -35,12 +36,14 @@ interface TimelineGridProps {
   ) => void;
   /** Total duration of the timeline in seconds */
   totalDuration: number;
-  /** Visual element showing drag preview */
+  /** Visual element showing drag preview (snapped) */
   ghostElement: {
     left: number; // Position from left as percentage
     width: number; // Width as percentage
     top: number; // Vertical position
   } | null;
+  /** Live push offsets during drag (from useTimelineState) */
+  livePushOffsets: Map<number, number>; // <itemId, pushDistanceInFrames>
   /** Callback to delete an overlay item */
   onDeleteItem: (id: number) => void;
   /** Callback to duplicate an overlay item */
@@ -52,7 +55,7 @@ interface TimelineGridProps {
   /** Callback when context menu state changes */
   onContextMenuChange: (open: boolean) => void;
   /** Callback to remove gap between items */
-  onRemoveGap?: (rowIndex: number, gapStart: number, gapEnd: number) => void;
+  onRemoveGap?: (rowIndex: number, gapStart: number, gapEnd: number) => void; // Revert signature
   /** Current frame of the timeline */
   currentFrame: number;
   /** Zoom scale of the timeline */
@@ -65,6 +68,8 @@ interface TimelineGridProps {
   dragOverRowIndex: number | null;
   /** Callback when asset loading state changes */
   onAssetLoadingChange?: (overlayId: number, isLoading: boolean) => void;
+  /** Array of calculated frame positions for alignment lines */
+  alignmentLines: number[];
 }
 
 /**
@@ -79,6 +84,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
   handleDragStart,
   totalDuration,
   ghostElement,
+  livePushOffsets,
   onDeleteItem,
   onDuplicateItem,
   onSplitItem,
@@ -90,6 +96,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
   draggedRowIndex,
   dragOverRowIndex,
   onAssetLoadingChange,
+  alignmentLines,
 }) => {
   const { visibleRows } = useTimeline();
 
@@ -157,7 +164,24 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
       className="relative overflow-x-auto overflow-y-hidden bg-white dark:bg-gray-900 h-full"
       style={{ height: `${visibleRows * ROW_HEIGHT}px` }}
     >
+      {/* Container for Rows and Alignment Lines */}
       <div className="absolute inset-0 flex flex-col gap-2 pt-2 pb-2">
+        {/* Render Alignment Lines - Conditionally visible and higher contrast */}
+        {isDragging &&
+          SNAPPING_CONFIG.enableVerticalSnapping &&
+          alignmentLines.map((frame) => (
+            <div
+              key={`align-${frame}`}
+              className="absolute top-0 bottom-0 w-px border-r border-dashed border-gray-500 dark:border-gray-200 z-40 pointer-events-none"
+              style={{
+                left: `${(frame / totalDuration) * 100}%`,
+                height: "100%", // Ensure line spans full grid height
+              }}
+              aria-hidden="true"
+            />
+          ))}
+
+        {/* Render Rows (existing code) */}
         {Array.from({ length: visibleRows }).map((_, rowIndex) => {
           const rowItems = overlays.filter(
             (overlay) => overlay.row === rowIndex
@@ -189,37 +213,47 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
                     : ""
                 }`}
             >
-              {rowItems.map((overlay) => (
-                <TimelineItem
-                  key={overlay.id}
-                  item={overlay}
-                  isDragging={isDragging}
-                  draggedItem={draggedItem}
-                  selectedItem={selectedItem}
-                  setSelectedItem={(item) => setSelectedOverlayId(item.id)}
-                  handleMouseDown={(action, e) =>
-                    handleDragStart(overlay, e.clientX, e.clientY, action)
-                  }
-                  handleTouchStart={(action, e) => {
-                    const touch = e.touches[0];
-                    handleDragStart(
-                      overlay,
-                      touch.clientX,
-                      touch.clientY,
-                      action
-                    );
-                  }}
-                  totalDuration={totalDuration}
-                  onDeleteItem={onDeleteItem}
-                  onDuplicateItem={onDuplicateItem}
-                  onSplitItem={onSplitItem}
-                  onHover={onHover}
-                  onContextMenuChange={onContextMenuChange}
-                  currentFrame={currentFrame}
-                  zoomScale={zoomScale}
-                  onAssetLoadingChange={onAssetLoadingChange}
-                />
-              ))}
+              {rowItems.map((overlay) => {
+                // Calculate the live push offset percentage for this specific item
+                const pushOffsetFrames = livePushOffsets.get(overlay.id) || 0;
+                const livePushOffsetPercent =
+                  totalDuration > 0
+                    ? (pushOffsetFrames / totalDuration) * 100
+                    : 0;
+
+                return (
+                  <TimelineItem
+                    key={overlay.id}
+                    item={overlay}
+                    isDragging={isDragging}
+                    draggedItem={draggedItem}
+                    selectedItem={selectedItem}
+                    setSelectedItem={(item) => setSelectedOverlayId(item.id)}
+                    handleMouseDown={(action, e) =>
+                      handleDragStart(overlay, e.clientX, e.clientY, action)
+                    }
+                    handleTouchStart={(action, e) => {
+                      const touch = e.touches[0];
+                      handleDragStart(
+                        overlay,
+                        touch.clientX,
+                        touch.clientY,
+                        action
+                      );
+                    }}
+                    totalDuration={totalDuration}
+                    onDeleteItem={onDeleteItem}
+                    onDuplicateItem={onDuplicateItem}
+                    onSplitItem={onSplitItem}
+                    onHover={onHover}
+                    onContextMenuChange={onContextMenuChange}
+                    currentFrame={currentFrame}
+                    zoomScale={zoomScale}
+                    onAssetLoadingChange={onAssetLoadingChange}
+                    livePushOffsetPercent={livePushOffsetPercent}
+                  />
+                );
+              })}
 
               {/* Gap indicators */}
               {!isDragging &&
@@ -238,11 +272,10 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
                 Math.floor(ghostElement.top / (100 / visibleRows)) ===
                   rowIndex && (
                   <div
-                    className="absolute inset-y-0 rounded-sm border-blue-500 dark:border-white border bg-blue-100/30 dark:bg-gray-400/30 pointer-events-none"
+                    className="absolute inset-y-[0.9px] rounded-md border-black dark:border-white border-2 bg-blue-100/30 dark:bg-gray-400/30 pointer-events-none shadow-md"
                     style={{
                       left: `${ghostElement.left}%`,
                       width: `${Math.max(ghostElement.width, 1)}%`,
-                      minWidth: "8px",
                       zIndex: 50,
                     }}
                   />
