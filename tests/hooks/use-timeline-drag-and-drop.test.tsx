@@ -93,10 +93,12 @@ describe("useTimelineDragAndDrop", () => {
       });
 
       // Use toBeCloseTo for floating point comparison
-      const [left, width, top] = mockProps.updateGhostElement.mock.calls[0];
+      const [left, width, top, pushedItems] =
+        mockProps.updateGhostElement.mock.calls[0];
       expect(left).toBe(0);
       expect(width).toBeCloseTo(33.33333333333333, 5);
       expect(top).toBe(0);
+      expect(pushedItems).toEqual(new Map());
     });
   });
 
@@ -118,7 +120,8 @@ describe("useTimelineDragAndDrop", () => {
       expect(mockProps.updateGhostElement).toHaveBeenLastCalledWith(
         expect.any(Number),
         expect.any(Number),
-        0
+        0,
+        expect.any(Map)
       );
       expect(mockProps.dragInfo.current.ghostLeft).toBeGreaterThan(0);
     });
@@ -180,7 +183,8 @@ describe("useTimelineDragAndDrop", () => {
       expect(mockProps.updateGhostElement).toHaveBeenLastCalledWith(
         expect.any(Number),
         expect.any(Number),
-        100 / 3 // One row down (100/maxRows)
+        100 / 3,
+        expect.any(Map)
       );
     });
   });
@@ -239,7 +243,9 @@ describe("useTimelineDragAndDrop", () => {
       expect(mockProps.onOverlayChange).toHaveBeenCalledWith(
         expect.objectContaining({
           videoStartTime: expect.any(Number),
-        })
+        }),
+        expect.any(Number),
+        expect.any(Array)
       );
     });
 
@@ -308,7 +314,9 @@ describe("useTimelineDragAndDrop", () => {
               endMs: expect.any(Number),
             }),
           ]),
-        })
+        }),
+        expect.any(Number),
+        expect.any(Array)
       );
     });
 
@@ -334,7 +342,9 @@ describe("useTimelineDragAndDrop", () => {
       expect(mockProps.onOverlayChange).toHaveBeenCalledWith(
         expect.objectContaining({
           durationInFrames: expect.any(Number),
-        })
+        }),
+        expect.any(Number),
+        expect.any(Array)
       );
 
       const lastCall = mockProps.onOverlayChange.mock.lastCall[0];
@@ -366,16 +376,41 @@ describe("useTimelineDragAndDrop", () => {
         result.current.handleDragEnd();
       });
 
-      // Check that the overlay was either:
-      // 1. Moved to a different row to avoid collision
-      // 2. Adjusted horizontally to avoid collision
-      const lastCall = mockProps.onOverlayChange.mock.lastCall[0];
-      const hasCollision =
-        lastCall.row === existingOverlay.row &&
-        lastCall.from <
-          existingOverlay.from + existingOverlay.durationInFrames &&
-        lastCall.from + lastCall.durationInFrames > existingOverlay.from;
-      expect(hasCollision).toBeFalsy();
+      // Verify the push logic resulted in two updates
+      expect(mockProps.onOverlayChange).toHaveBeenCalledTimes(2);
+
+      // Get the arguments for each call
+      const calls = mockProps.onOverlayChange.mock.calls;
+
+      // Find the update for the dragged overlay (id 1) and the pushed overlay (id 2)
+      const updateForDragged = calls.find(
+        (callArgs) => callArgs[0].id === 1
+      )?.[0];
+      const updateForPushed = calls.find(
+        (callArgs) => callArgs[0].id === 2
+      )?.[0];
+
+      // Check final state of dragged overlay (id 1)
+      expect(updateForDragged).toBeDefined();
+      expect(updateForDragged?.from).toBe(30); // Moved from 0, deltaX resulted in +30 frames
+      expect(updateForDragged?.row).toBe(1); // Moved from row 0 to row 1
+
+      // Check final state of pushed overlay (id 2)
+      expect(updateForPushed).toBeDefined();
+      expect(updateForPushed?.from).toBe(130); // Original 100, pushed by 30 frames
+      expect(updateForPushed?.row).toBe(1); // Should remain in row 1
+
+      // Optional: Verify no overlap between the FINAL states
+      if (updateForDragged && updateForPushed) {
+        const draggedEnd =
+          updateForDragged.from + updateForDragged.durationInFrames;
+        const pushedEnd =
+          updateForPushed.from + updateForPushed.durationInFrames;
+        const noOverlap =
+          draggedEnd <= updateForPushed.from ||
+          updateForDragged.from >= pushedEnd;
+        expect(noOverlap).toBeTruthy();
+      }
     });
 
     it("should handle sound overlay timing adjustment during resize-start", () => {
@@ -416,7 +451,9 @@ describe("useTimelineDragAndDrop", () => {
       expect(mockProps.onOverlayChange).toHaveBeenCalledWith(
         expect.objectContaining({
           startFromSound: expect.any(Number),
-        })
+        }),
+        expect.any(Number),
+        expect.any(Array)
       );
     });
 
@@ -437,7 +474,8 @@ describe("useTimelineDragAndDrop", () => {
       expect(mockProps.updateGhostElement).toHaveBeenLastCalledWith(
         expect.any(Number),
         expect.any(Number),
-        0 // Should clamp to row 0
+        0,
+        expect.any(Map)
       );
 
       // Try to move beyond bottom row

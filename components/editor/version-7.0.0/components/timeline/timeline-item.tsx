@@ -81,6 +81,8 @@ export interface TimelineItemProps {
   zoomScale: number;
   /** Callback when asset loading state changes */
   onAssetLoadingChange?: (overlayId: number, isLoading: boolean) => void;
+  /** Live push offset percentage during drag */
+  livePushOffsetPercent?: number;
 }
 
 /** Height of each timeline item in pixels */
@@ -103,6 +105,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   currentFrame,
   zoomScale,
   onAssetLoadingChange,
+  livePushOffsetPercent = 0, // Default to 0 if not provided
 }) => {
   const waveformData = useWaveformProcessor(
     item.type === OverlayType.SOUND ? item.src : undefined,
@@ -428,7 +431,13 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
           left: `${(item.from / totalDuration) * 100}%`,
           width: `${(item.durationInFrames / totalDuration) * 100}%`,
           zIndex: isDragging ? 1 : isSelected ? 35 : 30, // Increase z-index when selected
-          transition: "transform 0.2s, opacity 0.2s",
+          // Apply transform immediately if pushed, otherwise use standard transition
+          transition: `opacity 0.2s ${
+            livePushOffsetPercent !== 0
+              ? ", transform 0s"
+              : ", transform 0.2s ease-out"
+          }`,
+          transform: `translateX(${livePushOffsetPercent}%)`, // Apply live push offset
         }}
         onMouseDown={(e) => {
           e.stopPropagation(); // Prevent event bubbling

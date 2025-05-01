@@ -24,11 +24,10 @@ export const useTimelineEventHandlers = ({
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (isDragging) {
-        // If dragging, update the drag position
+        // Call handleDrag directly
         handleDrag(e.clientX, e.clientY);
       } else {
         // If not dragging, show ghost marker as hover preview
-        // Calculate position as percentage of timeline width
         const rect = timelineRef.current?.getBoundingClientRect();
         if (rect) {
           const position = ((e.clientX - rect.left) / rect.width) * 100;
@@ -36,6 +35,7 @@ export const useTimelineEventHandlers = ({
         }
       }
     },
+    // Update dependencies
     [isDragging, handleDrag, timelineRef, setGhostMarkerPosition]
   );
 
@@ -43,11 +43,12 @@ export const useTimelineEventHandlers = ({
   const handleTouchMove = useCallback(
     (e: React.TouchEvent<HTMLDivElement>) => {
       if (isDragging) {
-        // Get the first touch point and update drag position
+        // Call handleDrag directly
         const touch = e.touches[0];
         handleDrag(touch.clientX, touch.clientY);
       }
     },
+    // Update dependencies
     [isDragging, handleDrag]
   );
 

@@ -67,7 +67,7 @@ describe("useTimelineState", () => {
     );
 
     act(() => {
-      result.current.updateGhostElement(15, 25, 45);
+      result.current.updateGhostElement(15, 25, 45, new Map());
     });
 
     expect(result.current.ghostElement).toEqual({
