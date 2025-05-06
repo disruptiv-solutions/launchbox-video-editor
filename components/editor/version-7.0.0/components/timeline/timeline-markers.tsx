@@ -29,17 +29,21 @@ const TimeMarkers = ({
     const totalSeconds = durationInFrames / FPS;
 
     // Dynamic interval calculation based on zoom level
-    const baseInterval = (() => {
+    const baseInterval = ((): number => {
       const targetMarkerCount = Math.max(
         8,
         Math.min(40, Math.floor(25 * zoomScale))
       );
       const rawInterval = totalSeconds / targetMarkerCount;
 
-      // Adjusted nice intervals to include more precise measurements
-      const niceIntervals = [
+      const niceIntervals: number[] = [
         0.04, 0.08, 0.1, 0.2, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300,
       ];
+
+      if (isNaN(rawInterval) || rawInterval <= 0) {
+        return niceIntervals[0];
+      }
+
       return niceIntervals.reduce((prev, curr) =>
         Math.abs(curr - rawInterval) < Math.abs(prev - rawInterval)
           ? curr
@@ -51,32 +55,92 @@ const TimeMarkers = ({
     const majorInterval = baseInterval;
     const minorInterval = baseInterval / 4;
     const microInterval = baseInterval / 8;
-    const labelInterval = majorInterval * 2; // Show labels at twice the major interval
+    const labelInterval = majorInterval * 2;
 
-    // Generate marker elements
-    for (let time = 0; time <= totalSeconds; time += microInterval) {
-      const [minutes, seconds] = [Math.floor(time / 60), time % 60];
-      const isMainMarker = Math.abs(time % majorInterval) < 0.001;
-      const isIntermediateMarker = Math.abs(time % minorInterval) < 0.001;
-      const shouldShowLabel =
-        isMainMarker && Math.abs(time % labelInterval) < 0.001;
+    // Safeguard against division by zero or excessively small microInterval
+    if (microInterval < 1e-6) {
+      if (totalSeconds > 1e-9) {
+        const zeroMarker: JSX.Element = (
+          <div
+            key="0s-marker-guard"
+            className="absolute top-0 flex flex-col items-center"
+            data-timeline-marker="tick"
+            style={{
+              left: "0%",
+              transform: "translateX(-50%)",
+            }}
+          >
+            <div
+              className="h-2 w-[1px] bg-gray-300 dark:bg-gray-600/50"
+              data-timeline-marker="indicator"
+            />
+            <span
+              className="text-[8px] font-light tracking-tight text-gray-700 dark:text-gray-300/90 mt-0.5 select-none"
+              data-timeline-marker="label"
+            >
+              0.00s
+            </span>
+          </div>
+        );
+        return [zeroMarker];
+      }
+      return []; // No duration or too small interval, no markers
+    }
 
-      const markerElement = (
+    // Calculate number of micro steps for each interval type. These should be integers.
+    const numMicroStepsInMajor = Math.round(majorInterval / microInterval);
+    const numMicroStepsInMinor = Math.round(minorInterval / microInterval);
+    const numMicroStepsInLabel = Math.round(labelInterval / microInterval);
+
+    const effectiveTotalSeconds = Math.max(0, totalSeconds);
+    const totalMicroSteps = Math.floor(effectiveTotalSeconds / microInterval);
+
+    const epsilon = 1e-9; // Small value for floating point comparisons
+
+    for (let i = 0; i <= totalMicroSteps; i++) {
+      const timeCandidate = i * microInterval;
+
+      if (timeCandidate > effectiveTotalSeconds + epsilon && i > 0) {
+        continue;
+      }
+      const currentTime = Math.min(timeCandidate, effectiveTotalSeconds);
+
+      const preMinutes = Math.floor(currentTime / 60);
+      const preSeconds = currentTime % 60;
+
+      const resolvedSeconds =
+        Math.abs(preSeconds - 60) < epsilon ? 0 : preSeconds;
+      const resolvedMinutes =
+        Math.abs(preSeconds - 60) < epsilon &&
+        preMinutes < Number.MAX_SAFE_INTEGER
+          ? preMinutes + 1
+          : preMinutes;
+
+      const isMajorTick = i % numMicroStepsInMajor === 0;
+      const isMinorTick = i % numMicroStepsInMinor === 0;
+      const shouldShowLabel = i % numMicroStepsInLabel === 0;
+
+      const positionPercentage =
+        effectiveTotalSeconds > epsilon
+          ? (currentTime / effectiveTotalSeconds) * 100
+          : 0;
+
+      const markerElement: JSX.Element = (
         <div
-          key={time}
+          key={i}
           className="absolute top-0 flex flex-col items-center"
           data-timeline-marker="tick"
           style={{
-            left: `${(time / totalSeconds) * 100}%`,
+            left: `${positionPercentage}%`,
             transform: "translateX(-50%)",
           }}
         >
           <div
             className={`
               ${
-                isMainMarker
+                isMajorTick
                   ? "h-2 w-[1px] bg-gray-300 dark:bg-gray-600/50"
-                  : isIntermediateMarker
+                  : isMinorTick
                   ? "h-1 w-px bg-gray-300 dark:bg-gray-600/40"
                   : "h-0.5 w-px bg-gray-200 dark:bg-gray-600/30"
               }
@@ -89,19 +153,17 @@ const TimeMarkers = ({
             <span
               className={`
                 text-[8px] font-light tracking-tight
-                ${
-                  isMainMarker
-                    ? "text-gray-700 dark:text-gray-300/90"
-                    : "text-gray-500 dark:text-gray-500/60"
-                }
+                text-gray-700 dark:text-gray-300/90
                 mt-0.5 select-none
                 duration-150
               `}
               data-timeline-marker="label"
             >
-              {minutes > 0
-                ? `${minutes}m ${seconds.toString().padStart(2, "0")}s`
-                : `${seconds.toFixed(2)}s`}
+              {resolvedMinutes > 0
+                ? `${resolvedMinutes}m ${resolvedSeconds
+                    .toFixed(0)
+                    .padStart(2, "0")}s`
+                : `${resolvedSeconds.toFixed(2)}s`}
             </span>
           )}
         </div>
