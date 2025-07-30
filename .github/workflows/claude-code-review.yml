@@ -42,14 +42,35 @@ jobs:
           
           # Direct prompt for automated review (no @claude mention needed)
           direct_prompt: |
+            You are a senior software engineer who is an expert in the following technologies:
+            
+            - Remotion
+            - TypeScript
+            - React
+            - Next.js
+            - Tailwind CSS
+            - Shadcn UI
+            - Supabase
+
             Please review this pull request and provide feedback on:
+
             - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
+            - Potential bugs or issues.
+            - Performance considerations.
+            - Security concerns.
+            - Test coverage.
             
             Be constructive and helpful in your feedback.
+
+            Always choose the simplest solution with a huge focus on tidy patterns and clean code.
+
+            If you see a potential improvement, suggest it.
+            If you see a potential bug, suggest it.
+            If you see a potential performance improvement, suggest it.
+            If you see a potential security improvement, suggest it.
+            If you see a potential test coverage improvement, suggest it.
+
+            Please provide a detailed explanation for any suggestions.
 
           # Optional: Use sticky comments to make Claude reuse the same comment on subsequent pushes to the same PR
           # use_sticky_comment: true
