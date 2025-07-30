@@ -1,3 +1,5 @@
+Claude
+
 name: Claude Code
 
 on:
@@ -25,9 +27,27 @@ jobs:
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
     steps:
+      - name: Extract branch from comment
+        id: extract-branch
+        run: |
+          # Extract branch from comment text like "@claude branch:WIP/version-8" or "@claude on:feature-branch"
+          COMMENT_BODY="${{ github.event.comment.body || github.event.issue.body || github.event.review.body }}"
+          
+          # Look for patterns like "branch:name", "on:name", or "from:name"
+          BRANCH=$(echo "$COMMENT_BODY" | grep -oE "(branch:|on:|from:)[^\s]+" | head -1 | cut -d: -f2)
+          
+          # If no branch specified, default to WIP/version-8
+          if [ -z "$BRANCH" ]; then
+            BRANCH="WIP/version-8"
+          fi
+          
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "Using branch: $BRANCH"
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ steps.extract-branch.outputs.branch }}
           fetch-depth: 1
 
       - name: Run Claude Code
@@ -53,12 +73,28 @@ jobs:
           # allowed_tools: "Bash(npm install),Bash(npm run build),Bash(npm run test:*),Bash(npm run lint:*)"
           
           # Optional: Add custom instructions for Claude to customize its behavior for your project
-          # custom_instructions: |
-          #   Follow our coding standards
-          #   Ensure all new code has tests
-          #   Use TypeScript for new files
+          custom_instructions: |
+            You are working on a React Video Editor Pro project. Key technologies include:
+            - Remotion for video generation
+            - TypeScript and React
+            - Next.js framework
+            - Tailwind CSS and Shadcn UI
+            - Supabase for backend
+
+            BRANCH FUNCTIONALITY:
+            - By default, you'll be working on the WIP/version-8 branch
+            - Users can specify different branches using: "@claude branch:branch-name" or "@claude on:branch-name"
+            - If a user wants to switch branches, you can help them by responding with the proper syntax
+            - Always mention which branch you're working on when relevant
+
+            Follow coding standards:
+            - Use TypeScript for new files
+            - Follow clean code principles
+            - Focus on performance and user experience
+            - Ensure proper error handling
           
           # Optional: Custom environment variables for Claude
           # claude_env: |
           #   NODE_ENV: test
+
 
