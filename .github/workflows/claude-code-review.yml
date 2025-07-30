@@ -20,16 +20,23 @@ jobs:
     
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: write    # Changed from read to write to allow commenting
-      issues: read
+      contents: write  # Enhanced to allow git operations during review if needed
+      pull-requests: write    # Required for commenting and review actions
+      issues: write  # Enhanced to allow issue creation/commenting during review
       id-token: write
+      actions: read  # Required for reading CI results
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Fetch full history for better context
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "claude-bot[bot]"
+          git config --global user.email "claude-bot[bot]@users.noreply.github.com"
 
       - name: Run Claude Code Review
         id: claude-review
@@ -75,6 +82,26 @@ jobs:
           # Use sticky comments to make Claude reuse the same comment on subsequent pushes to the same PR
           use_sticky_comment: true
           
+          # Enhanced tools for comprehensive review capabilities
+          allowed_tools: |
+            Bash(git *),
+            Bash(gh *),
+            Bash(npm *),
+            Bash(yarn *),
+            Bash(pnpm *),
+            Bash(npx *),
+            Bash(node *),
+            Bash(ls *),
+            Bash(cat *),
+            Bash(echo *),
+            Bash(find *),
+            Bash(grep *),
+            Bash(head *),
+            Bash(tail *),
+            Bash(wc *),
+            Bash(which *),
+            Bash(pwd)
+          
           # Optional: Customize review based on file types
           # direct_prompt: |
           #   Review this PR focusing on:
@@ -88,9 +115,6 @@ jobs:
           #   ${{ github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR' && 
           #   'Welcome! Please review this PR from a first-time contributor. Be encouraging and provide detailed explanations for any suggestions.' ||
           #   'Please provide a thorough code review focusing on our coding standards and best practices.' }}
-          
-          # Optional: Add specific tools for running tests or linting
-          # allowed_tools: "Bash(npm run test),Bash(npm run lint),Bash(npm run typecheck)"
           
           # Optional: Skip review for certain conditions
           # if: |
