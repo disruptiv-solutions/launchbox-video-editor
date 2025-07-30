@@ -1,0 +1,84 @@
+name: Claude PR Creation
+
+on:
+  issue_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned]
+
+jobs:
+  claude-pr:
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude-pr')) ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude-pr') || contains(github.event.issue.title, '@claude-pr')))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write          # Required to create branches and commits
+      pull-requests: write     # Required to create PRs
+      issues: write           # Required to comment on issues
+      id-token: write
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history to access all branches
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "claude-bot[bot]"
+          git config --global user.email "claude-bot[bot]@users.noreply.github.com"
+
+      - name: Run Claude Code for PR Creation
+        id: claude-pr
+        uses: anthropics/claude-code-action@beta
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          # Custom instructions for PR creation workflow
+          custom_instructions: |
+            You are Claude, an AI assistant with access to create pull requests and work with Git branches.
+            
+            You have the following capabilities:
+            - Access to all branches in the repository (use 'git branch -a' to see them)
+            - Create new branches from any existing branch
+            - Make commits and push changes
+            - Create pull requests to any target branch
+            
+            When creating PRs:
+            - Use descriptive branch names with prefixes like feature/, fix/, chore/
+            - Write clear commit messages
+            - Create comprehensive PR descriptions
+            - Consider the target branch (don't default to main unless specified)
+            
+            Available commands include:
+            - git branch -a (to see all branches)
+            - git checkout -b new-branch existing-branch (to create from specific branch)
+            - git add, git commit, git push
+            - gh pr create (to create PRs)
+            
+            Project context:
+            - This is a React video editor built with Remotion, TypeScript, Next.js, Tailwind, Shadcn UI, and Supabase
+            - Follow existing code patterns and conventions
+            - Ensure TypeScript types are properly defined
+            - Test changes when possible
+
+          # Allow Claude to use Git and GitHub CLI commands
+          allowed_tools: |
+            Bash(git *),
+            Bash(gh *),
+            Bash(npm *),
+            Bash(yarn *),
+            Bash(pnpm *),
+            Bash(npx *),
+            Bash(node *),
+            Bash(ls *),
+            Bash(cat *),
+            Bash(echo *),
+            Bash(mkdir *),
+            Bash(cp *),
+            Bash(mv *)
+
+          # Optional: Specify model
+          # model: "claude-opus-4-20250514" 
