@@ -19,25 +19,26 @@ jobs:
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
     permissions:
-      contents: write           # MAXIMUM: Create branches, commits, pushes, tags, releases
-      pull-requests: write      # MAXIMUM: Create, edit, comment on PRs
-      issues: write            # MAXIMUM: Create, edit, comment on issues  
-      discussions: write       # MAXIMUM: Participate in discussions
-      repository-projects: write # MAXIMUM: Manage project boards
-      packages: write          # MAXIMUM: Manage packages
-      pages: write             # MAXIMUM: Manage GitHub Pages
-      deployments: write       # MAXIMUM: Manage deployments
-      id-token: write          # REQUIRED: For OIDC
-      actions: read           # MAXIMUM: Read workflow runs and CI results
-      checks: write           # MAXIMUM: Create and update check runs
-      statuses: write         # MAXIMUM: Create commit statuses
-      security-events: write  # MAXIMUM: Manage security events
+      contents: write
+      pull-requests: write
+      issues: write
+      discussions: write
+      repository-projects: write
+      packages: write
+      pages: write
+      deployments: write
+      id-token: write
+      actions: read
+      checks: write
+      statuses: write
+      security-events: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch ALL history and ALL branches
-          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+          token: ${{ secrets.CLAUDE_GITHUB_TOKEN }}
 
       - name: Configure Git with Maximum Access
         run: |
@@ -53,22 +54,20 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
-          # Maximum permissions for Claude to read CI results and more
           additional_permissions: |
             actions: read
             checks: write
             statuses: write
-          
+
           # Optional: Specify model (defaults to Claude Sonnet 4, uncomment for Claude Opus 4)
           # model: "claude-opus-4-20250514"
-          
+
           # Optional: Customize the trigger phrase (default: @claude)
           # trigger_phrase: "/claude"
-          
+
           # Optional: Trigger when specific user is assigned to an issue
           # assignee_trigger: "claude-bot"
-          
-          # MAXIMUM TOOLS - Complete development environment access
+
           allowed_tools: |
             Bash(git *),
             Bash(gh *),
@@ -154,12 +153,9 @@ jobs:
             Bash(aws *),
             Bash(gcloud *),
             Bash(az *)
-          
-          # AMAZING RIGHTS: Ultra-flexible custom instructions
+
           custom_instructions: |
             🚀 YOU HAVE AMAZING RIGHTS! 🚀
-            
-            You are Claude with MAXIMUM REPOSITORY ACCESS and can work from ANY branch the user specifies!
             
             CORE CAPABILITIES:
             ✅ Full git and GitHub CLI access
@@ -178,44 +174,10 @@ jobs:
             - Create PR back to: origin/X (or whatever they specify)
             - NEVER default to main unless explicitly requested
             
-            Common branch patterns you can work with:
-            - main, master, develop, staging, production
-            - WIP/version-8, WIP/version-9, etc.
-            - feature/*, fix/*, hotfix/*, release/*
-            - Any custom branch name they specify
-            
-            BRANCH WORKFLOW EXAMPLES:
-            1. "Create from WIP/version-8" → git checkout -b feature/new-thing origin/WIP/version-8
-            2. "Base off main" → git checkout -b fix/bug-fix origin/main  
-            3. "Use develop branch" → git checkout -b feature/awesome origin/develop
-            4. "From my-custom-branch" → git checkout -b enhancement/cool origin/my-custom-branch
-            
-            ALWAYS FIRST STEP:
-            📋 Run 'git branch -a' to see ALL available branches
-            📋 Ask for clarification if branch specification is unclear
-            
             PROJECT CONTEXT:
             - React video editor: Remotion, TypeScript, Next.js, Tailwind CSS, Shadcn UI, Supabase
             - Follow existing code patterns and TypeScript best practices
             - Test video editing functionality when possible
             - Write clear commits and comprehensive PR descriptions
             
-            DEVELOPMENT COMMANDS YOU CAN USE:
-            - git branch -a (see all branches)
-            - git checkout -b new-branch origin/base-branch
-            - git checkout existing-branch
-            - git add, git commit, git push
-            - gh pr create --base target-branch
-            - gh pr list, gh repo view
-            - npm/yarn/pnpm commands
-            - File operations, text processing, development tools
-            - Docker, cloud tools, and system utilities
-            
             🎯 REMEMBER: You can work from ANY branch they specify - you have AMAZING RIGHTS!
-          
-          # Optional: Custom environment variables for Claude
-          # claude_env: |
-          #   NODE_ENV: development
-          #   BRANCH_STRATEGY: flexible
-
-
