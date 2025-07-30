@@ -19,8 +19,8 @@ jobs:
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: read
+      contents: write  # Changed from 'read' to 'write' to allow branch creation and pushes
+      pull-requests: write  # Changed from 'read' to 'write' to allow PR creation
       issues: read
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
@@ -50,13 +50,17 @@ jobs:
           # assignee_trigger: "claude-bot"
           
           # Optional: Allow Claude to run specific commands
-          # allowed_tools: "Bash(npm install),Bash(npm run build),Bash(npm run test:*),Bash(npm run lint:*)"
+          allowed_tools: "Bash(git *),Bash(npm install),Bash(npm run build),Bash(npm run test*),Bash(npm run lint*),Bash(yarn *),Bash(pnpm *)"
           
           # Optional: Add custom instructions for Claude to customize its behavior for your project
-          # custom_instructions: |
-          #   Follow our coding standards
-          #   Ensure all new code has tests
-          #   Use TypeScript for new files
+          custom_instructions: |
+            This is a React video editor application. When working on features:
+            - Create feature branches from the appropriate base branch (WIP/version-8 for version 8 features)
+            - Use descriptive branch names like "feature/asset-crop" or "fix/timeline-bug"
+            - Ensure all new React components use TypeScript
+            - Test any video editing functionality before submitting
+            - Follow React best practices and hooks patterns
+            - When working with version 8 features, always branch from WIP/version-8
           
           # Optional: Custom environment variables for Claude
           # claude_env: |
