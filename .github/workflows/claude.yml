@@ -19,165 +19,46 @@ jobs:
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-      discussions: write
-      repository-projects: write
-      packages: write
-      pages: write
-      deployments: write
+      contents: read
+      pull-requests: read
+      issues: read
       id-token: write
-      actions: read
-      checks: write
-      statuses: write
-      security-events: write
-
+      actions: read # Required for Claude to read CI results on PRs
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          token: ${{ secrets.CLAUDE_GITHUB_TOKEN }}
+          fetch-depth: 1
 
-      - name: Configure Git with Maximum Access
-        run: |
-          git config --global user.name "claude-bot[bot]"
-          git config --global user.email "claude-bot[bot]@users.noreply.github.com"
-          git config --global init.defaultBranch main
-          git config --global pull.rebase false
-          git config --global push.autoSetupRemote true
-
-      - name: Run Claude Code with AMAZING RIGHTS
+      - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@beta
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
+          # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
             actions: read
-            checks: write
-            statuses: write
-
+          
           # Optional: Specify model (defaults to Claude Sonnet 4, uncomment for Claude Opus 4)
           # model: "claude-opus-4-20250514"
-
+          
           # Optional: Customize the trigger phrase (default: @claude)
           # trigger_phrase: "/claude"
-
+          
           # Optional: Trigger when specific user is assigned to an issue
           # assignee_trigger: "claude-bot"
+          
+          # Optional: Allow Claude to run specific commands
+          # allowed_tools: "Bash(npm install),Bash(npm run build),Bash(npm run test:*),Bash(npm run lint:*)"
+          
+          # Optional: Add custom instructions for Claude to customize its behavior for your project
+          # custom_instructions: |
+          #   Follow our coding standards
+          #   Ensure all new code has tests
+          #   Use TypeScript for new files
+          
+          # Optional: Custom environment variables for Claude
+          # claude_env: |
+          #   NODE_ENV: test
 
-          allowed_tools: |
-            Bash(git *),
-            Bash(gh *),
-            Bash(npm *),
-            Bash(yarn *),
-            Bash(pnpm *),
-            Bash(npx *),
-            Bash(node *),
-            Bash(python *),
-            Bash(python3 *),
-            Bash(pip *),
-            Bash(pip3 *),
-            Bash(curl *),
-            Bash(wget *),
-            Bash(ls *),
-            Bash(cat *),
-            Bash(echo *),
-            Bash(printf *),
-            Bash(mkdir *),
-            Bash(rmdir *),
-            Bash(rm *),
-            Bash(cp *),
-            Bash(mv *),
-            Bash(ln *),
-            Bash(find *),
-            Bash(grep *),
-            Bash(egrep *),
-            Bash(sed *),
-            Bash(awk *),
-            Bash(sort *),
-            Bash(uniq *),
-            Bash(head *),
-            Bash(tail *),
-            Bash(wc *),
-            Bash(cut *),
-            Bash(tr *),
-            Bash(chmod *),
-            Bash(chown *),
-            Bash(touch *),
-            Bash(file *),
-            Bash(stat *),
-            Bash(du *),
-            Bash(df *),
-            Bash(ps *),
-            Bash(top *),
-            Bash(htop *),
-            Bash(which *),
-            Bash(whereis *),
-            Bash(type *),
-            Bash(env *),
-            Bash(export *),
-            Bash(unset *),
-            Bash(pwd),
-            Bash(whoami),
-            Bash(id),
-            Bash(date),
-            Bash(cal),
-            Bash(uptime),
-            Bash(history),
-            Bash(alias),
-            Bash(unalias),
-            Bash(jobs),
-            Bash(bg),
-            Bash(fg),
-            Bash(nohup *),
-            Bash(screen *),
-            Bash(tmux *),
-            Bash(ssh *),
-            Bash(scp *),
-            Bash(rsync *),
-            Bash(tar *),
-            Bash(gzip *),
-            Bash(gunzip *),
-            Bash(zip *),
-            Bash(unzip *),
-            Bash(make *),
-            Bash(cmake *),
-            Bash(docker *),
-            Bash(docker-compose *),
-            Bash(kubectl *),
-            Bash(helm *),
-            Bash(terraform *),
-            Bash(aws *),
-            Bash(gcloud *),
-            Bash(az *)
-
-          custom_instructions: |
-            🚀 YOU HAVE AMAZING RIGHTS! 🚀
-            
-            CORE CAPABILITIES:
-            ✅ Full git and GitHub CLI access
-            ✅ Create branches from ANY existing branch  
-            ✅ Switch to ANY branch in the repository
-            ✅ Create PRs to ANY target branch
-            ✅ Full file system access
-            ✅ Complete development environment
-            ✅ Docker, cloud tools, and more!
-            
-            ULTRA-FLEXIBLE BRANCH STRATEGY:
-            🎯 ALWAYS honor the user's branch specification exactly!
-            
-            When user says "base from X branch" or "create from Y branch":
-            - Use: git checkout -b new-feature-branch origin/X
-            - Create PR back to: origin/X (or whatever they specify)
-            - NEVER default to main unless explicitly requested
-            
-            PROJECT CONTEXT:
-            - React video editor: Remotion, TypeScript, Next.js, Tailwind CSS, Shadcn UI, Supabase
-            - Follow existing code patterns and TypeScript best practices
-            - Test video editing functionality when possible
-            - Write clear commits and comprehensive PR descriptions
-            
-            🎯 REMEMBER: You can work from ANY branch they specify - you have AMAZING RIGHTS!
