@@ -31,13 +31,18 @@ These instructions will get you a copy of the project up and running on your loc
    npm install
    ```
 
-4. Create a `.env.local` file in the root directory and add your Pexels API key:
+4. Create a `.env.local` file in the root directory and add your configuration:
 
    ```
    NEXT_PUBLIC_PEXELS_API_KEY=your_pexels_api_key_here
+   NEXT_PUBLIC_DISABLE_RENDER=false
    ```
 
-   You can obtain a free API key by:
+   **Environment Variables:**
+   - `NEXT_PUBLIC_PEXELS_API_KEY`: Your Pexels API key for accessing stock videos and images
+   - `NEXT_PUBLIC_DISABLE_RENDER`: Set to `"true"` to disable video rendering functionality (optional, defaults to false)
+
+   You can obtain a free Pexels API key by:
 
    1. Going to https://www.pexels.com/api/
    2. Signing up for a Pexels account

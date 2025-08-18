@@ -61,6 +61,9 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   // Track if there are new renders
   const [hasNewRender, setHasNewRender] = React.useState(false);
 
+  // Check if rendering is disabled via environment variable
+  const isRenderDisabled = process.env.NEXT_PUBLIC_DISABLE_RENDER === "true";
+
   // Add new render to the list when completed
   React.useEffect(() => {
     if (state.status === "done") {
@@ -203,10 +206,13 @@ const RenderControls: React.FC<RenderControlsProps> = ({
         onClick={handleRender}
         size="sm"
         variant="outline"
-        disabled={state.status === "rendering" || state.status === "invoking"}
-        className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+        disabled={state.status === "rendering" || state.status === "invoking" || isRenderDisabled}
+        className={`bg-gray-800 text-white border-gray-700 hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50 ${isRenderDisabled ? "cursor-not-allowed" : ""}`}
+        title={isRenderDisabled ? "Rendering is currently disabled" : undefined}
       >
-        {state.status === "rendering" ? (
+        {isRenderDisabled ? (
+          "Render Video"
+        ) : state.status === "rendering" ? (
           <>
             <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
             Rendering... {(state.progress * 100).toFixed(0)}%
