@@ -40,8 +40,35 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
 }) => {
   const frame = useCurrentFrame();
 
+  // Determine and clean the video source URL
+  let videoSrc = overlay.src;
+
+  // Clean up proxy URLs (Remotion proxies external URLs through localhost in dev)
+  // In Lambda, we need the original URLs, not proxy URLs
+  try {
+    if (videoSrc.includes("localhost") && videoSrc.includes("/proxy")) {
+      const url = new URL(videoSrc);
+      const srcParam = url.searchParams.get("src");
+      if (srcParam) {
+        videoSrc = decodeURIComponent(srcParam);
+      }
+    }
+  } catch (e) {
+    // If URL parsing fails, continue with original src
+  }
+
+  // If it's a relative URL and baseUrl is provided, use baseUrl
+  if (videoSrc.startsWith("/") && baseUrl) {
+    videoSrc = `${baseUrl}${videoSrc}`;
+  }
+  // Otherwise use the toAbsoluteUrl helper for relative URLs
+  else if (videoSrc.startsWith("/")) {
+    videoSrc = toAbsoluteUrl(videoSrc);
+  }
+
   useEffect(() => {
-    console.log(`Preparing to load video: ${overlay.src}`);
+    // Use the cleaned videoSrc instead of overlay.src
+    console.log(`Preparing to load video: ${videoSrc}`);
     const handle = delayRender("Loading video");
 
     // Create a video element to preload the video
@@ -49,12 +76,12 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
     video.src = videoSrc;
 
     const handleLoadedMetadata = () => {
-      console.log(`Video metadata loaded: ${overlay.src}`);
+      console.log(`Video metadata loaded: ${videoSrc}`);
       continueRender(handle);
     };
 
     const handleError = (error: ErrorEvent) => {
-      console.error(`Error loading video ${overlay.src}:`, error);
+      console.error(`Error loading video ${videoSrc}:`, error);
       continueRender(handle);
     };
 
@@ -67,7 +94,7 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
       // Ensure we don't leave hanging render delays
       continueRender(handle);
     };
-  }, [overlay.src]);
+  }, [videoSrc]);
 
   // Calculate if we're in the exit phase (last 30 frames)
   const isExitPhase = frame >= overlay.durationInFrames - 30;
@@ -113,18 +140,6 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
     alignItems: "center",
     justifyContent: "center",
   };
-
-  // Determine the video source URL
-  let videoSrc = overlay.src;
-
-  // If it's a relative URL and baseUrl is provided, use baseUrl
-  if (overlay.src.startsWith("/") && baseUrl) {
-    videoSrc = `${baseUrl}${overlay.src}`;
-  }
-  // Otherwise use the toAbsoluteUrl helper for relative URLs
-  else if (overlay.src.startsWith("/")) {
-    videoSrc = toAbsoluteUrl(overlay.src);
-  }
 
   return (
     <div style={containerStyle}>

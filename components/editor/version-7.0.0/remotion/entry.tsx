@@ -33,6 +33,21 @@ const Root: React.FC = () => {
         fps={FPS}
         width={VIDEO_WIDTH}
         height={VIDEO_HEIGHT}
+        /**
+         * Dynamically calculates the video metadata based on the composition props.
+         * These values will be reflected in the Remotion player/preview.
+         * When the composition renders, it will use these dimensions and duration.
+         *
+         * @param props - The composition props passed to the component
+         * @returns An object containing the video dimensions and duration
+         */
+        calculateMetadata={async ({ props }) => {
+          return {
+            durationInFrames: props.durationInFrames,
+            width: props.width,
+            height: props.height,
+          };
+        }}
         defaultProps={defaultProps}
       />
     </>

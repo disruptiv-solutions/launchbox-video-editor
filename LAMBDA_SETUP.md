@@ -125,6 +125,22 @@ To request an increase:
 2. Search for "Lambda concurrent executions"
 3. Request a quota increase
 
+### Workaround for Low Concurrency Limits
+
+If you have a low concurrency limit (like 10) while waiting for AWS approval:
+
+**The project is already configured to work around this!** We've set `framesPerLambda` to 200 instead of the default 100. This means:
+- 1 Lambda function for orchestration
+- Up to 9 Lambda functions for rendering
+- Each renderer handles 200 frames instead of 100
+
+**Limitations with low limits:**
+- Longer videos will render more slowly (fewer parallel functions)
+- Once your quota is increased to 1000+, you can change `FRAMES_PER_LAMBDA` back to 100 in `app/api/latest/lambda/render/route.ts` for faster rendering
+
+**Formula:** With concurrency limit of `N`, you can safely render videos with up to `(N-1) × framesPerLambda` frames.
+- Example: Limit of 10, framesPerLambda of 200 = up to 1800 frames (~60 seconds at 30fps)
+
 ## Step 11: Test Render a Video
 
 To test rendering a video via CLI:
