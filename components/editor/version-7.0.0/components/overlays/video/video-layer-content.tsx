@@ -1,5 +1,6 @@
 import {
   OffthreadVideo,
+  Video,
   useCurrentFrame,
   delayRender,
   continueRender,
@@ -141,14 +142,18 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
     justifyContent: "center",
   };
 
+  // Use regular Video component for preview (better performance in Player)
+  // OffthreadVideo is optimized for rendering but can be slow in preview
+  // We'll use Video which works better for interactive preview in the editor
   return (
     <div style={containerStyle}>
-      <OffthreadVideo
+      <Video
         src={videoSrc}
         startFrom={overlay.videoStartTime || 0}
         style={videoStyle}
         volume={overlay.styles.volume ?? 1}
         playbackRate={overlay.speed ?? 1}
+        muted={false}
       />
     </div>
   );
